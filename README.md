@@ -6,7 +6,7 @@
   
 1) 执行`php artisan vendor:publish`来发布一些文件和目录  
   
-2) 赋予上传目录相应权限，执行`chmod 755 /到项目根目录的路径/storage/app/uploads -R`  
+2) 赋予上传目录相应权限，执行`chmod 755 /项目根目录的绝对路径/storage/app/uploads -R`  
   
 3) 在`config/app.php`的`providers`数组中添加一行`Peinhu\AetherUpload\AetherUploadServiceProvider::class,`  
   
