@@ -2,7 +2,7 @@
 提供超大文件上传的laravel扩展包，基于laravel 5开发。
 
 # 用法
-0) 在终端内切换到你的laravel项目根目录，执行`composer require peinhu/aetherupload-laravel dev-master`  
+0) 在终端内切换到你的laravel项目根目录，执行`composer require peinhu/aetherupload-laravel`  
 
 1) 在`config/app.php`的`providers`数组中添加一行`Peinhu\AetherUpload\AetherUploadServiceProvider::class,`  
   
