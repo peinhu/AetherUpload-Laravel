@@ -1,5 +1,6 @@
 # aetherupload-laravel
 提供超大文件上传的laravel扩展包，带百分比进度显示，支持断点续传，支持自定义中间件，基于laravel 5开发。
+![示例页面](http://ww2.sinaimg.cn/large/69e23056gw1f59r78adaij20n70ft0u2.jpg)
 
 # 用法
 0) 在终端内切换到你的laravel项目根目录，执行`composer require peinhu/aetherupload-laravel dev-master`  
