@@ -11,6 +11,13 @@
 3) 赋予上传目录相应权限，执行`chmod 755 /项目根目录的绝对路径/storage/app/uploads -R`    
   
 4) 在浏览器访问`http://根域名/aetherupload`可到达示例页面  
+
+# 优化建议
+* 利用Linux的tmpfs文件系统，来达到将临时文件放到内存中快速读写的目的。  
+执行以下命令：  
+`mkdir /dev/shm/tmp`  
+`chmod 1777 /dev/shm/tmp`  
+`mount --bind /dev/shm/tmp /tmp`  
   
 # 许可证
 使用GPLv2许可证, 查看LICENCE文件以获得更多信息。
