@@ -18,7 +18,11 @@
 `mkdir /dev/shm/tmp`  
 `chmod 1777 /dev/shm/tmp`  
 `mount --bind /dev/shm/tmp /tmp`  
-  
+
+# 贡献者  
+[peinhu](https://github.com/peinhu)  
+……(期待你的加入)
+
 # 许可证
 使用GPLv2许可证, 查看LICENCE文件以获得更多信息。
 
