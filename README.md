@@ -12,6 +12,8 @@
   
 4) 在浏览器访问`http://根域名/aetherupload`可到达示例页面  
 
+提示：更改相关配置选项请编辑`config/aetherupload.php`。  
+
 # 优化建议
 * 利用Linux的tmpfs文件系统，来达到将临时文件放到内存中快速读写的目的。  
 执行以下命令：  
