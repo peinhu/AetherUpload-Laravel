@@ -11,7 +11,7 @@ abstract class BaseUploader{
 
     abstract public function cleanUpDir();
 
-    abstract protected function reportError($message = "");
+    abstract protected function reportError($message = "",$deleteFiles = false);
 
     abstract protected function returnResult();
 
