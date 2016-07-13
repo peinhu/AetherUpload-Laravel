@@ -36,6 +36,15 @@
 `chmod 1777 /dev/shm/tmp`  
 `mount --bind /dev/shm/tmp /tmp`  
 
+# 更新日志
+**2016-07-13 v1.0.0正式版**  
+
+添加完整说明，修正一些小问题。  
+
+  
+**2016-06-24 v1.0.0测试版**  
+
+
 # 贡献者  
 [peinhu](https://github.com/peinhu)  
 ……(期待你的加入)
