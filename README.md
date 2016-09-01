@@ -45,10 +45,6 @@
 **2016-06-24 v1.0.0测试版**  
 
 
-# 贡献者  
-[peinhu](https://github.com/peinhu)  
-……(期待你的加入)
-
 # 许可证
 使用GPLv2许可证, 查看LICENCE文件以获得更多信息。
 
