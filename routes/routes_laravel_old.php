@@ -11,6 +11,11 @@ if(Config::get('aetherupload.ENABLE_EXAMPLE_PAGE')===true)
 
         return view('aetherupload::example');
     });
+    
+    Route::get('aetherupload/example_source', function () {
+
+        return '<pre>'.htmlspecialchars(File::get(__DIR__.'/../views/example.blade.php'));
+    });
 }
 
 Route::post('aetherupload/init',function(\Peinhu\AetherUpload\Uploader $uploader){
