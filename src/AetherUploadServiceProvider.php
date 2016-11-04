@@ -15,13 +15,16 @@ class AetherUploadServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/aetherupload.php' => config_path('aetherupload.php'),
             __DIR__.'/../assets/aetherupload.js' => public_path('js/aetherupload.js'),
-            __DIR__.'/../views/example.blade.php' => base_path('resources/views/vendor/aetherupload/example.blade.php'),
             __DIR__.'/../uploads/aetherupload_file' => storage_path('app/uploads/aetherupload_file'),
             __DIR__.'/../uploads/aetherupload_head' => storage_path('app/uploads/aetherupload_head'),
         ],'aetherupload');
 
         if (!$this->app->routesAreCached()) {
-            require __DIR__ . '/../routes.php';
+            if ((double) $this->app->version() >= 5.2) {
+                require __DIR__ . '/../routes/routes_laravel_52.php';
+            } else {
+                require __DIR__ . '/../routes/routes_laravel_old.php';
+            }
         }
     }
 

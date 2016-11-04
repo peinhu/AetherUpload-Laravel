@@ -12,7 +12,7 @@
 <div class="container">
     <div class="page-header">
         <h1>This is an example page.</h1>
-        <i>view the source code in resources/views/vendor/aetherupload/example.blade.php</i>
+        <i>view the source code in <a href="/aetherupload/example_source" target="_blank">vendor/peinhu/aetherupload-laravel/views/example.blade.php</a></i>
     </div>
 
     <div class="row">
@@ -50,8 +50,8 @@
 
         <hr/>
 
-        <a href="/aetherupload/display/UPLOADED-FILE-NAME">[查看某个上传的文件]</a>
-        <a href="/aetherupload/download/UPLOADED-FILE-NAME/DOWNLOAD-FILE-NEWNAME">[下载某个上传的文件]</a>
+        <a href="/aetherupload/display/UPLOADED-FILE-NAME" onclick="return false;">[查看某个上传的文件]</a>
+        <a href="/aetherupload/download/UPLOADED-FILE-NAME/DOWNLOAD-FILE-NEWNAME" onclick="return false;">[下载某个上传的文件]</a>
         <p><i>仅演示写法，请查看源码</i></p>
     </div>
 </div>

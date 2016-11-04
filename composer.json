@@ -1,6 +1,6 @@
 {
     "name": "peinhu/aetherupload-laravel",
-    "description": "Laravel Package for uploading big files",
+    "description": "Upload big files for Laravel",
 	"keywords": ["laravel", "upload" , "file"],
     "license": "GPL-2.0",
     "authors": [

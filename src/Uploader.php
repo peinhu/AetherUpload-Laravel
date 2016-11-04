@@ -238,25 +238,6 @@ class Uploader extends BaseUploader
 
     }
 
-    private function getContentType($fileName)
-    {
-
-        $extension = explode('.',$fileName)[1];
-
-        switch($extension)
-        {
-            case 'mp3' : $contentType = 'audio/mp3';break;
-            case 'mp4' : $contentType = 'video/mpeg4';break;
-            case 'gif' : $contentType = 'image/gif';break;
-            case 'png' : $contentType = 'image/png';break;
-            case 'jpg' : $contentType = 'image/jpeg';break;
-            default : $contentType = 'application/octet-stream';break;
-        }
-
-        return $contentType;
-
-    }
-
     protected function reportError($message = '',$deleteFiles = false)
     {
         if($deleteFiles) {
