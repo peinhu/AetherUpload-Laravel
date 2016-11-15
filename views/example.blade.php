@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="csrf-token" content="{{ csrf_token() }}"><!--need to have csrf token-->
+    <meta name="csrf-token" content="{{ csrf_token() }}"><!--need to have csrf token here-->
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" />
 </head>
 <body>
@@ -50,13 +50,28 @@
 
         <hr/>
 
-        <a href="/aetherupload/display/UPLOADED-FILE-NAME" onclick="return false;">[查看某个上传的文件]</a>
-        <a href="/aetherupload/download/UPLOADED-FILE-NAME/DOWNLOAD-FILE-NEWNAME" onclick="return false;">[下载某个上传的文件]</a>
-        <p><i>仅演示写法，请查看源码</i></p>
+        <div >
+        <p>原文件名：<span id="test1"></span></p>
+        <p>原文件大小：<span id="test2"></span></p>
+        <p>上传文件名：<span id="test3"></span></p>
+        </div>
+
+        <a href="/aetherupload/display/UPLOADED-FILE-NAME" target="_blank" id="display">[获得上传的文件]</a>
+        <a href="/aetherupload/download/UPLOADED-FILE-NAME/DOWNLOAD-FILE-NEWNAME" target="_blank" id="download">[下载上传的文件]</a>
     </div>
 </div>
 
-<script src="//cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script><!--need to have jquery-->
-<script src="{{ URL::asset('js/aetherupload.js') }}"></script><!--need to have aetherupload.js-->
+<script src="//cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script><!--need to have jquery here-->
+<script src="{{ URL::asset('js/aetherupload.js') }}"></script><!--need to have aetherupload.js here-->
+<script>
+    AetherUpload.success = function(){
+        //Example
+        $('#test1').text(this.fileName);
+        $('#test2').text(parseInt(this.fileSize/1024)+'KB');
+        $('#test3').text(this.uploadBasename+'.'+this.uploadExt);
+        $('#display').attr('href','/aetherupload/display/'+this.uploadBasename+'.'+this.uploadExt);
+        $('#download').attr('href','/aetherupload/download/'+this.uploadBasename+'.'+this.uploadExt+'/test.'+this.uploadExt);
+    }
+</script><!--this function will be called after file is uploaded-->
 </body>
 </html>

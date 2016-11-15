@@ -19,30 +19,30 @@ var AetherUpload = {
 
         this.file = $("#aetherupload-file")[0].files[0],
 
-        this.fileName = this.file.name,
+            this.fileName = this.file.name,
 
-        this.fileSize = this.file.size,
+            this.fileSize = this.file.size,
 
-        this.uploadBasename = "",
+            this.uploadBasename = "",
 
-        this.uploadExt = "",
+            this.uploadExt = "",
 
-        this.chunkSize = 0,
+            this.chunkSize = 0,
 
-        this.chunkCount = 0,
+            this.chunkCount = 0,
 
-        this.i = 0;
-		
-		var _this = this;
-		
-		$.post('/aetherupload/init',{file_name:_this.fileName,file_size:_this.fileSize},function(res){
+            this.i = 0;
 
-		    if(res.error != 0){
+        var _this = this;
+
+        $.post('/aetherupload/init',{file_name:_this.fileName,file_size:_this.fileSize},function(res){
+
+            if(res.error != 0){
                 $("#aetherupload-output").text(res.error);
                 return;
             }
 
-			_this.uploadBasename = res.uploadBasename;
+            _this.uploadBasename = res.uploadBasename;
 
             _this.uploadExt = res.uploadExt;
 
@@ -50,8 +50,8 @@ var AetherUpload = {
 
             _this.chunkCount = Math.ceil(_this.fileSize / _this.chunkSize),
 
-			_this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk,_this),0);
-		},'json');
+                _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk,_this),0);
+        },'json');
 
     },
 
@@ -107,19 +107,19 @@ var AetherUpload = {
                     $("#aetherupload-uploadname") .val(res.uploadName);
                     $("#aetherupload-output").text('上传完毕！');
                     $("#aetherupload-file").attr('disabled', 'disabled');
-
+                    _this.success();
                 }
 
                 ++_this.i;
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-				if(XMLHttpRequest.status===0){
-					$("#aetherupload-output").text('网络故障，正在重试……');
-					_this.sleep(3000);
-				}else{
-					$("#aetherupload-output").text('发生故障，上传失败。');
-					clearInterval(_this.uploadChunkInterval);
-				}
+                if(XMLHttpRequest.status===0){
+                    $("#aetherupload-output").text('网络故障，正在重试……');
+                    _this.sleep(3000);
+                }else{
+                    $("#aetherupload-output").text('发生故障，上传失败。');
+                    clearInterval(_this.uploadChunkInterval);
+                }
             }
 
         });
@@ -130,13 +130,13 @@ var AetherUpload = {
         while (true) {
             if (new Date().getTime() > wakeUpTime) return;
         }
+    },
+    success:function(){
+        //
     }
 
 };
 
-
 $(function(){
-
     AetherUpload.init();
-
 });
