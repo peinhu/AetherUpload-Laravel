@@ -18,7 +18,6 @@ class Uploader extends BaseUploader
         self::$UPLOAD_PATH = Config::get('aetherupload.UPLOAD_PATH');
         self::$UPLOAD_FILE_DIR = Config::get('aetherupload.UPLOAD_FILE_DIR');
         self::$UPLOAD_HEAD_DIR = Config::get('aetherupload.UPLOAD_HEAD_DIR');
-
     }
 
     /**
@@ -38,8 +37,7 @@ class Uploader extends BaseUploader
             'uploadExt' => ''
         ];
 
-        if(!($fileName && $fileSize))
-        {
+        if (!($fileName && $fileSize)) {
             return $this->reportError('Param is not valid.');
         }
 
@@ -50,14 +48,12 @@ class Uploader extends BaseUploader
         $EXTENSIONS = Config::get('aetherupload.UPLOAD_FILE_EXTENSIONS');
 
         # 文件大小过滤
-        if($fileSize > $MAXSIZE && $MAXSIZE != 0)
-        {
+        if ($fileSize > $MAXSIZE && $MAXSIZE != 0) {
             return $this->reportError('File is too large.');
         }
 
         # 文件类型过滤
-        if((!in_array($uploadExt,explode(',',$EXTENSIONS)) && $EXTENSIONS != '') || $uploadExt == 'php' || $uploadExt == 'tmp')
-        {
+        if ((!in_array($uploadExt,explode(',',$EXTENSIONS)) && $EXTENSIONS != '') || $uploadExt == 'php' || $uploadExt == 'tmp') {
             return $this->reportError('File type is not valid.');
         }
 
@@ -67,8 +63,7 @@ class Uploader extends BaseUploader
 
         $this->uploadHead = $this->getUploadHeadPath($uploadBasename);
 
-        if(!( @touch($this->uploadFilePartial) && @touch($this->uploadHead)))
-        {
+        if (!( @touch($this->uploadFilePartial) && @touch($this->uploadHead))) {
             return $this->reportError('Fail to create file.');
         }
 
@@ -107,53 +102,46 @@ class Uploader extends BaseUploader
             'uploadName' => ''
         ];
 
-        if(!($chunkTotalCount && $chunkIndex && $uploadExt && $uploadBasename))
-        {
+        if (!($chunkTotalCount && $chunkIndex && $uploadExt && $uploadBasename)) {
             return $this->reportError('Param is not valid.',true);
         }
 
-        if(!(is_file($this->uploadFilePartial) && is_file($this->uploadHead)))
-        {
+        # 防止被人为跳过init方法直接调用save方法，从而上传恶意文件
+        if (!(is_file($this->uploadFilePartial) && is_file($this->uploadHead))) {
             return $this->reportError('File type is not valid.',true);
         }
 
-        if($file->getError() > 0)
-        {
+        if ($file->getError() > 0) {
             return $this->reportError($file->getErrorMessage(),true);
         }
 
-        if(!$file->isValid())
-        {
+        if (!$file->isValid()) {
             return $this->reportError('File is not uploaded via HTTP POST.',true);
         }
 
         # 头部文件指针验证，防止断线造成的重复传输某个文件块
-        if(is_file($this->uploadHead) && @file_get_contents($this->uploadHead) != $chunkIndex-1)
-        {
+        if (@file_get_contents($this->uploadHead) != $chunkIndex-1) {
             return $this->returnResult();
         }
 
         # 写入上传文件内容
-        if( @file_put_contents($this->uploadFilePartial, @file_get_contents($file->getRealPath()),FILE_APPEND) === FALSE)
-        {
+        if (@file_put_contents($this->uploadFilePartial, @file_get_contents($file->getRealPath()),FILE_APPEND) === FALSE) {
             return $this->reportError('Fail to write upload file.',true);
         }
 
         # 写入头文件内容
-        if( @file_put_contents($this->uploadHead, $chunkIndex) === FALSE)
-        {
+        if (@file_put_contents($this->uploadHead, $chunkIndex) === FALSE) {
             return $this->reportError('Fail to write head file.',true);
         }
 
         # 判断文件传输完成
-        if($chunkIndex == $chunkTotalCount)
-        {
+        if ($chunkIndex == $chunkTotalCount) {
+
             @unlink($this->uploadHead);
 
             $uploadFile = str_ireplace('.tmp','',$this->uploadFilePartial);
 
-            if(!@rename($this->uploadFilePartial,$uploadFile))
-            {
+            if (!@rename($this->uploadFilePartial,$uploadFile)) {
                 return $this->reportError('Fail to rename file.',true);
             }
 
@@ -174,7 +162,7 @@ class Uploader extends BaseUploader
     {
         $uploadedFile = self::$UPLOAD_PATH.self::$UPLOAD_FILE_DIR.DIRECTORY_SEPARATOR.$resourceName;
 
-        if(!is_file($uploadedFile))abort(404);
+        if (!is_file($uploadedFile)) abort(404);
 
         return response()->download($uploadedFile,'', [],'inline');
 
@@ -190,7 +178,7 @@ class Uploader extends BaseUploader
     {
         $uploadedFile = self::$UPLOAD_PATH.self::$UPLOAD_FILE_DIR.DIRECTORY_SEPARATOR.$resourceName;
 
-        if(!is_file($uploadedFile))abort(404);
+        if (!is_file($uploadedFile)) abort(404);
 
         $extension = explode('.',$resourceName)[1];
 
@@ -209,29 +197,29 @@ class Uploader extends BaseUploader
 
         $uploadArr = scandir(self::$UPLOAD_PATH.self::$UPLOAD_FILE_DIR);
 
-        foreach($headArr as $head)
-        {
+        foreach ($headArr as $head) {
+
             $headFile = self::$UPLOAD_PATH.self::$UPLOAD_HEAD_DIR.DIRECTORY_SEPARATOR.$head;
 
-            if(!is_file($headFile))
+            if (!is_file($headFile))
                 continue;
 
             $createTime = substr(pathinfo($headFile,PATHINFO_BASENAME),0,10);
 
-            if($createTime < $overTime)
+            if ($createTime < $overTime)
                 @unlink($headFile);
         }
 
-        foreach($uploadArr as $upload)
-        {
+        foreach ($uploadArr as $upload) {
+
             $uploadFile = self::$UPLOAD_PATH.self::$UPLOAD_FILE_DIR.DIRECTORY_SEPARATOR.$upload;
 
-            if(!is_file($uploadFile) || pathinfo($uploadFile, PATHINFO_EXTENSION) != 'tmp')
+            if (!is_file($uploadFile) || pathinfo($uploadFile, PATHINFO_EXTENSION) != 'tmp')
                 continue;
 
             $createTime = substr(pathinfo($uploadFile,PATHINFO_BASENAME),0,10);
 
-            if($createTime < $overTime)
+            if ($createTime < $overTime)
                 @unlink($uploadFile);
 
         }
@@ -240,7 +228,8 @@ class Uploader extends BaseUploader
 
     protected function reportError($message = '',$deleteFiles = false)
     {
-        if($deleteFiles) {
+        if ($deleteFiles) {
+
             @unlink($this->uploadHead);
 			
             @unlink($this->uploadFilePartial);
@@ -255,13 +244,11 @@ class Uploader extends BaseUploader
     protected function returnResult()
     {
         return response()->json($this->result);
-
     }
 
     protected function generateNewName()
     {
         return time().mt_rand(100,999);
-
     }
 
     private function getUploadFilePartialPath($uploadBasename,$uploadExt)
