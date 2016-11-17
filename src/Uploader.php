@@ -53,7 +53,7 @@ class Uploader extends BaseUploader
         }
 
         # 文件类型过滤
-        if ((!in_array($uploadExt,explode(',',$EXTENSIONS)) && $EXTENSIONS != '') || $uploadExt == 'php' || $uploadExt == 'tmp') {
+        if ($EXTENSIONS != '' && (!in_array($uploadExt,explode(',',$EXTENSIONS))) || in_array($uploadExt,static::getDangerousExtList())) {
             return $this->reportError('File type is not valid.');
         }
 
@@ -259,6 +259,11 @@ class Uploader extends BaseUploader
     private function getUploadHeadPath($uploadBasename)
     {
         return self::$UPLOAD_PATH.self::$UPLOAD_HEAD_DIR.DIRECTORY_SEPARATOR.$uploadBasename.'.head';
+    }
+
+    protected static function getDangerousExtList()
+    {
+        return ['php','tmp','html','shtml','htm','shtm','js','jsp','asp'];
     }
 
 
