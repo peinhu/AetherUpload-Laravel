@@ -21,9 +21,9 @@ class AetherUploadServiceProvider extends ServiceProvider
 
         if (!$this->app->routesAreCached()) {
             if ((double) $this->app->version() >= 5.2) {
-                require __DIR__ . '/../routes/routes_laravel_52.php';
+                require __DIR__ . '/../routes/routes_laravel_after52.php';
             } else {
-                require __DIR__ . '/../routes/routes_laravel_old.php';
+                require __DIR__ . '/../routes/routes_laravel_before52.php';
             }
         }
     }

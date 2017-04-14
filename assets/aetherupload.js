@@ -48,7 +48,7 @@ var AetherUpload = {
 
             _this.chunkSize = res.chunkSize;
 
-            _this.chunkCount = Math.ceil(_this.fileSize / _this.chunkSize),
+            _this.chunkCount = Math.ceil(_this.fileSize / _this.chunkSize);
 
                 _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk,_this),0);
         },'json');

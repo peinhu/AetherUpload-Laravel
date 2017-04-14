@@ -64,14 +64,14 @@
 <script src="//cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script><!--need to have jquery here-->
 <script src="{{ URL::asset('js/aetherupload.js') }}"></script><!--need to have aetherupload.js here-->
 <script>
+    // this function will be called after file is uploaded
     AetherUpload.success = function(){
-        //Example
         $('#test1').text(this.fileName);
-        $('#test2').text(parseInt(this.fileSize/1024)+'KB');
-        $('#test3').text(this.uploadBasename+'.'+this.uploadExt);
-        $('#display').attr('href','/aetherupload/display/'+this.uploadBasename+'.'+this.uploadExt);
-        $('#download').attr('href','/aetherupload/download/'+this.uploadBasename+'.'+this.uploadExt+'/test.'+this.uploadExt);
+        $('#test2').text(parseInt(this.fileSize/(1024 * 1024))+"MB");
+        $('#test3').text(this.uploadBasename+"."+this.uploadExt);
+        $('#display').attr("href","/aetherupload/display/"+this.uploadBasename+"."+this.uploadExt);
+        $('#download').attr("href","/aetherupload/download/"+this.uploadBasename+"."+this.uploadExt+"/test."+this.uploadExt);
     }
-</script><!--this function will be called after file is uploaded-->
+</script>
 </body>
 </html>
