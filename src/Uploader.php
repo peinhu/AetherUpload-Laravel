@@ -1,10 +1,7 @@
 <?php
 namespace Peinhu\AetherUpload;
 
-use Config;
-use Request;
-
-class Uploader extends BaseUploader
+class Uploader
 {
     protected $result;
     protected $uploadHead;
@@ -15,9 +12,9 @@ class Uploader extends BaseUploader
 
     public function __construct()
     {
-        self::$UPLOAD_PATH = Config::get('aetherupload.UPLOAD_PATH');
-        self::$UPLOAD_FILE_DIR = Config::get('aetherupload.UPLOAD_FILE_DIR');
-        self::$UPLOAD_HEAD_DIR = Config::get('aetherupload.UPLOAD_HEAD_DIR');
+        self::$UPLOAD_PATH = config('aetherupload.UPLOAD_PATH');
+        self::$UPLOAD_FILE_DIR = config('aetherupload.UPLOAD_FILE_DIR');
+        self::$UPLOAD_HEAD_DIR = config('aetherupload.UPLOAD_HEAD_DIR');
     }
 
     /**
@@ -26,13 +23,13 @@ class Uploader extends BaseUploader
      */
     public function init()
     {
-        $fileName = Request::input('file_name',0);
+        $fileName = request('file_name',0);
 
-        $fileSize = Request::input('file_size',0);
+        $fileSize = request('file_size',0);
 
         $this->result = [ 
             'error' => 0,
-            'chunkSize' => Config::get('aetherupload.CHUNK_SIZE'),
+            'chunkSize' => config('aetherupload.CHUNK_SIZE'),
             'uploadBasename' => '',
             'uploadExt' => ''
         ];
@@ -43,9 +40,9 @@ class Uploader extends BaseUploader
 
         $uploadExt = strtolower(substr($fileName,strripos($fileName,'.')+1));
 
-        $MAXSIZE = Config::get('aetherupload.UPLOAD_FILE_MAXSIZE') * 1024 * 1024;
+        $MAXSIZE = config('aetherupload.UPLOAD_FILE_MAXSIZE') * 1024 * 1024;
 
-        $EXTENSIONS = Config::get('aetherupload.UPLOAD_FILE_EXTENSIONS');
+        $EXTENSIONS = config('aetherupload.UPLOAD_FILE_EXTENSIONS');
 
         # 文件大小过滤
         if ($fileSize > $MAXSIZE && $MAXSIZE != 0) {
@@ -82,15 +79,15 @@ class Uploader extends BaseUploader
     public function save()
     {
 
-        $chunkTotalCount = Request::input('chunk_total',0);# 分片总数
+        $chunkTotalCount = request('chunk_total',0);# 分片总数
 
-        $chunkIndex = Request::input('chunk_index',0);# 当前分片号
+        $chunkIndex = request('chunk_index',0);# 当前分片号
 
-        $uploadBasename = Request::input('upload_basename',0);# 文件重命名
+        $uploadBasename = request('upload_basename',0);# 文件重命名
 
-        $uploadExt = Request::input('upload_ext',0);# 文件扩展名
+        $uploadExt = request('upload_ext',0);# 文件扩展名
 
-        $file = Request::file('file');
+        $file = request()->file('file');
 
         $this->uploadHead = $this->getUploadHeadPath($uploadBasename);
 

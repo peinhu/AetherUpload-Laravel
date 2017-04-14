@@ -20,21 +20,14 @@ class AetherUploadServiceProvider extends ServiceProvider
         ],'aetherupload');
 
         if (!$this->app->routesAreCached()) {
-            if ((double) $this->app->version() >= 5.2) {
-                require __DIR__ . '/../routes/routes_laravel_after52.php';
-            } else {
-                require __DIR__ . '/../routes/routes_laravel_before52.php';
-            }
+            require __DIR__ . '/../routes/routes.php';
         }
     }
 
 
     public function register()
     {
-        $this->mergeConfigFrom(
-            __DIR__.'/../config/aetherupload.php', 'aetherupload'
-        );
-
+        //
     }
 
 }
