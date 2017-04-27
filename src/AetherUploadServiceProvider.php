@@ -10,31 +10,24 @@ class AetherUploadServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        $this->loadViewsFrom(__DIR__.'/../views', 'aetherupload');
+        $this->loadViewsFrom(__DIR__ . '/../views', 'aetherupload');
 
         $this->publishes([
-            __DIR__.'/../config/aetherupload.php' => config_path('aetherupload.php'),
-            __DIR__.'/../assets/aetherupload.js' => public_path('js/aetherupload.js'),
-            __DIR__.'/../uploads/aetherupload_file' => storage_path('app/uploads/aetherupload_file'),
-            __DIR__.'/../uploads/aetherupload_head' => storage_path('app/uploads/aetherupload_head'),
-        ],'aetherupload');
+            __DIR__ . '/../config/aetherupload.php'   => config_path('aetherupload.php'),
+            __DIR__ . '/../assets/aetherupload.js'    => public_path('js/aetherupload.js'),
+            __DIR__ . '/../uploads/aetherupload_file' => storage_path('app/uploads/aetherupload_file'),
+            __DIR__ . '/../uploads/aetherupload_head' => storage_path('app/uploads/aetherupload_head'),
+        ], 'aetherupload');
 
-        if (!$this->app->routesAreCached()) {
-            if ((double) $this->app->version() >= 5.2) {
-                require __DIR__ . '/../routes/routes_laravel_52.php';
-            } else {
-                require __DIR__ . '/../routes/routes_laravel_old.php';
-            }
+        if ( ! $this->app->routesAreCached() ) {
+            require __DIR__ . '/../routes/routes.php';
         }
     }
 
 
     public function register()
     {
-        $this->mergeConfigFrom(
-            __DIR__.'/../config/aetherupload.php', 'aetherupload'
-        );
-
+        //
     }
 
 }
