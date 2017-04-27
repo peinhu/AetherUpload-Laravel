@@ -1,7 +1,7 @@
 
 var AetherUpload = {
 
-    init: function(){
+    upload: function(){
 
         $.ajaxSetup({
             headers: {
@@ -9,55 +9,59 @@ var AetherUpload = {
             }
         });
 
-        $("#aetherupload-file").change($.proxy(this.upload, this));
+        this.fileDom = $('#aetherupload-file'),
 
-    },
+        this.outputDom = $('#aetherupload-output'),
 
-    upload: function(){
+        this.progressBarDom = $('#aetherupload-progressbar'),
 
-        $("#aetherupload-output").text('开始上传');
+        this.uploadNameDom = $('#aetherupload-uploadname'),
 
-        this.file = $("#aetherupload-file")[0].files[0],
+        this.file = this.fileDom[0].files[0],
 
-            this.fileName = this.file.name,
+        this.fileName = this.file.name,
 
-            this.fileSize = this.file.size,
+        this.fileSize = this.file.size,
 
-            this.uploadBasename = "",
+        this.uploadBasename = "",
 
-            this.uploadExt = "",
+        this.uploadExt = "",
 
-            this.chunkSize = 0,
+        this.chunkSize = 0,
 
-            this.chunkCount = 0,
+        this.chunkCount = 0,
 
-            this.i = 0;
+        this.i = 0;
 
         var _this = this;
 
-        $.post('/aetherupload/init',{file_name:_this.fileName,file_size:_this.fileSize},function(res){
+        this.outputDom.text('开始上传');
 
-            if(res.error != 0){
-                $("#aetherupload-output").text(res.error);
+        $.post('/aetherupload/initialize',{file_name:_this.fileName,file_size:_this.fileSize},function(rst){
+
+            if(rst.error != 0){
+
+                _this.outputDom.text(rst.error);
+
                 return;
+
             }
 
-            _this.uploadBasename = res.uploadBasename;
+            _this.uploadBasename = rst.uploadBasename;
 
-            _this.uploadExt = res.uploadExt;
+            _this.uploadExt = rst.uploadExt;
 
-            _this.chunkSize = res.chunkSize;
+            _this.chunkSize = rst.chunkSize;
 
             _this.chunkCount = Math.ceil(_this.fileSize / _this.chunkSize);
 
-                _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk,_this),0);
+            _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk,_this),0);
+
         },'json');
 
     },
 
     uploadChunk:function(){
-
-        if((this.i+1)==this.chunkCount){clearInterval(this.uploadChunkInterval);}
 
         var start = this.i * this.chunkSize,end = Math.min(this.fileSize, start + this.chunkSize);
 
@@ -77,7 +81,7 @@ var AetherUpload = {
 
         $.ajax({
 
-            url: "/aetherupload/upload",
+            url: "/aetherupload/uploading",
 
             type: "POST",
 
@@ -91,52 +95,84 @@ var AetherUpload = {
 
             contentType: false,
 
-            success: function (res) {
+            success: function (rst) {
 
-                if (res.error != 0) {
-                    $("#aetherupload-output").text(res.error);
+                if (rst.error != 0) {
+
+                    _this.outputDom.text(rst.error);
+
                     clearInterval(_this.uploadChunkInterval);
+
                     return;
+
                 }
 
-                var percent = parseInt((_this.i + 1) / _this.chunkCount * 100) + "%";
-                $("#aetherupload-bar").css("width", percent);
-                $("#aetherupload-output").text(percent);
+                _this.refreshProgress();
 
-                if (res.complete) {
-                    $("#aetherupload-uploadname") .val(res.uploadName);
-                    $("#aetherupload-output").text('上传完毕！');
-                    $("#aetherupload-file").attr('disabled', 'disabled');
+                if (_this.i+1 == _this.chunkCount) {
+
+                    clearInterval(_this.uploadChunkInterval);
+
+                    _this.uploadNameDom.val(_this.uploadBasename+'.'+_this.uploadExt);
+
+                    _this.outputDom.text('上传完毕');
+
+                    _this.fileDom.attr('disabled', 'disabled');
+
                     _this.success();
+
                 }
 
                 ++_this.i;
+
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
+
                 if(XMLHttpRequest.status===0){
-                    $("#aetherupload-output").text('网络故障，正在重试……');
+
+                    _this.outputDom.text('网络故障，正在重试……');
+
                     _this.sleep(3000);
+
                 }else{
-                    $("#aetherupload-output").text('发生故障，上传失败。');
+
+                    _this.outputDom.text('发生故障，上传失败。');
+
                     clearInterval(_this.uploadChunkInterval);
+
                 }
             }
 
         });
 
     },
+
+    refreshProgress:function(){
+
+        var percent = parseInt((this.i + 1) / this.chunkCount * 100) + "%";
+
+        this.progressBarDom.css("width", percent);
+
+        this.outputDom.text("正在上传 " + percent);
+
+    },
+
     sleep:function(milliSecond){
+
         var wakeUpTime = new Date().getTime() + milliSecond;
+
         while (true) {
-            if (new Date().getTime() > wakeUpTime) return;
+
+            if (new Date().getTime() > wakeUpTime){
+
+                return;
+
+            }
         }
     },
+
     success:function(){
         //
     }
 
 };
-
-$(function(){
-    AetherUpload.init();
-});

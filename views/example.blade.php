@@ -21,9 +21,9 @@
             <div class="form-group">
                 <label >文件：</label>
                 <div class="controls">
-                    <input type="file"  id="aetherupload-file"/><!--need to have an id "aetherupload-file" here for the file to be uploaded-->
+                    <input type="file"  id="aetherupload-file" onchange="AetherUpload.upload()"/><!--need to have an id "aetherupload-file" here for the file to be uploaded-->
                     <div class="progress " style="height: 6px;margin-bottom: 2px;margin-top: 10px;width: 200px;">
-                        <div id="aetherupload-bar" style="background:blue;height:6px;width:0;"></div><!--need to have an id "aetherupload-bar" here for the progress bar-->
+                        <div id="aetherupload-progressbar" style="background:blue;height:6px;width:0;"></div><!--need to have an id "aetherupload-progressbar" here for the progress bar-->
                     </div>
                     <span style="font-size:12px;color:#aaa;" id="aetherupload-output">等待上传</span><!--need to have an id "aetherupload-output" here for the prompt message-->
                 </div>
@@ -45,15 +45,14 @@
 
             <input type="hidden" name="uploadname" id="aetherupload-uploadname" value=""><!--need to have an id "aetherupload-uploadname"  here for the name of the uploaded file-->
             <button type="button" class="btn btn-primary">提交</button>
-
         </form>
 
         <hr/>
 
         <div >
-        <p>原文件名：<span id="test1"></span></p>
-        <p>原文件大小：<span id="test2"></span></p>
-        <p>上传文件名：<span id="test3"></span></p>
+            <p>原文件名：<span id="test1"></span></p>
+            <p>原文件大小：<span id="test2"></span></p>
+            <p>上传文件名：<span id="test3"></span></p>
         </div>
 
         <a href="/aetherupload/display/UPLOADED-FILE-NAME" target="_blank" id="display">[获得上传的文件]</a>
@@ -61,17 +60,20 @@
     </div>
 </div>
 
-<script src="//cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script><!--need to have jquery here-->
-<script src="{{ URL::asset('js/aetherupload.js') }}"></script><!--need to have aetherupload.js here-->
+<script src="//cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script><!--need to have jquery-->
+<script src="{{ URL::asset('js/aetherupload.js') }}"></script><!--need to have aetherupload.js-->
 <script>
-    // this function will be called after file is uploaded
+    // this function will be called after file is uploaded successfully
+    // you can get fileName,fileSize,uploadName(this.uploadBasename+'.'+this.uploadExt),chunkCount,chunkSize of the uploaded file
     AetherUpload.success = function(){
+        // example
         $('#test1').text(this.fileName);
-        $('#test2').text(parseInt(this.fileSize/(1024 * 1024))+"MB");
-        $('#test3').text(this.uploadBasename+"."+this.uploadExt);
-        $('#display').attr("href","/aetherupload/display/"+this.uploadBasename+"."+this.uploadExt);
-        $('#download').attr("href","/aetherupload/download/"+this.uploadBasename+"."+this.uploadExt+"/test."+this.uploadExt);
+        $('#test2').text(parseFloat(this.fileSize/(1024 * 1024)).toFixed(2)+'MB');
+        $('#test3').text(this.uploadBasename+'.'+this.uploadExt);
+        $('#display').attr('href','/aetherupload/display/'+this.uploadBasename+'.'+this.uploadExt);
+        $('#download').attr('href','/aetherupload/download/'+this.uploadBasename+'.'+this.uploadExt+'/test.'+this.uploadExt);
     }
+
 </script>
 </body>
 </html>
