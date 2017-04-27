@@ -38,7 +38,7 @@ var AetherUpload = {
         this.outputDom.text('开始上传');
 
         $.post('/aetherupload/initialize',{file_name:_this.fileName,file_size:_this.fileSize},function(rst){
-console.log(rst);
+
             if(rst.error != 0){
 
                 _this.outputDom.text(rst.error);
