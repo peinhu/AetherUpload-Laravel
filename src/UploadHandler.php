@@ -25,14 +25,23 @@ class UploadHandler
         }
 
         $fileExt = $this->receiver->uploadExt = strtolower(substr($fileName, strripos($fileName, '.') + 1));
-        $this->filterBySize($fileSize);
-        $this->filterByExt($fileExt);
-        $uploadBasename = $this->receiver->createFile();
+
+        if ( ($reportError = $this->filterBySize($fileSize)) != 'pass' ) {
+            return $reportError;
+        }
+
+        if ( ($reportError = $this->filterByExt($fileExt)) != 'pass' ) {
+            return $reportError;
+        }
+
+        if ( ($reportError = $this->receiver->createFile()) != 'success' ) {
+            return $reportError;
+        }
 
         $result = [
             'error'          => 0,
             'chunkSize'      => Receiver::$CHUNK_SIZE,
-            'uploadBasename' => $uploadBasename,
+            'uploadBasename' => $this->receiver->uploadBasename,
             'uploadExt'      => $fileExt,
         ];
 
@@ -82,7 +91,9 @@ class UploadHandler
             return Responser::returnResult($result);
         }
 
-        $this->receiver->writeFile();
+        if ( ($reportError = $this->receiver->writeFile()) != 'success' ) {
+            return $reportError;
+        }
 
         return Responser::returnResult($result);
     }
@@ -95,7 +106,7 @@ class UploadHandler
             return Responser::reportError('文件过大');
         }
 
-        return true;
+        return 'pass';
     }
 
     public function filterByExt($uploadExt)
@@ -106,7 +117,7 @@ class UploadHandler
             return Responser::reportError('文件类型不正确');
         }
 
-        return true;
+        return 'pass';
     }
 
     protected static function getDangerousExtList()

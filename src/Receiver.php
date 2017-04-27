@@ -10,6 +10,7 @@ class Receiver
     public $chunkTotalCount;
     public $file;
     public $uploadExt;
+    public $uploadBasename;
     static public $UPLOAD_FILE_DIR;
     static public $UPLOAD_HEAD_DIR;
     static public $UPLOAD_PATH;
@@ -25,24 +26,22 @@ class Receiver
 
     /**
      * filter and create the file
-     * @return \Illuminate\Http\JsonResponse|string
      */
     public function createFile()
     {
-        $uploadBasename = $this->generateNewName();
-        $this->uploadFilePartial = $this->getUploadFilePartialPath($uploadBasename, $this->uploadExt);
-        $this->uploadHead = $this->getUploadHeadPath($uploadBasename);
+        $this->uploadBasename = $this->generateNewName();
+        $this->uploadFilePartial = $this->getUploadFilePartialPath($this->uploadBasename, $this->uploadExt);
+        $this->uploadHead = $this->getUploadHeadPath($this->uploadBasename);
 
         if ( ! (@touch($this->uploadFilePartial) && @touch($this->uploadHead)) ) {
             return Responser::reportError('无法创建文件');
         }
 
-        return $uploadBasename;
+        return 'success';
     }
 
     /**
      * write data to the existing file
-     * @return bool|\Illuminate\Http\JsonResponse
      */
     public function writeFile()
     {
@@ -64,7 +63,7 @@ class Receiver
 
         }
 
-        return true;
+        return 'success';
     }
 
     protected function generateNewName()
