@@ -68,7 +68,7 @@
     AetherUpload.success = function(){
         // example
         $('#test1').text(this.fileName);
-        $('#test2').text(parseFloat(this.fileSize/(1024 * 1024)).toFixed(2)+'MB');
+        $('#test2').text(parseFloat(this.fileSize/(1000 * 1000)).toFixed(2)+'MB');
         $('#test3').text(this.uploadBasename+'.'+this.uploadExt);
         $('#display').attr('href','/aetherupload/display/'+this.uploadBasename+'.'+this.uploadExt);
         $('#download').attr('href','/aetherupload/download/'+this.uploadBasename+'.'+this.uploadExt+'/test.'+this.uploadExt);
