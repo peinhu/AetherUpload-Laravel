@@ -100,7 +100,7 @@ class UploadHandler
 
     public function filterBySize($fileSize)
     {
-        $MAXSIZE = config('aetherupload.UPLOAD_FILE_MAXSIZE') * 1024 * 1024;
+        $MAXSIZE = config('aetherupload.UPLOAD_FILE_MAXSIZE') * 1000 * 1000;
         # 文件大小过滤
         if ( $fileSize > $MAXSIZE && $MAXSIZE != 0 ) {
             return Responser::reportError('文件过大');

@@ -45,9 +45,7 @@ class ResourceHandler
             abort(404);
         }
 
-        $extension = explode('.', $resourceName)[1];
-
-        return response()->download($uploadedFile, $newName . '.' . $extension, [], 'attachment');
+        return response()->download($uploadedFile, $newName, [], 'attachment');
     }
 
     /**
