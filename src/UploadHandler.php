@@ -52,7 +52,7 @@ class UploadHandler
      * handle and save the uploaded data
      * @return \Illuminate\Http\JsonResponse
      */
-    public function save()
+    public function saveChunk()
     {
         $chunkTotalCount = request('chunk_total', 0);# 分片总数
         $chunkIndex = request('chunk_index', 0);# 当前分片号
