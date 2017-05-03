@@ -9,7 +9,8 @@ return [
     "UPLOAD_FILE_DIR"        => "aetherupload_file", # 上传文件的目录
     "UPLOAD_HEAD_DIR"        => "aetherupload_head", # 指针头文件的目录
     "CHUNK_SIZE"             => 1 * 1000 * 1000, # 上传时的分块大小（B），默认为1M，越大传输越快，需要小于web服务器和php.ini中设置的上传限值
-    "MIDDLEWARE_UPLOAD"      => [], # 文件上传时的路由中间件
+    "MIDDLEWARE_INIT"        => [], # 上传初始化时的路由中间件
+    "MIDDLEWARE_SAVECHUNK"   => [], # 上传文件分块时的路由中间件
     "MIDDLEWARE_DISPLAY"     => [], # 文件展示时的路由中间件
     "MIDDLEWARE_DOWNLOAD"    => [], # 文件下载时的路由中间件
 

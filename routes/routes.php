@@ -20,12 +20,12 @@ if ( Config::get('aetherupload.ENABLE_EXAMPLE_PAGE') === true ) {
 Route::post('aetherupload/initialize', function (\Peinhu\AetherUpload\UploadHandler $uploadHandler) {
 
     return $uploadHandler->init();
-})->middleware(Config::get('aetherupload.MIDDLEWARE_UPLOAD'));
+})->middleware(Config::get('aetherupload.MIDDLEWARE_INIT'));
 
 Route::post('aetherupload/uploading', function (\Peinhu\AetherUpload\UploadHandler $uploadHandler) {
 
-    return $uploadHandler->save();
-});
+    return $uploadHandler->saveChunk();
+})->middleware(Config::get('aetherupload.MIDDLEWARE_SAVECHUNK'));
 
 Route::get('aetherupload/display/{resourceName}', function (\Peinhu\AetherUpload\ResourceHandler $resourceHandler, $resourceName) {
 
