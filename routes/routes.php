@@ -17,23 +17,11 @@ if ( Config::get('aetherupload.ENABLE_EXAMPLE_PAGE') === true ) {
     });
 }
 
-Route::post('aetherupload/initialize', function (\Peinhu\AetherUpload\UploadHandler $uploadHandler) {
+Route::post('aetherupload/initialize', '\Peinhu\AetherUpload\UploadHandler@init');
 
-    return $uploadHandler->init();
-})->middleware(Config::get('aetherupload.MIDDLEWARE_INIT'));
+Route::post('aetherupload/uploading', '\Peinhu\AetherUpload\UploadHandler@saveChunk');
 
-Route::post('aetherupload/uploading', function (\Peinhu\AetherUpload\UploadHandler $uploadHandler) {
+Route::get('aetherupload/display/{group}/{resourceName}', '\Peinhu\AetherUpload\ResourceHandler@displayResource');
 
-    return $uploadHandler->saveChunk();
-})->middleware(Config::get('aetherupload.MIDDLEWARE_SAVECHUNK'));
-
-Route::get('aetherupload/display/{resourceName}', function (\Peinhu\AetherUpload\ResourceHandler $resourceHandler, $resourceName) {
-
-    return $resourceHandler->displayResource($resourceName);
-})->middleware(Config::get('aetherupload.MIDDLEWARE_DISPLAY'));
-
-Route::get('aetherupload/download/{resourceName}/{newName}', function (\Peinhu\AetherUpload\ResourceHandler $resourceHandler, $resourceName, $newName) {
-
-    return $resourceHandler->downloadResource($resourceName, $newName);
-})->middleware(Config::get('aetherupload.MIDDLEWARE_DOWNLOAD'));
+Route::get('aetherupload/download/{group}/{resourceName}/{newName}', '\Peinhu\AetherUpload\ResourceHandler@downloadResource');
 

@@ -2,27 +2,30 @@
 
 namespace Peinhu\AetherUpload;
 
-class ResourceHandler
+class ResourceHandler extends \Illuminate\Routing\Controller
 {
-    static protected $UPLOAD_FILE_DIR;
-    static protected $UPLOAD_HEAD_DIR;
-    static protected $UPLOAD_PATH;
+    public $config;
+    public $configMapper;
 
-    public function __construct()
+    public function __construct(ConfigMapper $configMapper)
     {
-        self::$UPLOAD_PATH = config('aetherupload.UPLOAD_PATH');
-        self::$UPLOAD_FILE_DIR = config('aetherupload.UPLOAD_FILE_DIR');
-        self::$UPLOAD_HEAD_DIR = config('aetherupload.UPLOAD_HEAD_DIR');
+        $this->configMapper = $configMapper;
+        $this->middleware(config('aetherupload.groups.' . request()->route('group') . '.MIDDLEWARE_DISPLAY'), ['only' => ['displayResource']]);
+        $this->middleware(config('aetherupload.groups.' . request()->route('group') . '.MIDDLEWARE_DOWNLOAD'), ['only' => ['downloadResource']]);
+
     }
 
     /**
      * display the uploaded file
+     * @param $group
      * @param $resourceName
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
      */
-    public function displayResource($resourceName)
+    public function displayResource($group, $resourceName)
     {
-        $uploadedFile = self::$UPLOAD_PATH . DIRECTORY_SEPARATOR . self::$UPLOAD_FILE_DIR . DIRECTORY_SEPARATOR . $resourceName;
+        $this->config = $this->configMapper->getConfigByGroup($group);
+
+        $uploadedFile = $this->config->UPLOAD_PATH . DIRECTORY_SEPARATOR . $this->config->UPLOAD_FILE_DIR . DIRECTORY_SEPARATOR . $resourceName;
 
         if ( ! is_file($uploadedFile) ) {
             abort(404);
@@ -33,13 +36,16 @@ class ResourceHandler
 
     /**
      * download the uploaded file
+     * @param $group
      * @param $resourceName
      * @param $newName
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
      */
-    public function downloadResource($resourceName, $newName)
+    public function downloadResource($group, $resourceName, $newName)
     {
-        $uploadedFile = self::$UPLOAD_PATH . DIRECTORY_SEPARATOR . self::$UPLOAD_FILE_DIR . DIRECTORY_SEPARATOR . $resourceName;
+        $this->config = $this->configMapper->getConfigByGroup($group);
+
+        $uploadedFile = $this->config->UPLOAD_PATH . DIRECTORY_SEPARATOR . $this->config->UPLOAD_FILE_DIR . DIRECTORY_SEPARATOR . $resourceName;
 
         if ( ! is_file($uploadedFile) ) {
             abort(404);
@@ -54,36 +60,42 @@ class ResourceHandler
     public function cleanUpDir()
     {
         $dueTime = strtotime('-2 day');
-        $headArr = scandir(self::$UPLOAD_PATH . DIRECTORY_SEPARATOR . self::$UPLOAD_HEAD_DIR);
-        $uploadArr = scandir(self::$UPLOAD_PATH . DIRECTORY_SEPARATOR . self::$UPLOAD_FILE_DIR);
 
-        foreach ( $headArr as $head ) {
-            $headFile = self::$UPLOAD_PATH . DIRECTORY_SEPARATOR . self::$UPLOAD_HEAD_DIR . DIRECTORY_SEPARATOR . $head;
+        foreach ( config('aetherupload.groups') as $group ) {
+            $headArr = scandir($group['UPLOAD_PATH'] . DIRECTORY_SEPARATOR . $group['UPLOAD_HEAD_DIR']);
+            $fileArr = scandir($group['UPLOAD_PATH'] . DIRECTORY_SEPARATOR . $group['UPLOAD_FILE_DIR']);
 
-            if ( ! file_exists($headFile) ) {
-                continue;
+            foreach ( $headArr as $head ) {
+                $headFile = $group['UPLOAD_PATH'] . DIRECTORY_SEPARATOR . $group['UPLOAD_HEAD_DIR'] . DIRECTORY_SEPARATOR . $head;
+
+                if ( ! file_exists($headFile) ) {
+                    continue;
+                }
+
+                $createTime = substr(pathinfo($headFile, PATHINFO_BASENAME), 0, 10);
+
+                if ( $createTime < $dueTime ) {
+                    @unlink($headFile);
+                }
             }
 
-            $createTime = substr(pathinfo($headFile, PATHINFO_BASENAME), 0, 10);
+            foreach ( $fileArr as $file ) {
+                $uploadFile = $group['UPLOAD_PATH'] . DIRECTORY_SEPARATOR . $group['UPLOAD_FILE_DIR'] . DIRECTORY_SEPARATOR . $file;
 
-            if ( $createTime < $dueTime ) {
-                @unlink($headFile);
+                if ( ! file_exists($uploadFile) || pathinfo($uploadFile, PATHINFO_EXTENSION) != 'part' ) {
+                    continue;
+                }
+
+                $createTime = substr(pathinfo($uploadFile, PATHINFO_BASENAME), 0, 10);
+
+                if ( $createTime < $dueTime ) {
+                    @unlink($uploadFile);
+                }
             }
+
         }
 
-        foreach ( $uploadArr as $upload ) {
-            $uploadFile = self::$UPLOAD_PATH . DIRECTORY_SEPARATOR . self::$UPLOAD_FILE_DIR . DIRECTORY_SEPARATOR . $upload;
-
-            if ( ! file_exists($uploadFile) || pathinfo($uploadFile, PATHINFO_EXTENSION) != 'part' ) {
-                continue;
-            }
-
-            $createTime = substr(pathinfo($uploadFile, PATHINFO_BASENAME), 0, 10);
-
-            if ( $createTime < $dueTime ) {
-                @unlink($uploadFile);
-            }
-        }
     }
+
 
 }

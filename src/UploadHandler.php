@@ -2,13 +2,19 @@
 
 namespace Peinhu\AetherUpload;
 
-class UploadHandler
+class UploadHandler extends \Illuminate\Routing\Controller
 {
-    public $result;
+    public $config;
+    public $receiver;
+    public $configMapper;
 
-    public function __construct(Receiver $receiver)
+    public function __construct(Receiver $receiver, ConfigMapper $configMapper)
     {
         $this->receiver = $receiver;
+        $group = request('group');
+        $this->config = $this->receiver->config = $configMapper->getConfigByGroup($group);
+        $this->middleware(config('aetherupload.groups.' . $group . '.MIDDLEWARE_INIT'), ['only' => ['init']]);
+        $this->middleware(config('aetherupload.groups.' . $group . '.MIDDLEWARE_SAVECHUNK'), ['only' => ['saveChunk']]);
     }
 
     /**
@@ -40,7 +46,7 @@ class UploadHandler
 
         $result = [
             'error'          => 0,
-            'chunkSize'      => Receiver::$CHUNK_SIZE,
+            'chunkSize'      => $this->config->CHUNK_SIZE,
             'uploadBasename' => $this->receiver->uploadBasename,
             'uploadExt'      => $fileExt,
         ];
@@ -74,7 +80,7 @@ class UploadHandler
         if ( ! ($chunkTotalCount && $chunkIndex && $uploadExt && $uploadBasename) ) {
             return Responser::reportError('缺少必要的文件块参数', true, $uploadHead, $uploadFilePartial);
         }
-        # 防止被人为跳过验证过程直接调用save方法，从而上传恶意文件
+        # 防止被人为跳过验证过程直接调用保存方法，从而上传恶意文件
         if ( ! is_file($uploadFilePartial) ) {
             return Responser::reportError('此文件不被允许上传', true, $uploadHead, $uploadFilePartial);
         }
@@ -100,7 +106,7 @@ class UploadHandler
 
     public function filterBySize($fileSize)
     {
-        $MAXSIZE = config('aetherupload.UPLOAD_FILE_MAXSIZE') * 1000 * 1000;
+        $MAXSIZE = $this->config->UPLOAD_FILE_MAXSIZE * 1000 * 1000;
         # 文件大小过滤
         if ( $fileSize > $MAXSIZE && $MAXSIZE != 0 ) {
             return Responser::reportError('文件过大');
@@ -111,7 +117,7 @@ class UploadHandler
 
     public function filterByExt($uploadExt)
     {
-        $EXTENSIONS = config('aetherupload.UPLOAD_FILE_EXTENSIONS');
+        $EXTENSIONS = $this->config->UPLOAD_FILE_EXTENSIONS;
         # 文件类型过滤
         if ( ($EXTENSIONS != '' && ! in_array($uploadExt, explode(',', $EXTENSIONS))) || in_array($uploadExt, static::getDangerousExtList()) ) {
             return Responser::reportError('文件类型不正确');

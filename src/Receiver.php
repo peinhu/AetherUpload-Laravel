@@ -11,18 +11,7 @@ class Receiver
     public $file;
     public $uploadExt;
     public $uploadBasename;
-    static public $UPLOAD_FILE_DIR;
-    static public $UPLOAD_HEAD_DIR;
-    static public $UPLOAD_PATH;
-    static public $CHUNK_SIZE;
-
-    public function __construct()
-    {
-        self::$UPLOAD_PATH = config('aetherupload.UPLOAD_PATH');
-        self::$UPLOAD_FILE_DIR = config('aetherupload.UPLOAD_FILE_DIR');
-        self::$UPLOAD_HEAD_DIR = config('aetherupload.UPLOAD_HEAD_DIR');
-        self::$CHUNK_SIZE = config('aetherupload.CHUNK_SIZE');
-    }
+    public $config;
 
     /**
      * filter and create the file
@@ -73,12 +62,12 @@ class Receiver
 
     public function getUploadFilePartialPath($uploadBasename, $uploadExt)
     {
-        return self::$UPLOAD_PATH . DIRECTORY_SEPARATOR . self::$UPLOAD_FILE_DIR . DIRECTORY_SEPARATOR . $uploadBasename . '.' . $uploadExt . '.part';
+        return $this->config->UPLOAD_PATH . DIRECTORY_SEPARATOR . $this->config->UPLOAD_FILE_DIR . DIRECTORY_SEPARATOR . $uploadBasename . '.' . $uploadExt . '.part';
     }
 
     public function getUploadHeadPath($uploadBasename)
     {
-        return self::$UPLOAD_PATH . DIRECTORY_SEPARATOR . self::$UPLOAD_HEAD_DIR . DIRECTORY_SEPARATOR . $uploadBasename . '.head';
+        return $this->config->UPLOAD_PATH . DIRECTORY_SEPARATOR . $this->config->UPLOAD_HEAD_DIR . DIRECTORY_SEPARATOR . $uploadBasename . '.head';
     }
 
 

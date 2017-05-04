@@ -21,7 +21,7 @@
             <div class="form-group">
                 <label >文件：</label>
                 <div class="controls">
-                    <input type="file"  id="aetherupload-file" onchange="AetherUpload.upload()"/><!--need to have an id "aetherupload-file" here for the file to be uploaded-->
+                    <input type="file"  id="aetherupload-file" onchange="AetherUpload.upload('default')"/><!--need to have an id "aetherupload-file" here for the file to be uploaded, 'default' stands for the default group in config/aetherupload.php-->
                     <div class="progress " style="height: 6px;margin-bottom: 2px;margin-top: 10px;width: 200px;">
                         <div id="aetherupload-progressbar" style="background:blue;height:6px;width:0;"></div><!--need to have an id "aetherupload-progressbar" here for the progress bar-->
                     </div>
@@ -55,8 +55,8 @@
             <p>上传文件名：<span id="test3"></span></p>
         </div>
 
-        <a href="/aetherupload/display/UPLOADED-FILE-NAME" target="_blank" id="display">[获得上传的文件]</a>
-        <a href="/aetherupload/download/UPLOADED-FILE-NAME/DOWNLOAD-FILE-NEWNAME" target="_blank" id="download">[下载上传的文件]</a>
+        <a href="/aetherupload/display/GROUP/UPLOADED-FILE-NAME" target="_blank" id="display">[获得上传的文件]</a>
+        <a href="/aetherupload/download/GROUP/UPLOADED-FILE-NAME/DOWNLOAD-FILE-NEWNAME" target="_blank" id="download">[下载上传的文件]</a>
     </div>
 </div>
 
@@ -64,14 +64,14 @@
 <script src="{{ URL::asset('js/aetherupload.js') }}"></script><!--need to have aetherupload.js-->
 <script>
     // this function will be called after file is uploaded successfully
-    // you can get fileName,fileSize,uploadName(this.uploadBasename+'.'+this.uploadExt),chunkCount,chunkSize of the uploaded file
+    // you can get fileName,fileSize,uploadName(this.uploadBasename+'.'+this.uploadExt),chunkCount,chunkSize,group of the uploaded file
     AetherUpload.success = function(){
         // example
         $('#test1').text(this.fileName);
         $('#test2').text(parseFloat(this.fileSize/(1000 * 1000)).toFixed(2)+'MB');
         $('#test3').text(this.uploadBasename+'.'+this.uploadExt);
-        $('#display').attr('href','/aetherupload/display/'+this.uploadBasename+'.'+this.uploadExt);
-        $('#download').attr('href','/aetherupload/download/'+this.uploadBasename+'.'+this.uploadExt+'/test.'+this.uploadExt);
+        $('#display').attr('href','/aetherupload/display/'+this.group+'/'+this.uploadBasename+'.'+this.uploadExt);
+        $('#download').attr('href','/aetherupload/download/'+this.group+'/'+this.uploadBasename+'.'+this.uploadExt+'/test.'+this.uploadExt);
     }
 
 </script>

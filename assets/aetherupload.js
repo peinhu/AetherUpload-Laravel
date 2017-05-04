@@ -1,7 +1,7 @@
 
 var AetherUpload = {
 
-    upload: function(){
+    upload: function(group){
 
         $.ajaxSetup({
             headers: {
@@ -31,13 +31,15 @@ var AetherUpload = {
 
         this.chunkCount = 0,
 
+        this.group = group, //对应配置文件中的分组名
+
         this.i = 0;
 
         var _this = this;
 
         this.outputDom.text('开始上传');
 
-        $.post('/aetherupload/initialize',{file_name:_this.fileName,file_size:_this.fileSize},function(rst){
+        $.post('/aetherupload/initialize',{file_name:_this.fileName,file_size:_this.fileSize,group:_this.group},function(rst){
 
             if(rst.error != 0){
 
@@ -76,6 +78,8 @@ var AetherUpload = {
         form.append("chunk_index", this.i + 1);
 
         form.append("upload_basename",this.uploadBasename);
+
+        form.append("group",this.group);
 
         var _this = this;
 
