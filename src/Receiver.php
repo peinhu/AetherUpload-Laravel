@@ -4,25 +4,30 @@ namespace Peinhu\AetherUpload;
 
 class Receiver
 {
-    public $uploadHead;
-    public $uploadFilePartial;
-    public $chunkIndex;
-    public $chunkTotalCount;
-    public $file;
-    public $uploadExt;
-    public $uploadBasename;
-    public $config;
+    protected $uploadHead;
+    protected $uploadPartialFile;
+    protected $chunkIndex;
+    protected $chunkTotalCount;
+    protected $file;
+    protected $uploadExt;
+    protected $uploadBaseName;
+    protected $config;
+
+    public function __construct()
+    {
+        $this->config = ConfigMapper::getInstance();
+    }
 
     /**
      * filter and create the file
      */
     public function createFile()
     {
-        $this->uploadBasename = $this->generateNewName();
-        $this->uploadFilePartial = $this->getUploadFilePartialPath($this->uploadBasename, $this->uploadExt);
-        $this->uploadHead = $this->getUploadHeadPath($this->uploadBasename);
+        $this->uploadBaseName = $this->generateNewFileName();
+        $this->uploadPartialFile = $this->getUploadPartialFilePath();
+        $this->uploadHead = $this->getUploadHeadPath();
 
-        if ( ! (@touch($this->uploadFilePartial) && @touch($this->uploadHead)) ) {
+        if ( ! (@touch($this->uploadPartialFile) && @touch($this->uploadHead)) ) {
             return Responser::reportError('无法创建文件');
         }
 
@@ -35,19 +40,19 @@ class Receiver
     public function writeFile()
     {
         # 写入上传文件内容
-        if ( @file_put_contents($this->uploadFilePartial, @file_get_contents($this->file->getRealPath()), FILE_APPEND) === false ) {
-            return Responser::reportError('写文件失败', true, $this->uploadHead, $this->uploadFilePartial);
+        if ( @file_put_contents($this->uploadPartialFile, @file_get_contents($this->file->getRealPath()), FILE_APPEND) === false ) {
+            return Responser::reportError('写文件失败', true, $this->uploadHead, $this->uploadPartialFile);
         }
         # 写入头文件内容
         if ( @file_put_contents($this->uploadHead, $this->chunkIndex) === false ) {
-            return Responser::reportError('写头文件失败', true, $this->uploadHead, $this->uploadFilePartial);
+            return Responser::reportError('写头文件失败', true, $this->uploadHead, $this->uploadPartialFile);
         }
         # 判断文件传输完成
         if ( $this->chunkIndex === $this->chunkTotalCount ) {
             @unlink($this->uploadHead);
 
-            if ( ! @rename($this->uploadFilePartial, str_ireplace('.part', '', $this->uploadFilePartial)) ) {
-                return Responser::reportError('重命名文件失败', true, $this->uploadHead, $this->uploadFilePartial);
+            if ( ! @rename($this->uploadPartialFile, str_ireplace('.part', '', $this->uploadPartialFile)) ) {
+                return Responser::reportError('重命名文件失败', true, $this->uploadHead, $this->uploadPartialFile);
             }
 
         }
@@ -55,19 +60,38 @@ class Receiver
         return 'success';
     }
 
-    protected function generateNewName()
+    protected function generateNewFileName()
     {
         return time() . mt_rand(100, 999);
     }
 
-    public function getUploadFilePartialPath($uploadBasename, $uploadExt)
+    public function getUploadPartialFilePath($subDir = null)
     {
-        return $this->config->UPLOAD_PATH . DIRECTORY_SEPARATOR . $this->config->UPLOAD_FILE_DIR . DIRECTORY_SEPARATOR . $uploadBasename . '.' . $uploadExt . '.part';
+        if ( $subDir === null ) {
+            $subDir = $this->config->get('FILE_SUB_DIR');
+        }
+
+        return $this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $this->config->get('FILE_DIR') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . $this->uploadBaseName . '.' . $this->uploadExt . '.part';
     }
 
-    public function getUploadHeadPath($uploadBasename)
+    public function getUploadHeadPath()
     {
-        return $this->config->UPLOAD_PATH . DIRECTORY_SEPARATOR . $this->config->UPLOAD_HEAD_DIR . DIRECTORY_SEPARATOR . $uploadBasename . '.head';
+        return $this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $this->config->get('HEAD_DIR') . DIRECTORY_SEPARATOR . $this->uploadBaseName . '.head';
+    }
+
+    public function getUploadFileSubFolderPath()
+    {
+        return $this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $this->config->get('FILE_DIR') . DIRECTORY_SEPARATOR . $this->config->get('FILE_SUB_DIR');
+    }
+
+    public function get($property)
+    {
+        return $this->{$property};
+    }
+
+    public function set($property, $value)
+    {
+        return $this->{$property} = $value;
     }
 
 

@@ -15,8 +15,8 @@ class AetherUploadServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../config/aetherupload.php'   => config_path('aetherupload.php'),
             __DIR__ . '/../assets/aetherupload.js'    => public_path('js/aetherupload.js'),
-            __DIR__ . '/../uploads/aetherupload_file' => storage_path('app/uploads/aetherupload_file'),
-            __DIR__ . '/../uploads/aetherupload_head' => storage_path('app/uploads/aetherupload_head'),
+            __DIR__ . '/../uploads/aetherupload_file' => storage_path('app/aetherupload/file'),
+            __DIR__ . '/../uploads/aetherupload_head' => storage_path('app/aetherupload/_head'),
         ], 'aetherupload');
 
         if ( ! $this->app->routesAreCached() ) {
