@@ -1,7 +1,6 @@
-
 var AetherUpload = {
 
-    upload: function(){
+    upload: function (group) { //group对应配置文件中的分组名
 
         $.ajaxSetup({
             headers: {
@@ -15,7 +14,7 @@ var AetherUpload = {
 
         this.progressBarDom = $('#aetherupload-progressbar'),
 
-        this.uploadNameDom = $('#aetherupload-uploadname'),
+        this.savedPathDom = $('#aetherupload-savedpath'),
 
         this.file = this.fileDom[0].files[0],
 
@@ -23,7 +22,7 @@ var AetherUpload = {
 
         this.fileSize = this.file.size,
 
-        this.uploadBasename = "",
+        this.uploadBaseName = "",
 
         this.uploadExt = "",
 
@@ -31,15 +30,23 @@ var AetherUpload = {
 
         this.chunkCount = 0,
 
+        this.group = group,
+
+        this.subDir = "",
+
         this.i = 0;
 
         var _this = this;
 
         this.outputDom.text('开始上传');
 
-        $.post('/aetherupload/initialize',{file_name:_this.fileName,file_size:_this.fileSize},function(rst){
+        $.post('/aetherupload/initialize', {
+            file_name: _this.fileName,
+            file_size: _this.fileSize,
+            group: _this.group
+        }, function (rst) {
 
-            if(rst.error != 0){
+            if (rst.error != 0) {
 
                 _this.outputDom.text(rst.error);
 
@@ -47,7 +54,7 @@ var AetherUpload = {
 
             }
 
-            _this.uploadBasename = rst.uploadBasename;
+            _this.uploadBaseName = rst.uploadBaseName;
 
             _this.uploadExt = rst.uploadExt;
 
@@ -55,27 +62,33 @@ var AetherUpload = {
 
             _this.chunkCount = Math.ceil(_this.fileSize / _this.chunkSize);
 
-            _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk,_this),0);
+            _this.subDir = rst.subDir;
 
-        },'json');
+            _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk, _this), 0);
+
+        }, 'json');
 
     },
 
-    uploadChunk:function(){
+    uploadChunk: function () {
 
-        var start = this.i * this.chunkSize,end = Math.min(this.fileSize, start + this.chunkSize);
+        var start = this.i * this.chunkSize, end = Math.min(this.fileSize, start + this.chunkSize);
 
         var form = new FormData();
 
-        form.append("file", this.file.slice(start,end));
+        form.append("file", this.file.slice(start, end));
 
-        form.append("upload_ext",this.uploadExt);
+        form.append("upload_ext", this.uploadExt);
 
         form.append("chunk_total", this.chunkCount);
 
         form.append("chunk_index", this.i + 1);
 
-        form.append("upload_basename",this.uploadBasename);
+        form.append("upload_basename", this.uploadBaseName);
+
+        form.append("group", this.group);
+
+        form.append("sub_dir", this.subDir);
 
         var _this = this;
 
@@ -109,11 +122,11 @@ var AetherUpload = {
 
                 _this.refreshProgress();
 
-                if (_this.i+1 == _this.chunkCount) {
+                if (_this.i + 1 == _this.chunkCount) {
 
                     clearInterval(_this.uploadChunkInterval);
 
-                    _this.uploadNameDom.val(_this.uploadBasename+'.'+_this.uploadExt);
+                    _this.savedPathDom.val(_this.group + '/' + _this.subDir + '/' + _this.uploadBaseName + '.' + _this.uploadExt);
 
                     _this.outputDom.text('上传完毕');
 
@@ -128,13 +141,13 @@ var AetherUpload = {
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
 
-                if(XMLHttpRequest.status===0){
+                if (XMLHttpRequest.status === 0) {
 
                     _this.outputDom.text('网络故障，正在重试……');
 
                     _this.sleep(3000);
 
-                }else{
+                } else {
 
                     _this.outputDom.text('发生故障，上传失败。');
 
@@ -147,7 +160,7 @@ var AetherUpload = {
 
     },
 
-    refreshProgress:function(){
+    refreshProgress: function () {
 
         var percent = parseInt((this.i + 1) / this.chunkCount * 100) + "%";
 
@@ -157,13 +170,13 @@ var AetherUpload = {
 
     },
 
-    sleep:function(milliSecond){
+    sleep: function (milliSecond) {
 
         var wakeUpTime = new Date().getTime() + milliSecond;
 
         while (true) {
 
-            if (new Date().getTime() > wakeUpTime){
+            if (new Date().getTime() > wakeUpTime) {
 
                 return;
 
@@ -171,7 +184,7 @@ var AetherUpload = {
         }
     },
 
-    success:function(){
+    success: function () {
         //
     }
 

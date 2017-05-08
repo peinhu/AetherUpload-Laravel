@@ -17,7 +17,9 @@ class Responser
             @unlink($uploadFilePartial);
         }
 
-        $result['error'] = '错误：' . $message;
+        $result = [
+            'error' => '错误：' . $message,
+        ];
 
         return response()->json($result);
     }
