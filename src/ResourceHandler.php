@@ -43,12 +43,14 @@ class ResourceHandler extends \Illuminate\Routing\Controller
     public function downloadResource($group, $subDir, $resourceName, $newName)
     {
         $uploadedFile = $this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $this->config->get('FILE_DIR') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . $resourceName;
+        
+        $ext = pathinfo($uploadedFile, PATHINFO_EXTENSION);
 
         if ( ! is_file($uploadedFile) ) {
             abort(404);
         }
 
-        return response()->download($uploadedFile, $newName, [], 'attachment');
+        return response()->download($uploadedFile, $newName.'.'.$ext, [], 'attachment');
     }
 
     /**
@@ -64,13 +66,15 @@ class ResourceHandler extends \Illuminate\Routing\Controller
     /**
      * remove partial files which are created two days ago
      */
-    public function cleanUpDir()
+    public static function cleanUpDir()
     {
         $dueTime = strtotime('-2 day');
-        $headFileNameArr = scandir($this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $this->config->get('HEAD_DIR'));
+        $uploadPath = config('aetherupload.UPLOAD_PATH');
+        $headDir = config('aetherupload.HEAD_DIR');
+        $headFileNames = scandir($uploadPath . DIRECTORY_SEPARATOR . $headDir);
 
-        foreach ( $headFileNameArr as $headFileName ) {
-            $headFile = $this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $this->config->get('HEAD_DIR') . DIRECTORY_SEPARATOR . $headFileName;
+        foreach ( $headFileNames as $headFileName ) {
+            $headFile = $uploadPath . DIRECTORY_SEPARATOR . $headDir . DIRECTORY_SEPARATOR . $headFileName;
 
             if ( pathinfo($headFile, PATHINFO_EXTENSION) != 'head' ) {
                 continue;
@@ -83,21 +87,21 @@ class ResourceHandler extends \Illuminate\Routing\Controller
             }
         }
 
-        $groupNameArr = array_keys(config('aetherupload.GROUPS'));
+        $groupNames = array_keys(config('aetherupload.GROUPS'));
 
-        foreach ( $groupNameArr as $groupName ) {
-            $subDirNameArr = scandir($this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $groupName);
+        foreach ( $groupNames as $groupName ) {
+            $subDirNames = scandir($uploadPath . DIRECTORY_SEPARATOR . $groupName);
 
-            foreach ( $subDirNameArr as $subDirName ) {
-                $subDir = $this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $groupName . DIRECTORY_SEPARATOR . $subDirName;
+            foreach ( $subDirNames as $subDirName ) {
+                $subDir = $uploadPath . DIRECTORY_SEPARATOR . $groupName . DIRECTORY_SEPARATOR . $subDirName;
 
                 if ( $subDirName === '.' || $subDirName === '..' || ! is_dir($subDir) ) {
                     continue;
                 }
 
-                $fileNameArr = scandir($subDir);
+                $fileNames = scandir($subDir);
 
-                foreach ( $fileNameArr as $fileName ) {
+                foreach ( $fileNames as $fileName ) {
                     $uploadedFile = $subDir . DIRECTORY_SEPARATOR . $fileName;
 
                     if ( $fileName === '.' || $fileName === '..' || pathinfo($uploadedFile, PATHINFO_EXTENSION) != 'part' ) {
