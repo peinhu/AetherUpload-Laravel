@@ -40,14 +40,13 @@ class UploadHandler extends \Illuminate\Routing\Controller
             @mkdir($uploadFileSubFolderPath, 0755);
         }
 
-        $fileExt = strtolower(substr($fileName, strripos($fileName, '.') + 1));
-        $this->receiver->set('uploadExt', $fileExt);
+        $this->receiver->uploadExt = strtolower(substr($fileName, strripos($fileName, '.') + 1));
 
         if ( ($reportError = $this->filterBySize($fileSize)) != 'pass' ) {
             return $reportError;
         }
 
-        if ( ($reportError = $this->filterByExt($fileExt)) != 'pass' ) {
+        if ( ($reportError = $this->filterByExt($this->receiver->uploadExt)) != 'pass' ) {
             return $reportError;
         }
 
@@ -55,8 +54,8 @@ class UploadHandler extends \Illuminate\Routing\Controller
             return $reportError;
         }
 
-        $result['uploadExt'] = $fileExt;
-        $result['uploadBaseName'] = $this->receiver->get('uploadBaseName');
+        $result['uploadExt'] = $this->receiver->uploadExt;
+        $result['uploadBaseName'] = $this->receiver->uploadBaseName;
 
         return Responser::returnResult($result);
     }
@@ -67,40 +66,49 @@ class UploadHandler extends \Illuminate\Routing\Controller
      */
     public function saveChunk()
     {
-        $chunkTotalCount = $this->receiver->set('chunkTotalCount', request('chunk_total', 0));# 分片总数
-        $chunkIndex = $this->receiver->set('chunkIndex', request('chunk_index', 0));# 当前分片号
-        $uploadBaseName = $this->receiver->set('uploadBaseName', request('upload_basename', 0));# 文件重命名
-        $uploadExt = $this->receiver->set('uploadExt', request('upload_ext', 0)); # 文件扩展名
-        $file = $this->receiver->set('file', request()->file('file', 0));# 文件
+        $this->receiver->chunkTotalCount = request('chunk_total', 0);# 分片总数
+        $this->receiver->chunkIndex = request('chunk_index', 0);# 当前分片号
+        $this->receiver->uploadBaseName = request('upload_basename', 0);# 文件重命名
+        $this->receiver->uploadExt = request('upload_ext', 0); # 文件扩展名
+        $this->receiver->file = request()->file('file', 0);# 文件
         $subDir = request('sub_dir', 0);# 子目录名
-        $uploadHead = $this->receiver->set('uploadHead', $this->receiver->getUploadHeadPath());
-        $uploadPartialFile = $this->receiver->set('uploadPartialFile', $this->receiver->getUploadPartialFilePath($subDir));
+        $this->receiver->uploadHead = $this->receiver->getUploadHeadPath();
+        $this->receiver->uploadPartialFile = $this->receiver->getUploadPartialFilePath($subDir);
         $result = [
             'error' => 0,
         ];
 
-        if ( ! ($chunkTotalCount && $chunkIndex && $uploadExt && $uploadBaseName && $subDir) ) {
-            return Responser::reportError('缺少必要的文件块参数', true, $uploadHead, $uploadPartialFile);
+        if ( ! ($this->receiver->chunkTotalCount && $this->receiver->chunkIndex && $this->receiver->uploadExt && $this->receiver->uploadBaseName && $subDir) ) {
+            return Responser::reportError('缺少必要的文件块参数', true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
         }
         # 防止被人为跳过验证过程直接调用保存方法，从而上传恶意文件
-        if ( ! is_file($uploadPartialFile) ) {
-            return Responser::reportError('此文件不被允许上传', true, $uploadHead, $uploadPartialFile);
+        if ( ! is_file($this->receiver->uploadPartialFile) ) {
+            return Responser::reportError('此文件不被允许上传', true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
         }
 
-        if ( $file->getError() > 0 ) {
-            return Responser::reportError($file->getErrorMessage(), true, $uploadHead, $uploadPartialFile);
+        if ( $this->receiver->file->getError() > 0 ) {
+            return Responser::reportError($this->receiver->file->getErrorMessage(), true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
         }
 
-        if ( ! $file->isValid() ) {
-            return Responser::reportError('文件必须通过HTTP POST上传', true, $uploadHead, $uploadPartialFile);
+        if ( ! $this->receiver->file->isValid() ) {
+            return Responser::reportError('文件必须通过HTTP POST上传', true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
         }
         # 头文件指针验证，防止断线造成的重复传输某个文件块
-        if ( @file_get_contents($uploadHead) != $chunkIndex - 1 ) {
+        if ( @file_get_contents($this->receiver->uploadHead) != $this->receiver->chunkIndex - 1 ) {
             return Responser::returnResult($result);
         }
 
         if ( ($reportError = $this->receiver->writeFile()) != 'success' ) {
             return $reportError;
+        }
+        # 判断文件传输完成
+        if ( $this->receiver->chunkIndex === $this->receiver->chunkTotalCount ) {
+            @unlink($this->receiver->uploadHead);
+
+            if ( ! @rename($this->receiver->uploadPartialFile, str_ireplace('.part', '', $this->receiver->uploadPartialFile)) ) {
+                return Responser::reportError('重命名文件失败', true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
+            }
+
         }
 
         return Responser::returnResult($result);
