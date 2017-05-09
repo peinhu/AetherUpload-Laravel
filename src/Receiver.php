@@ -4,14 +4,14 @@ namespace Peinhu\AetherUpload;
 
 class Receiver
 {
-    protected $uploadHead;
-    protected $uploadPartialFile;
-    protected $chunkIndex;
-    protected $chunkTotalCount;
-    protected $file;
-    protected $uploadExt;
-    protected $uploadBaseName;
-    protected $config;
+    public $uploadHead;
+    public $uploadPartialFile;
+    public $chunkIndex;
+    public $chunkTotalCount;
+    public $file;
+    public $uploadExt;
+    public $uploadBaseName;
+    public $config;
 
     public function __construct()
     {
@@ -47,15 +47,6 @@ class Receiver
         if ( @file_put_contents($this->uploadHead, $this->chunkIndex) === false ) {
             return Responser::reportError('写头文件失败', true, $this->uploadHead, $this->uploadPartialFile);
         }
-        # 判断文件传输完成
-        if ( $this->chunkIndex === $this->chunkTotalCount ) {
-            @unlink($this->uploadHead);
-
-            if ( ! @rename($this->uploadPartialFile, str_ireplace('.part', '', $this->uploadPartialFile)) ) {
-                return Responser::reportError('重命名文件失败', true, $this->uploadHead, $this->uploadPartialFile);
-            }
-
-        }
 
         return 'success';
     }
@@ -82,16 +73,6 @@ class Receiver
     public function getUploadFileSubFolderPath()
     {
         return $this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $this->config->get('FILE_DIR') . DIRECTORY_SEPARATOR . $this->config->get('FILE_SUB_DIR');
-    }
-
-    public function get($property)
-    {
-        return $this->{$property};
-    }
-
-    public function set($property, $value)
-    {
-        return $this->{$property} = $value;
     }
 
 
