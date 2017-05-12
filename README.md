@@ -29,7 +29,7 @@
   
 2 执行`php artisan vendor:publish --tag=aetherupload --force`来发布一些文件和目录  
   
-3 赋予上传目录相应权限，在项目根目录下，执行`chmod -R 755 storage/app/uploads`    
+3 赋予上传目录相应权限，在项目根目录下，执行`chmod -R 755 storage/app/aetherupload`    
   
 4 在浏览器访问`http://域名/aetherupload`可到达示例页面  
 
