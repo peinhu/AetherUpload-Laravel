@@ -20,16 +20,19 @@ class UploadHandler extends \Illuminate\Routing\Controller
      * initialize the upload handler
      * @return \Illuminate\Http\JsonResponse
      */
-    public function init()
+    public function preprocess()
     {
         $fileName = request('file_name', 0);
         $fileSize = request('file_size', 0);
+        $fileHash = request('file_hash', 0);
+
         $result = [
             'error'          => 0,
             'chunkSize'      => $this->config->get('CHUNK_SIZE'),
             'subDir'         => $this->config->get('FILE_SUB_DIR'),
             'uploadBaseName' => '',
             'uploadExt'      => '',
+            'savedFilePath'  => '',
         ];
 
         if ( ! ($fileName && $fileSize) ) {
@@ -48,6 +51,14 @@ class UploadHandler extends \Illuminate\Routing\Controller
 
         if ( ($reportError = $this->filterByExt($this->receiver->uploadExt)) != 'pass' ) {
             return $reportError;
+        }
+
+        if ( $fileHash ) {
+            if ( RedisHandler::hashExists($fileHash) ) {
+                $result['savedFilePath'] = RedisHandler::getFilePathByHash($fileHash);
+
+                return Responser::returnResult($result);
+            }
         }
 
         if ( ($reportError = $this->receiver->createFile()) != 'success' ) {
@@ -75,7 +86,8 @@ class UploadHandler extends \Illuminate\Routing\Controller
         $this->receiver->uploadHead = $this->receiver->getUploadHeadPath();
         $this->receiver->uploadPartialFile = $this->receiver->getUploadPartialFilePath($subDir);
         $result = [
-            'error' => 0,
+            'error'         => 0,
+            'savedFilePath' => '',
         ];
 
         if ( ! ($this->receiver->chunkTotalCount && $this->receiver->chunkIndex && $this->receiver->uploadExt && $this->receiver->uploadBaseName && $subDir) ) {
@@ -105,9 +117,11 @@ class UploadHandler extends \Illuminate\Routing\Controller
         if ( $this->receiver->chunkIndex === $this->receiver->chunkTotalCount ) {
             @unlink($this->receiver->uploadHead);
 
-            if ( ! @rename($this->receiver->uploadPartialFile, str_ireplace('.part', '', $this->receiver->uploadPartialFile)) ) {
+            if ( ! ($result['savedFilePath'] = $this->receiver->renameTempFile()) ) {
                 return Responser::reportError('重命名文件失败', true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
             }
+
+            RedisHandler::setOneHash(pathinfo($this->receiver->savedFilePath, PATHINFO_FILENAME), $this->receiver->savedFilePath);
 
         }
 
@@ -140,5 +154,6 @@ class UploadHandler extends \Illuminate\Routing\Controller
     {
         return ['php', 'part', 'html', 'shtml', 'htm', 'shtm', 'js', 'jsp', 'asp', 'node', 'py', 'sh', 'bat', 'exe'];
     }
+
 
 }

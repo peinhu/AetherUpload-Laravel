@@ -10,14 +10,15 @@
 <body>
 
 <div class="container">
+
     <div class="page-header">
         <h1>This is an example page.</h1>
         <i>view the source code in <a href="/aetherupload/example_source" target="_blank">vendor/peinhu/aetherupload-laravel/views/example.blade.php</a></i>
     </div>
 
     <div class="row">
-        <form method="post" action="">
 
+        <form method="post" action="">
             <div class="form-group">
                 <label>文件：</label>
                 <div class="controls">
@@ -38,23 +39,23 @@
         <div>
             <p>原文件名：<span id="test1"></span></p>
             <p>原文件大小：<span id="test2"></span></p>
-            <p>上传文件名：<span id="test3"></span></p>
+            <p>储存文件名：<span id="test3"></span></p>
         </div>
 
     </div>
 </div>
-
+<script src="{{ URL::asset('js/spark-md5.min.js') }}"></script><!--need to have spark-md5.js for md5 calculation-->
 <script src="//cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script><!--need to have jquery-->
 <script src="{{ URL::asset('js/aetherupload.js') }}"></script><!--need to have aetherupload.js-->
 <script>
     // this function will be called after file is uploaded successfully
-    // you can get fileName,fileSize,uploadBaseName,uploadExt,chunkCount,chunkSize,subDir,group of the uploaded file
+    // you can get fileName,fileSize,uploadExt,chunkCount,chunkSize,subDir,group,savedFilePath of the uploaded file
     AetherUpload.success = function () {
         // Example
         $('#test1').text(this.fileName);
         $('#test2').text(parseFloat(this.fileSize / (1000 * 1000)).toFixed(2) + 'MB');
-        $('#test3').text(this.uploadBaseName + '.' + this.uploadExt);
-    }
+        $('#test3').text(this.savedFilePath.substr(this.savedFilePath.lastIndexOf('/') + 1));
+    };
 
 </script>
 </body>

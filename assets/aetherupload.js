@@ -34,16 +34,105 @@ var AetherUpload = {
 
         this.subDir = "",
 
-        this.i = 0;
+        this.savedFilePath = "",
 
-        var _this = this;
+        this.fileHash = "",
+
+        this.blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice,
+
+        this.i = 0;
 
         this.outputDom.text('开始上传');
 
-        $.post('/aetherupload/initialize', {
+        if (!this.blobSlice) {
+
+            this.outputDom.text("上传组件不被此浏览器支持");
+
+            return;
+
+        }
+
+        if (!('FileReader' in window) || !('File' in window)) {
+
+            this.preprocess(); //浏览器不支持读取本地文件，跳过计算hash
+
+        } else {
+
+            this.calculateHash();
+
+        }
+
+    },
+
+    calculateHash: function () { //计算hash
+
+        var _this = this,
+
+            chunkSize = 2000000,
+
+            chunks = Math.ceil(_this.file.size / chunkSize),
+
+            currentChunk = 0,
+
+            spark = new SparkMD5.ArrayBuffer(),
+
+            fileReader = new FileReader();
+
+        fileReader.onload = function (e) {
+
+            spark.append(e.target.result);
+
+            ++currentChunk;
+
+            _this.outputDom.text('正在hash ' + parseInt(currentChunk / chunks * 100) + '%');
+
+            if (currentChunk < chunks) {
+
+                loadNext();
+
+            } else {
+
+                _this.fileHash = spark.end();
+
+                _this.preprocess();
+
+            }
+        };
+
+        fileReader.onerror = function () {
+
+            _this.preprocess();
+
+        };
+
+        function loadNext() {
+
+            var start = currentChunk * chunkSize,
+
+                end = start + chunkSize >= _this.file.size ? _this.file.size : start + chunkSize;
+
+            fileReader.readAsArrayBuffer(_this.blobSlice.call(_this.file, start, end));
+
+        }
+
+        loadNext();
+
+    },
+
+    preprocess: function () { //预处理
+
+        var _this = this;
+
+        $.post('/aetherupload/preprocess', {
+
             file_name: _this.fileName,
+
             file_size: _this.fileSize,
+
+            file_hash: _this.fileHash,
+
             group: _this.group
+
         }, function (rst) {
 
             if (rst.error != 0) {
@@ -64,7 +153,25 @@ var AetherUpload = {
 
             _this.subDir = rst.subDir;
 
-            _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk, _this), 0);
+            if (rst.savedFilePath.length === 0) {
+
+                _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk, _this), 0);
+
+            } else {
+
+                _this.progressBarDom.css("width", "100%");
+
+                _this.savedFilePath = rst.savedFilePath;
+
+                _this.savedPathDom.val(_this.savedFilePath);
+
+                _this.fileDom.attr('disabled', 'disabled');
+
+                _this.outputDom.text("秒传成功");
+
+                _this.success();
+
+            }
 
         }, 'json');
 
@@ -72,9 +179,13 @@ var AetherUpload = {
 
     uploadChunk: function () {
 
-        var start = this.i * this.chunkSize, end = Math.min(this.fileSize, start + this.chunkSize);
+        var _this = this,
 
-        var form = new FormData();
+            start = this.i * this.chunkSize,
+
+            end = Math.min(this.fileSize, start + this.chunkSize),
+
+            form = new FormData();
 
         form.append("file", this.file.slice(start, end));
 
@@ -89,8 +200,6 @@ var AetherUpload = {
         form.append("group", this.group);
 
         form.append("sub_dir", this.subDir);
-
-        var _this = this;
 
         $.ajax({
 
@@ -120,17 +229,23 @@ var AetherUpload = {
 
                 }
 
-                _this.refreshProgress();
+                var percent = parseInt((_this.i + 1) / _this.chunkCount * 100);
 
-                if (_this.i + 1 == _this.chunkCount) {
+                _this.progressBarDom.css("width", percent + "%");
+
+                _this.outputDom.text("正在上传 " + percent + "%");
+
+                if (_this.i + 1 === _this.chunkCount) {
 
                     clearInterval(_this.uploadChunkInterval);
 
-                    _this.savedPathDom.val(_this.group + '/' + _this.subDir + '/' + _this.uploadBaseName + '.' + _this.uploadExt);
+                    _this.savedFilePath = rst.savedFilePath;
 
-                    _this.outputDom.text('上传完毕');
+                    _this.savedPathDom.val(_this.savedFilePath);
 
                     _this.fileDom.attr('disabled', 'disabled');
+
+                    _this.outputDom.text("上传完毕");
 
                     _this.success();
 
@@ -157,16 +272,6 @@ var AetherUpload = {
             }
 
         });
-
-    },
-
-    refreshProgress: function () {
-
-        var percent = parseInt((this.i + 1) / this.chunkCount * 100) + "%";
-
-        this.progressBarDom.css("width", percent);
-
-        this.outputDom.text("正在上传 " + percent);
 
     },
 

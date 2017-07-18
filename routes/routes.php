@@ -24,7 +24,7 @@ if ( Config::get('aetherupload.ENABLE_EXAMPLE_PAGE') === true ) {
     });
 }
 
-Route::post('aetherupload/initialize', '\Peinhu\AetherUpload\UploadHandler@init');
+Route::post('aetherupload/preprocess', '\Peinhu\AetherUpload\UploadHandler@preprocess');
 
 Route::post('aetherupload/uploading', '\Peinhu\AetherUpload\UploadHandler@saveChunk');
 

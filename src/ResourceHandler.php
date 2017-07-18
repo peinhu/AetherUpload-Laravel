@@ -43,14 +43,14 @@ class ResourceHandler extends \Illuminate\Routing\Controller
     public function downloadResource($group, $subDir, $resourceName, $newName)
     {
         $uploadedFile = $this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $this->config->get('FILE_DIR') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . $resourceName;
-        
+
         $ext = pathinfo($uploadedFile, PATHINFO_EXTENSION);
 
         if ( ! is_file($uploadedFile) ) {
             abort(404);
         }
 
-        return response()->download($uploadedFile, $newName.'.'.$ext, [], 'attachment');
+        return response()->download($uploadedFile, $newName . '.' . $ext, [], 'attachment');
     }
 
     /**
@@ -64,7 +64,7 @@ class ResourceHandler extends \Illuminate\Routing\Controller
     }
 
     /**
-     * remove partial files which are created two days ago
+     * remove partial files which are created a few days ago
      */
     public static function cleanUpDir()
     {

@@ -11,6 +11,7 @@ class Receiver
     public $file;
     public $uploadExt;
     public $uploadBaseName;
+    public $savedFilePath;
     public $config;
 
     public function __construct()
@@ -23,7 +24,7 @@ class Receiver
      */
     public function createFile()
     {
-        $this->uploadBaseName = $this->generateNewFileName();
+        $this->uploadBaseName = $this->generateTempFileName();
         $this->uploadPartialFile = $this->getUploadPartialFilePath();
         $this->uploadHead = $this->getUploadHeadPath();
 
@@ -51,9 +52,21 @@ class Receiver
         return 'success';
     }
 
-    protected function generateNewFileName()
+    public function renameTempFile()
     {
-        return time() . mt_rand(100, 999);
+        $savedFileHash = $this->generateSavedFileHash($this->uploadPartialFile);
+
+        if ( RedisHandler::hashExists($savedFileHash) ) {
+            $this->savedFilePath = RedisHandler::getFilePathByHash($savedFileHash);
+        } else {
+            $this->savedFilePath = $this->config->get('FILE_DIR') . DIRECTORY_SEPARATOR . $this->config->get('FILE_SUB_DIR') . DIRECTORY_SEPARATOR . $savedFileHash . '.' . $this->uploadExt;
+
+            if ( ! @rename($this->uploadPartialFile, $this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $this->savedFilePath) ) {
+                return false;
+            }
+        }
+
+        return $this->savedFilePath;
     }
 
     public function getUploadPartialFilePath($subDir = null)
@@ -73,6 +86,16 @@ class Receiver
     public function getUploadFileSubFolderPath()
     {
         return $this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $this->config->get('FILE_DIR') . DIRECTORY_SEPARATOR . $this->config->get('FILE_SUB_DIR');
+    }
+
+    protected function generateSavedFileHash($filePath)
+    {
+        return md5_file($filePath);
+    }
+
+    protected function generateTempFileName()
+    {
+        return time() . mt_rand(100, 999);
     }
 
 
