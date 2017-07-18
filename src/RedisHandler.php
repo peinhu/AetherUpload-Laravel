@@ -7,8 +7,6 @@ use Predis\Connection\ConnectionException;
 
 class RedisHandler
 {
-    protected static $config;
-
     /**
      * @param $fileHash
      * @return bool
