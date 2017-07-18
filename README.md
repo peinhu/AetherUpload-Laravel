@@ -39,7 +39,7 @@
 
 **添加秒传功能（需Redis及浏览器支持）**
 
-安装Redis并启动服务端。安装predis包`composer require predis/predis`，根据实际情况在.env文件中配置Redis的相关参数。  
+安装Redis并启动服务端。安装predis包`composer require predis/predis`，在.env文件中配置Redis的相关参数。确保上传页面引入了spark-md5.min.js文件。
 
 *提示：在Redis中维护了一份与实际资源文件对应的hash清单，文件的md5哈希值为资源文件的唯一标识符，实际资源文件的增删造成的变化均需要同步到hash清单中，否则会产生脏数据，扩展包已包含新增部分，删除（deleteOneHash）则需要使用者自行调用相关方法处理，详情参考RedisHandler类。*   
 
