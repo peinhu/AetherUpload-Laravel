@@ -5,6 +5,7 @@ namespace Peinhu\AetherUpload;
 use Illuminate\Support\ServiceProvider;
 use Peinhu\AetherUpload\Console\BuildRedisHashesCommand;
 use Peinhu\AetherUpload\Console\CleanUpDirCommand;
+use Peinhu\AetherUpload\Console\CreateGroupDirectoryCommand;
 use Peinhu\AetherUpload\Console\PublishCommand;
 
 class AetherUploadServiceProvider extends ServiceProvider
@@ -18,7 +19,7 @@ class AetherUploadServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../config/aetherupload.php'   => config_path('aetherupload.php'),
             __DIR__ . '/../assets/aetherupload.js'    => public_path('js/aetherupload.js'),
-            __DIR__ . '/../assets/spark-md5.min.js'    => public_path('js/spark-md5.min.js'),
+            __DIR__ . '/../assets/spark-md5.min.js'   => public_path('js/spark-md5.min.js'),
             __DIR__ . '/../uploads/aetherupload_file' => storage_path('app/aetherupload/file'),
             __DIR__ . '/../uploads/aetherupload_head' => storage_path('app/aetherupload/_head'),
         ], 'aetherupload');
@@ -27,7 +28,6 @@ class AetherUploadServiceProvider extends ServiceProvider
             require __DIR__ . '/../routes/routes.php';
         }
     }
-
 
     public function register()
     {
@@ -52,7 +52,15 @@ class AetherUploadServiceProvider extends ServiceProvider
             }
         );
 
-        $this->commands('command.aetherupload.publish','command.aetherupload.build','command.aetherupload.clean');
+        $this->app->singleton(
+            'command.aetherupload.group',
+            function () {
+                return new CreateGroupDirectoryCommand();
+            }
+        );
+
+        $this->commands('command.aetherupload.publish', 'command.aetherupload.build', 'command.aetherupload.clean', 'command.aetherupload.group');
+
     }
 
 
