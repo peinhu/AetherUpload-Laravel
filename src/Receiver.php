@@ -29,10 +29,10 @@ class Receiver
         $this->uploadHead = $this->getUploadHeadPath();
 
         if ( ! (@touch($this->uploadPartialFile) && @touch($this->uploadHead)) ) {
-            return Responser::reportError('无法创建文件');
+            return '无法创建文件';
         }
 
-        return 'success';
+        return false;
     }
 
     /**
@@ -42,14 +42,14 @@ class Receiver
     {
         # 写入上传文件内容
         if ( @file_put_contents($this->uploadPartialFile, @file_get_contents($this->file->getRealPath()), FILE_APPEND) === false ) {
-            return Responser::reportError('写文件失败', true, $this->uploadHead, $this->uploadPartialFile);
+            return '写文件失败';
         }
         # 写入头文件内容
         if ( @file_put_contents($this->uploadHead, $this->chunkIndex) === false ) {
-            return Responser::reportError('写头文件失败', true, $this->uploadHead, $this->uploadPartialFile);
+            return '写头文件失败';
         }
 
-        return 'success';
+        return false;
     }
 
     public function renameTempFile()

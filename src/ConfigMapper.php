@@ -12,7 +12,7 @@ class ConfigMapper
     private $CHUNK_SIZE;
     private $FILE_MAXSIZE;
     private $FILE_EXTENSIONS;
-    private $MIDDLEWARE_INIT;
+    private $MIDDLEWARE_PREPROCESS;
     private $MIDDLEWARE_SAVE_CHUNK;
     private $MIDDLEWARE_DISPLAY;
     private $MIDDLEWARE_DOWNLOAD;
@@ -40,7 +40,7 @@ class ConfigMapper
         $this->FILE_SUB_DIR = config('aetherupload.FILE_SUB_DIR');
         $this->FILE_MAXSIZE = config('aetherupload.GROUPS.' . $group . '.FILE_MAXSIZE');
         $this->FILE_EXTENSIONS = config('aetherupload.GROUPS.' . $group . '.FILE_EXTENSIONS');
-        $this->MIDDLEWARE_INIT = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_INIT');
+        $this->MIDDLEWARE_PREPROCESS = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_PREPROCESS');
         $this->MIDDLEWARE_SAVE_CHUNK = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_SAVE_CHUNK');
         $this->MIDDLEWARE_DISPLAY = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_DISPLAY');
         $this->MIDDLEWARE_DOWNLOAD = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_DOWNLOAD');

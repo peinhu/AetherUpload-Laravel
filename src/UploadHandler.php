@@ -12,12 +12,12 @@ class UploadHandler extends \Illuminate\Routing\Controller
         $group = request('group');
         $this->receiver = $receiver;
         $this->config = ConfigMapper::getInstance()->applyConfigByGroup($group);
-        $this->middleware($this->config->get('MIDDLEWARE_INIT'))->only('init');
+        $this->middleware($this->config->get('MIDDLEWARE_PREPROCESS'))->only('preprocess');
         $this->middleware($this->config->get('MIDDLEWARE_SAVE_CHUNK'))->only('saveChunk');
     }
 
     /**
-     * initialize the upload handler
+     * preprocess the upload request
      * @return \Illuminate\Http\JsonResponse
      */
     public function preprocess()
@@ -45,12 +45,12 @@ class UploadHandler extends \Illuminate\Routing\Controller
 
         $this->receiver->uploadExt = strtolower(substr($fileName, strripos($fileName, '.') + 1));
 
-        if ( ($reportError = $this->filterBySize($fileSize)) != 'pass' ) {
-            return $reportError;
+        if ( $error = $this->filterBySize($fileSize)) {
+            return Responser::reportError($error);
         }
 
-        if ( ($reportError = $this->filterByExt($this->receiver->uploadExt)) != 'pass' ) {
-            return $reportError;
+        if ( $error = $this->filterByExt($this->receiver->uploadExt)) {
+            return Responser::reportError($error);
         }
 
         if ( $fileHash ) {
@@ -61,8 +61,8 @@ class UploadHandler extends \Illuminate\Routing\Controller
             }
         }
 
-        if ( ($reportError = $this->receiver->createFile()) != 'success' ) {
-            return $reportError;
+        if ( $error = $this->receiver->createFile() ) {
+            return Responser::reportError($error);
         }
 
         $result['uploadExt'] = $this->receiver->uploadExt;
@@ -110,8 +110,8 @@ class UploadHandler extends \Illuminate\Routing\Controller
             return Responser::returnResult($result);
         }
 
-        if ( ($reportError = $this->receiver->writeFile()) != 'success' ) {
-            return $reportError;
+        if ( $error = $this->receiver->writeFile()) {
+            return Responser::reportError($error, true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
         }
         # 判断文件传输完成
         if ( $this->receiver->chunkIndex === $this->receiver->chunkTotalCount ) {
@@ -133,10 +133,10 @@ class UploadHandler extends \Illuminate\Routing\Controller
         $MAXSIZE = $this->config->get('FILE_MAXSIZE') * 1000 * 1000;
         # 文件大小过滤
         if ( $fileSize > $MAXSIZE && $MAXSIZE != 0 ) {
-            return Responser::reportError('文件过大');
+            return '文件过大';
         }
 
-        return 'pass';
+        return false;
     }
 
     public function filterByExt($uploadExt)
@@ -144,15 +144,15 @@ class UploadHandler extends \Illuminate\Routing\Controller
         $EXTENSIONS = $this->config->get('FILE_EXTENSIONS');
         # 文件类型过滤
         if ( ($EXTENSIONS != '' && ! in_array($uploadExt, explode(',', $EXTENSIONS))) || in_array($uploadExt, static::getDangerousExtList()) ) {
-            return Responser::reportError('文件类型不正确');
+            return '文件类型不正确';
         }
 
-        return 'pass';
+        return false;
     }
 
     private static function getDangerousExtList()
     {
-        return ['php', 'part', 'html', 'shtml', 'htm', 'shtm', 'js', 'jsp', 'asp', 'node', 'py', 'sh', 'bat', 'exe'];
+        return ['php', 'part', 'html', 'shtml', 'htm', 'shtm', 'js', 'jsp', 'asp', 'java', 'py', 'sh', 'bat', 'exe'];
     }
 
 
