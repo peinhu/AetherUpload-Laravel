@@ -11,14 +11,14 @@ class CreateGroupDirectoryCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'aetherupload:group';
+    protected $signature = 'aetherupload:groups';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create directories for the groups';
+    protected $description = 'Create directories for the new groups in configuration';
 
     /**
      * Create a new command instance.

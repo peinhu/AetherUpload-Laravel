@@ -10,11 +10,11 @@ class Responser
         return response()->json($result);
     }
 
-    public static function reportError($message, $deleteFiles = false, $uploadHead = '', $uploadFilePartial = '')
+    public static function reportError($message, $deleteFiles = false, $uploadHead = '', $uploadPartialFile = '')
     {
         if ( $deleteFiles ) {
             @unlink($uploadHead);
-            @unlink($uploadFilePartial);
+            @unlink($uploadPartialFile);
         }
 
         $result = [

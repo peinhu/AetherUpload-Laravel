@@ -34,7 +34,7 @@ var AetherUpload = {
 
         this.subDir = "",
 
-        this.savedFilePath = "",
+        this.savedPath = "",
 
         this.fileHash = "",
 
@@ -153,7 +153,7 @@ var AetherUpload = {
 
             _this.subDir = rst.subDir;
 
-            if (rst.savedFilePath.length === 0) {
+            if (rst.savedPath.length === 0) {
 
                 _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk, _this), 0);
 
@@ -161,9 +161,9 @@ var AetherUpload = {
 
                 _this.progressBarDom.css("width", "100%");
 
-                _this.savedFilePath = rst.savedFilePath;
+                _this.savedPath = rst.savedPath;
 
-                _this.savedPathDom.val(_this.savedFilePath);
+                _this.savedPathDom.val(_this.savedPath);
 
                 _this.fileDom.attr('disabled', 'disabled');
 
@@ -239,9 +239,9 @@ var AetherUpload = {
 
                     clearInterval(_this.uploadChunkInterval);
 
-                    _this.savedFilePath = rst.savedFilePath;
+                    _this.savedPath = rst.savedPath;
 
-                    _this.savedPathDom.val(_this.savedFilePath);
+                    _this.savedPathDom.val(_this.savedPath);
 
                     _this.fileDom.attr('disabled', 'disabled');
 

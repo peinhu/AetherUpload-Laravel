@@ -4,14 +4,12 @@ namespace Peinhu\AetherUpload;
 
 class ResourceHandler extends \Illuminate\Routing\Controller
 {
-    public $config;
 
     public function __construct()
     {
-        $group = request()->route('group');
-        $this->config = ConfigMapper::getInstance()->applyConfigByGroup($group);
-        $this->middleware($this->config->get('MIDDLEWARE_DISPLAY'))->only('displayResource');
-        $this->middleware($this->config->get('MIDDLEWARE_DOWNLOAD'))->only('downloadResource');
+        ConfigMapper::getInstance()->applyGroupConfig(request()->route('group'));
+        $this->middleware(ConfigMapper::get('MIDDLEWARE_DISPLAY'))->only('displayResource');
+        $this->middleware(ConfigMapper::get('MIDDLEWARE_DOWNLOAD'))->only('downloadResource');
     }
 
     /**
@@ -23,7 +21,7 @@ class ResourceHandler extends \Illuminate\Routing\Controller
      */
     public function displayResource($group, $subDir, $resourceName)
     {
-        $uploadedFile = $this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $this->config->get('FILE_DIR') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . $resourceName;
+        $uploadedFile = ConfigMapper::get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . ConfigMapper::get('FILE_DIR') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . $resourceName;
 
         if ( ! is_file($uploadedFile) ) {
             abort(404);
@@ -42,7 +40,7 @@ class ResourceHandler extends \Illuminate\Routing\Controller
      */
     public function downloadResource($group, $subDir, $resourceName, $newName)
     {
-        $uploadedFile = $this->config->get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . $this->config->get('FILE_DIR') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . $resourceName;
+        $uploadedFile = ConfigMapper::get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . ConfigMapper::get('FILE_DIR') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . $resourceName;
 
         $ext = pathinfo($uploadedFile, PATHINFO_EXTENSION);
 

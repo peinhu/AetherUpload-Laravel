@@ -5,7 +5,7 @@ namespace Peinhu\AetherUpload\Console;
 use Illuminate\Console\Command;
 use Peinhu\AetherUpload\ResourceHandler;
 
-class CleanUpDirCommand extends Command
+class CleanUpDirectoryCommand extends Command
 {
     /**
      * The name and signature of the console command.

@@ -4,7 +4,7 @@ namespace Peinhu\AetherUpload;
 
 use Illuminate\Support\ServiceProvider;
 use Peinhu\AetherUpload\Console\BuildRedisHashesCommand;
-use Peinhu\AetherUpload\Console\CleanUpDirCommand;
+use Peinhu\AetherUpload\Console\CleanUpDirectoryCommand;
 use Peinhu\AetherUpload\Console\CreateGroupDirectoryCommand;
 use Peinhu\AetherUpload\Console\PublishCommand;
 
@@ -48,18 +48,18 @@ class AetherUploadServiceProvider extends ServiceProvider
         $this->app->singleton(
             'command.aetherupload.clean',
             function () {
-                return new CleanUpDirCommand();
+                return new CleanUpDirectoryCommand();
             }
         );
 
         $this->app->singleton(
-            'command.aetherupload.group',
+            'command.aetherupload.groups',
             function () {
                 return new CreateGroupDirectoryCommand();
             }
         );
 
-        $this->commands('command.aetherupload.publish', 'command.aetherupload.build', 'command.aetherupload.clean', 'command.aetherupload.group');
+        $this->commands('command.aetherupload.publish', 'command.aetherupload.build', 'command.aetherupload.clean', 'command.aetherupload.groups');
 
     }
 

@@ -42,14 +42,14 @@ class RedisHandler
     /**
      * set or overwrite a hash
      * @param $fileHash
-     * @param $savedFilePath
+     * @param $savedPath
      * @return bool
      */
-    public static function setOneHash($fileHash, $savedFilePath)
+    public static function setOneHash($fileHash, $savedPath)
     {
         $result = false;
         try {
-            $result = Redis::hset(config('aetherupload.REDIS_KEY'), $fileHash, $savedFilePath);
+            $result = Redis::hset(config('aetherupload.REDIS_KEY'), $fileHash, $savedPath);
         } catch ( ConnectionException $e ) {
 
         }

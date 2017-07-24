@@ -49,12 +49,12 @@
 <script src="{{ URL::asset('js/aetherupload.js') }}"></script><!--need to have aetherupload.js-->
 <script>
     // this function will be called after file is uploaded successfully
-    // you can get fileName,fileSize,uploadExt,chunkCount,chunkSize,subDir,group,savedFilePath of the uploaded file
+    // you can get fileName,fileSize,uploadExt,chunkCount,chunkSize,subDir,group,savedPath of the uploaded file
     AetherUpload.success = function () {
         // Example
         $('#test1').text(this.fileName);
         $('#test2').text(parseFloat(this.fileSize / (1000 * 1000)).toFixed(2) + 'MB');
-        $('#test3').text(this.savedFilePath.substr(this.savedFilePath.lastIndexOf('/') + 1));
+        $('#test3').text(this.savedPath.substr(this.savedPath.lastIndexOf('/') + 1));
     };
 
 </script>

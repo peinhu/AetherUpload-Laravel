@@ -25,37 +25,36 @@ class ConfigMapper
     public static function getInstance()
     {
         if ( self::$_instance === null ) {
-            self::$_instance = new self();
+            self::$_instance = (new self())->applyCommonConfig();
         }
 
         return self::$_instance;
     }
 
-    public function applyConfigByGroup($group = null)
+    private function applyCommonConfig()
     {
         $this->UPLOAD_PATH = config('aetherupload.UPLOAD_PATH');
         $this->CHUNK_SIZE = config('aetherupload.CHUNK_SIZE');
         $this->HEAD_DIR = config('aetherupload.HEAD_DIR');
-        $this->FILE_DIR = $group;
         $this->FILE_SUB_DIR = config('aetherupload.FILE_SUB_DIR');
+
+        return $this;
+    }
+
+    public function applyGroupConfig($group)
+    {
+        $this->FILE_DIR = $group;
         $this->FILE_MAXSIZE = config('aetherupload.GROUPS.' . $group . '.FILE_MAXSIZE');
         $this->FILE_EXTENSIONS = config('aetherupload.GROUPS.' . $group . '.FILE_EXTENSIONS');
         $this->MIDDLEWARE_PREPROCESS = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_PREPROCESS');
         $this->MIDDLEWARE_SAVE_CHUNK = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_SAVE_CHUNK');
         $this->MIDDLEWARE_DISPLAY = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_DISPLAY');
         $this->MIDDLEWARE_DOWNLOAD = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_DOWNLOAD');
-
         return $this;
     }
 
-    public function get($property)
-    {
-        return $this->{$property};
-    }
-
-    public function set($property, $value)
-    {
-        return $this->{$property} = $value;
+    public static function get($property){
+        return self::getInstance()->{$property};
     }
 
 }
