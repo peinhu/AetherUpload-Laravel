@@ -14,10 +14,13 @@ class RedisHandler
     public static function hashExists($fileHash)
     {
         $result = false;
-        try {
-            $result = Redis::hexists(config('aetherupload.REDIS_KEY'), $fileHash);
-        } catch ( ConnectionException $e ) {
 
+        if ( class_exists('\Predis\Connection\ConnectionException') ) {
+            try {
+                $result = Redis::hexists(config('aetherupload.REDIS_KEY'), $fileHash);
+            } catch ( ConnectionException $e ) {
+
+            }
         }
 
         return $result;
@@ -30,10 +33,13 @@ class RedisHandler
     public static function getFilePathByHash($fileHash)
     {
         $filePath = "";
-        try {
-            $filePath = Redis::hget(config('aetherupload.REDIS_KEY'), $fileHash);
-        } catch ( ConnectionException $e ) {
 
+        if ( class_exists('\Predis\Connection\ConnectionException') ) {
+            try {
+                $filePath = Redis::hget(config('aetherupload.REDIS_KEY'), $fileHash);
+            } catch ( ConnectionException $e ) {
+
+            }
         }
 
         return $filePath;
@@ -48,10 +54,13 @@ class RedisHandler
     public static function setOneHash($fileHash, $savedPath)
     {
         $result = false;
-        try {
-            $result = Redis::hset(config('aetherupload.REDIS_KEY'), $fileHash, $savedPath);
-        } catch ( ConnectionException $e ) {
 
+        if(class_exists('\Predis\Connection\ConnectionException')) {
+            try {
+                $result = Redis::hset(config('aetherupload.REDIS_KEY'), $fileHash, $savedPath);
+            } catch ( ConnectionException $e ) {
+
+            }
         }
 
         return $result;
@@ -100,10 +109,13 @@ class RedisHandler
     public static function deleteOneHash($fileHash)
     {
         $result = false;
-        try {
-            $result = Redis::hdel(config('aetherupload.REDIS_KEY'), $fileHash);
-        } catch ( ConnectionException $e ) {
 
+        if(class_exists('\Predis\Connection\ConnectionException')) {
+            try {
+                $result = Redis::hdel(config('aetherupload.REDIS_KEY'), $fileHash);
+            } catch ( ConnectionException $e ) {
+
+            }
         }
 
         return $result;
@@ -112,10 +124,13 @@ class RedisHandler
     public static function deleteAllHashes()
     {
         $result = false;
-        try {
-            $result = Redis::del(config('aetherupload.REDIS_KEY'));
-        } catch ( ConnectionException $e ) {
 
+        if(class_exists('\Predis\Connection\ConnectionException')) {
+            try {
+                $result = Redis::del(config('aetherupload.REDIS_KEY'));
+            } catch ( ConnectionException $e ) {
+
+            }
         }
 
         return $result;

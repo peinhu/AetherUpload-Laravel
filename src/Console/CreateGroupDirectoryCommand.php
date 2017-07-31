@@ -37,6 +37,7 @@ class CreateGroupDirectoryCommand extends Command
         $groupNames = array_keys($config['GROUPS']);
         $directories = scandir($config['UPLOAD_PATH']);
         foreach ( $groupNames as $groupName ) {
+            $this->info($groupName);
             if ( in_array($groupName, $directories) ) {
                 continue;
             } else {
