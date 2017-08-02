@@ -10,12 +10,14 @@ return [
     "REDIS_KEY"           => "aetherupload_file_hashes", #redis中hashes的key名称
     "GROUPS"              => [ # 分组，可设置多个不同分组，各自拥有独立配置
         "file" => [ # 新增分组请尽量使用video、audio等有意义的分组名，运行artisan命令aetherupload:groups自动创建对应目录
-            "FILE_MAXSIZE"          => 0, # 被允许的资源文件大小（MB），0为不限制
-            "FILE_EXTENSIONS"       => "", # 被允许的资源文件扩展名，空为不限制，多个值以逗号分隔
-            "MIDDLEWARE_PREPROCESS" => [], # 上传预处理时的路由中间件
-            "MIDDLEWARE_SAVE_CHUNK" => [], # 上传文件分块时的路由中间件
-            "MIDDLEWARE_DISPLAY"    => [], # 文件展示时的路由中间件
-            "MIDDLEWARE_DOWNLOAD"   => [], # 文件下载时的路由中间件
+            "FILE_MAXSIZE"                 => 0, # 被允许的资源文件大小（MB），0为不限制
+            "FILE_EXTENSIONS"              => "", # 被允许的资源文件扩展名，空为不限制，多个值以逗号分隔
+            "MIDDLEWARE_PREPROCESS"        => [], # 上传预处理时的路由中间件
+            "MIDDLEWARE_SAVE_CHUNK"        => [], # 上传文件分块时的路由中间件
+            "MIDDLEWARE_DISPLAY"           => [], # 文件展示时的路由中间件
+            "MIDDLEWARE_DOWNLOAD"          => [], # 文件下载时的路由中间件
+            "EVENT_BEFORE_UPLOAD_COMPLETE" => '', # 上传完成前触发的事件（临时文件），Receiver的实例被注入
+            "EVENT_UPLOAD_COMPLETE"        => '', # 上传完成触发的事件（已存文件），Receiver的实例被注入
         ],
 
     ],

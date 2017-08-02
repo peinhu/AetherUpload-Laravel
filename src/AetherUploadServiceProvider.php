@@ -31,28 +31,28 @@ class AetherUploadServiceProvider extends ServiceProvider
 
     public function register()
     {
-        $this->app->singleton(
+        $this->app->bind(
             'command.aetherupload.publish',
             function () {
                 return new PublishCommand();
             }
         );
 
-        $this->app->singleton(
+        $this->app->bind(
             'command.aetherupload.build',
             function () {
                 return new BuildRedisHashesCommand();
             }
         );
 
-        $this->app->singleton(
+        $this->app->bind(
             'command.aetherupload.clean',
             function () {
                 return new CleanUpDirectoryCommand();
             }
         );
 
-        $this->app->singleton(
+        $this->app->bind(
             'command.aetherupload.groups',
             function () {
                 return new CreateGroupDirectoryCommand();

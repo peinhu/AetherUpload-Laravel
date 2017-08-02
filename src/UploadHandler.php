@@ -4,7 +4,7 @@ namespace Peinhu\AetherUpload;
 
 class UploadHandler extends \Illuminate\Routing\Controller
 {
-    public $receiver;
+    private $receiver;
 
     public function __construct(Receiver $receiver)
     {
@@ -29,7 +29,7 @@ class UploadHandler extends \Illuminate\Routing\Controller
             'subDir'         => ConfigMapper::get('FILE_SUB_DIR'),
             'uploadBaseName' => '',
             'uploadExt'      => '',
-            'savedPath'  => '',
+            'savedPath'      => '',
         ];
 
         if ( ! ($fileName && $fileSize) ) {
@@ -38,17 +38,18 @@ class UploadHandler extends \Illuminate\Routing\Controller
 
         $this->receiver->uploadExt = strtolower(substr($fileName, strripos($fileName, '.') + 1));
 
-        if ( $error = $this->filterBySize($fileSize)) {
+        if ( $error = $this->filterBySize($fileSize) ) {
             return Responser::reportError($error);
         }
 
-        if ( $error = $this->filterByExt($this->receiver->uploadExt)) {
+        if ( $error = $this->filterByExt($this->receiver->uploadExt) ) {
             return Responser::reportError($error);
         }
         # 检测是否可以秒传
         if ( $fileHash ) {
             if ( RedisHandler::hashExists($fileHash) ) {
                 $result['savedPath'] = RedisHandler::getFilePathByHash($fileHash);
+
                 return Responser::returnResult($result);
             }
         }
@@ -82,7 +83,7 @@ class UploadHandler extends \Illuminate\Routing\Controller
         $this->receiver->uploadHead = $this->receiver->getUploadHeadPath();
         $this->receiver->uploadPartialFile = $this->receiver->getUploadPartialFilePath($subDir);
         $result = [
-            'error'         => 0,
+            'error'     => 0,
             'savedPath' => '',
         ];
 
@@ -106,18 +107,26 @@ class UploadHandler extends \Illuminate\Routing\Controller
             return Responser::returnResult($result);
         }
         # 写入数据到预创建的文件
-        if ( $error = $this->receiver->writeFile()) {
+        if ( $error = $this->receiver->writeFile() ) {
             return Responser::reportError($error, true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
         }
         # 判断文件传输完成
         if ( $this->receiver->chunkIndex === $this->receiver->chunkTotalCount ) {
             @unlink($this->receiver->uploadHead);
+            # 触发上传完成前事件
+            if ( ! empty($beforeUploadCompleteEvent = ConfigMapper::get('EVENT_BEFORE_UPLOAD_COMPLETE')) ) {
+                event(new $beforeUploadCompleteEvent($this->receiver));
+            }
 
             if ( ! ($result['savedPath'] = $this->receiver->renameTempFile()) ) {
                 return Responser::reportError('重命名文件失败', true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
             }
 
             RedisHandler::setOneHash(pathinfo($this->receiver->savedPath, PATHINFO_FILENAME), $this->receiver->savedPath);
+            # 触发上传完成事件
+            if ( ! empty($uploadCompleteEvent = ConfigMapper::get('EVENT_UPLOAD_COMPLETE')) ) {
+                event(new $uploadCompleteEvent($this->receiver));
+            }
 
         }
 

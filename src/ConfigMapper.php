@@ -16,6 +16,8 @@ class ConfigMapper
     private $MIDDLEWARE_SAVE_CHUNK;
     private $MIDDLEWARE_DISPLAY;
     private $MIDDLEWARE_DOWNLOAD;
+    private $EVENT_BEFORE_UPLOAD_COMPLETE;
+    private $EVENT_UPLOAD_COMPLETE;
 
     private function __construct()
     {
@@ -50,6 +52,8 @@ class ConfigMapper
         $this->MIDDLEWARE_SAVE_CHUNK = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_SAVE_CHUNK');
         $this->MIDDLEWARE_DISPLAY = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_DISPLAY');
         $this->MIDDLEWARE_DOWNLOAD = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_DOWNLOAD');
+        $this->EVENT_BEFORE_UPLOAD_COMPLETE = config('aetherupload.GROUPS.' . $group . '.EVENT_BEFORE_UPLOAD_COMPLETE');
+        $this->EVENT_UPLOAD_COMPLETE = config('aetherupload.GROUPS.' . $group . '.EVENT_UPLOAD_COMPLETE');
         return $this;
     }
 
