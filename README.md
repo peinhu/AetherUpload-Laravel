@@ -1,4 +1,10 @@
-# AetherUpload-Laravel
+# AetherUpload-Laravel  
+[![Build Status](https://travis-ci.org/peinhu/AetherUpload-Laravel.svg?branch=master)](https://travis-ci.org/peinhu/AetherUpload-Laravel)
+[![Latest Stable Version](https://poser.pugx.org/peinhu/aetherupload-laravel/v/stable)](https://packagist.org/packages/peinhu/aetherupload-laravel)
+[![Total Downloads](https://poser.pugx.org/peinhu/aetherupload-laravel/downloads)](https://packagist.org/packages/peinhu/aetherupload-laravel)
+[![Latest Unstable Version](https://poser.pugx.org/peinhu/aetherupload-laravel/v/unstable)](https://packagist.org/packages/peinhu/aetherupload-laravel)
+[![License](https://poser.pugx.org/peinhu/aetherupload-laravel/license)](https://packagist.org/packages/peinhu/aetherupload-laravel)  
+    
 提供**超大文件**上传的Laravel扩展包，支持**分组配置**、**断线续传**、**秒传**等功能，简单易用，满足多数人的主流需求，**无需编写**适配代码，几乎开箱即用。基于Laravel 5开发，目前支持5.1~5.4版本。  
 
 我们知道，在以前，文件上传采用的是直接传整个文件的方式，这种方式对付一些小文件是没有问题的。而当需要上传大文件时，此种方式不仅操作繁琐，需要修改web服务器和后端语言的配置，而且会大量占用服务器的内存，导致服务器内存吃紧，严重的甚至传输超时或文件过大无法上传。很显然，普通的文件上传方式已无法满足现在越来越高的要求。  
