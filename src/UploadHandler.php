@@ -36,7 +36,7 @@ class UploadHandler extends \Illuminate\Routing\Controller
             return Responser::reportError('缺少必要的文件参数');
         }
 
-        $this->receiver->uploadExt = strtolower(substr($fileName, strripos($fileName, '.') + 1));
+        $this->receiver->uploadExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
         if ( $error = $this->filterBySize($fileSize) ) {
             return Responser::reportError($error);
