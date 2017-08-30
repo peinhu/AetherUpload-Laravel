@@ -50,9 +50,9 @@
 
 分组配置：在配置文件的GROUPS下新增分组，运行`php artisan aetherupload:groups`自动创建对应目录。  
 
-自定义中间件：参考laravel文档中间件部分，在`Kernel.php`中创建你的中间件并注册，将你注册的中间件名称填入配置文件相应部分，如['middleware1','middleware2']。  
+自定义中间件：参考laravel文档中间件部分，创建你的中间件并在`Kernel.php`中注册，将你注册的中间件名称填入配置文件对应部分，如['middleware1','middleware2']。  
 
-上传完成事件：分为上传完成前和上传完成后事件，参考laravel文档事件系统部分，在`EventServiceProvider`中注册你的事件和监听器，运行`php artisan event:generate`生成事件和监听器，将你注册事件的完整类名填入配置文件对应部分，如'App\Events\OrderShipped'。
+上传完成事件：分为上传完成前和上传完成后事件，参考laravel文档事件系统部分，在`EventServiceProvider`中注册你的事件和监听器，运行`php artisan event:generate`生成事件和监听器，将你注册的事件完整类名填入配置文件对应部分，如'App\Events\OrderShipped'。
 
 **添加秒传功能（需Redis及浏览器支持）**
 
