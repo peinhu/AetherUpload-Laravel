@@ -1,6 +1,6 @@
 <?php
 
-namespace Peinhu\AetherUpload\Console;
+namespace AetherUpload\Console;
 
 use Illuminate\Console\Command;
 

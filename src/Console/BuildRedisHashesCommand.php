@@ -1,9 +1,9 @@
 <?php
 
-namespace Peinhu\AetherUpload\Console;
+namespace AetherUpload\Console;
 
 use Illuminate\Console\Command;
-use Peinhu\AetherUpload\RedisHandler;
+use AetherUpload\RedisHandler;
 
 class BuildRedisHashesCommand extends Command
 {

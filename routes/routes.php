@@ -24,11 +24,11 @@ if ( Config::get('aetherupload.ENABLE_EXAMPLE_PAGE') === true ) {
     });
 }
 
-Route::post('aetherupload/preprocess', '\Peinhu\AetherUpload\UploadHandler@preprocess');
+Route::post('aetherupload/preprocess', '\AetherUpload\UploadHandler@preprocess');
 
-Route::post('aetherupload/uploading', '\Peinhu\AetherUpload\UploadHandler@saveChunk');
+Route::post('aetherupload/uploading', '\AetherUpload\UploadHandler@saveChunk');
 
-Route::get('aetherupload/display/{group}/{subDir}/{resourceName}', '\Peinhu\AetherUpload\ResourceHandler@displayResource');
+Route::get('aetherupload/display/{group}/{subDir}/{resourceName}', '\AetherUpload\ResourceHandler@displayResource');
 
-Route::get('aetherupload/download/{group}/{subDir}/{resourceName}/{newName}', '\Peinhu\AetherUpload\ResourceHandler@downloadResource');
+Route::get('aetherupload/download/{group}/{subDir}/{resourceName}/{newName}', '\AetherUpload\ResourceHandler@downloadResource');
 

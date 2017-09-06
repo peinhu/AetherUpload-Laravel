@@ -1,6 +1,6 @@
 <?php
 
-namespace Peinhu\AetherUpload;
+namespace AetherUpload;
 
 class UploadHandler extends \Illuminate\Routing\Controller
 {

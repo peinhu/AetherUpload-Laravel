@@ -1,6 +1,6 @@
 <?php
 
-namespace Peinhu\AetherUpload;
+namespace AetherUpload;
 
 use Illuminate\Support\Facades\Redis;
 use Predis\Connection\ConnectionException;

@@ -1,12 +1,12 @@
 <?php
 
-namespace Peinhu\AetherUpload;
+namespace AetherUpload;
 
 use Illuminate\Support\ServiceProvider;
-use Peinhu\AetherUpload\Console\BuildRedisHashesCommand;
-use Peinhu\AetherUpload\Console\CleanUpDirectoryCommand;
-use Peinhu\AetherUpload\Console\CreateGroupDirectoryCommand;
-use Peinhu\AetherUpload\Console\PublishCommand;
+use AetherUpload\Console\BuildRedisHashesCommand;
+use AetherUpload\Console\CleanUpDirectoryCommand;
+use AetherUpload\Console\CreateGroupDirectoryCommand;
+use AetherUpload\Console\PublishCommand;
 
 class AetherUploadServiceProvider extends ServiceProvider
 {
