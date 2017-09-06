@@ -34,7 +34,7 @@
 
 0 在终端内切换到你的laravel项目根目录，执行`composer require peinhu/aetherupload-laravel ~1.0`  
 
-1 在`config/app.php`的`providers`数组中添加一行`AetherUpload\AetherUploadServiceProvider::class,`  
+1 在`config/app.php`的`providers`数组中添加一行`Peinhu\AetherUpload\AetherUploadServiceProvider::class,`  
   
 2 执行`php artisan aetherupload:publish`来发布一些文件和目录  
   
@@ -75,7 +75,7 @@
 在`app/Console/Kernel.php`中的`schedule`方法中添加以下代码：
 ```php
   $schedule->call(function () {
-      \AetherUpload\ResourceHandler::cleanUpDir();
+      \Peinhu\AetherUpload\ResourceHandler::cleanUpDir();
   })->daily();
 ```  
 * 设置每天自动重建Redis中的hash清单。  
@@ -85,7 +85,7 @@
 在`app/Console/Kernel.php`中的`schedule`方法中添加以下代码：
 ```php
   $schedule->call(function () {
-      \AetherUpload\RedisHandler::build();
+      \Peinhu\AetherUpload\RedisHandler::build();
   })->daily();
 ```
 * 提高临时文件读写速度。  
