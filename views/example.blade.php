@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="csrf-token" content="{{ csrf_token() }}"><!--need to have csrf token here-->
+    <meta name="csrf-token" content="{{ csrf_token() }}"><!--需要有csrf token-->
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
 </head>
 <body>
@@ -17,45 +17,53 @@
     </div>
 
     <div class="row">
-
         <form method="post" action="">
-            <div class="form-group">
-                <label>文件：</label>
-                <div class="controls">
-                    <input type="file" id="aetherupload-file" onchange="AetherUpload.upload('file')"/><!--need to have an id "aetherupload-file" here for the file to be uploaded, 'file' is the default group name in config/aetherupload.php-->
+
+            <div class="form-group " id="aetherupload-wrapper" ><!--组件最外部需要有一个名为aetherupload-wrapper的id，用以包装组件-->
+                <label>文件1：</label>
+                <div class="controls" >
+                    <input type="file" id="file"  onchange="aetherupload(this,'file').success(someCallback).upload()"/><!--需要有一个名为file的id，用以标识上传的文件，aetherupload(file,group)中第二个参数为分组名，success方法可用于声名上传成功后的回调方法名-->
                     <div class="progress " style="height: 6px;margin-bottom: 2px;margin-top: 10px;width: 200px;">
-                        <div id="aetherupload-progressbar" style="background:blue;height:6px;width:0;"></div><!--need to have an id "aetherupload-progressbar" here for the progress bar-->
+                        <div id="progressbar" style="background:blue;height:6px;width:0;"></div><!--需要有一个名为progressbar的id，用以标识进度条-->
                     </div>
-                    <span style="font-size:12px;color:#aaa;" id="aetherupload-output">等待上传</span><!--need to have an id "aetherupload-output" here for the prompt message-->
+                    <span style="font-size:12px;color:#aaa;" id="output">等待上传</span><!--需要有一个名为output的id，用以标识提示信息-->
+                    <input type="hidden" name="file1" id="savedpath" ><!--需要有一个名为savedpath的id，用以标识文件保存路径的表单字段，还需要一个任意名称的name-->
                 </div>
             </div>
 
-            <input type="hidden" name="savedpath" id="aetherupload-savedpath" value=""><!--need to have an id "aetherupload-savedpath"  and a name "savedpath" here for the saved path of the uploaded file-->
-            <button type="submit" class="btn btn-primary">点击这里提交</button>
+            <div class="form-group " id="aetherupload-wrapper">
+                <label>文件2：</label>
+                <div class="controls" >
+                    <input type="file" id="file" onchange="aetherupload(this,'file').upload()"/>
+                    <div class="progress " style="height: 6px;margin-bottom: 2px;margin-top: 10px;width: 200px;">
+                        <div id="progressbar" style="background:blue;height:6px;width:0;"></div>
+                    </div>
+                    <span style="font-size:12px;color:#aaa;" id="output">等待上传</span>
+                    <input type="hidden" name="file2" id="savedpath" >
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">点击提交</button>
         </form>
 
         <hr/>
 
-        <div>
-            <p>原文件名：<span id="test1"></span></p>
-            <p>原文件大小：<span id="test2"></span></p>
-            <p>储存文件名：<span id="test3"></span></p>
-        </div>
+        <div id="result"></div>
 
     </div>
 </div>
-<script src="{{ URL::asset('js/spark-md5.min.js') }}"></script><!--need to have spark-md5.js for md5 calculation-->
-<script src="//cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script><!--need to have jquery-->
-<script src="{{ URL::asset('js/aetherupload.js') }}"></script><!--need to have aetherupload.js-->
+<script src="{{ URL::asset('js/spark-md5.min.js') }}"></script><!--需要引入spark-md5.min.js-->
+<script src="//cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script><!--需要引入jquery.min.js-->
+<script src="{{ URL::asset('js/aetherupload.js') }}"></script><!--需要引入aetherupload.js-->
 <script>
-    // this function will be called after file is uploaded successfully
-    // you can get fileName,fileSize,uploadExt,chunkCount,chunkSize,subDir,group,savedPath of the uploaded file
-    AetherUpload.success = function () {
+    // success(callback)中声名的回调方法需在此定义，参数callback可为任意名称，此方法将会在上传完成后被调用
+    // 可使用this对象获得fileName,fileSize,uploadBaseName,uploadExt,subDir,group,savedPath等属性的值
+    someCallback = function(){
         // Example
-        $('#test1').text(this.fileName);
-        $('#test2').text(parseFloat(this.fileSize / (1000 * 1000)).toFixed(2) + 'MB');
-        $('#test3').text(this.savedPath.substr(this.savedPath.lastIndexOf('/') + 1));
-    };
+        $('#result').append(
+            '<p>原文件名：<span >'+this.fileName+'</span> | 原文件大小：<span >'+parseFloat(this.fileSize / (1000 * 1000)).toFixed(2) + 'MB'+'</span> | 储存文件名：<span >'+this.savedPath.substr(this.savedPath.lastIndexOf('/') + 1)+'</span></p>'
+        );
+    }
 
 </script>
 </body>

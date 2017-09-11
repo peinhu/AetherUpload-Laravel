@@ -12,10 +12,16 @@ if ( Config::get('aetherupload.ENABLE_EXAMPLE_PAGE') === true ) {
         echo '表单提交的数据(由脚本在上传完成后自动填入)：';
         echo '<pre>';
         print_r(request()->all());
-        echo '通过路由"/aetherupload/display/"+savedpath';
-        echo '<a href="/aetherupload/display/' . request()->input('savedpath') . '">获得文件</a>' . PHP_EOL;
-        echo '通过路由"/aetherupload/download/"+savedpath+"/"+newname';
-        echo '<a href="/aetherupload/download/' . request()->input('savedpath') . '/newname">下载文件</a>' . PHP_EOL;
+        echo PHP_EOL;
+        echo '通过请求"/aetherupload/display/"+file1 ';
+        echo '<a href="/aetherupload/display/' . request()->input('file1') . '" target="_blank">获得file1</a>' . PHP_EOL;
+        echo '通过请求"/aetherupload/download/"+file1+"/"+newname ';
+        echo '<a href="/aetherupload/download/' . request()->input('file1') . '/newname">下载file1</a>' . PHP_EOL;
+        echo PHP_EOL;
+        echo '通过请求"/aetherupload/display/"+file2 ';
+        echo '<a href="/aetherupload/display/' . request()->input('file2') . '" target="_blank">获得file2</a>' . PHP_EOL;
+        echo '通过请求"/aetherupload/download/"+file2+"/"+newname ';
+        echo '<a href="/aetherupload/download/' . request()->input('file2') . '/newname">下载file2</a>' . PHP_EOL;
     });
 
     Route::get('aetherupload/example_source', function () {

@@ -1,6 +1,6 @@
 var AetherUpload = {
 
-    upload: function (group) { //group对应配置文件中的分组名
+    upload: function () {
 
         $.ajaxSetup({
             headers: {
@@ -8,39 +8,37 @@ var AetherUpload = {
             }
         });
 
-        this.fileDom = $('#aetherupload-file'),
+        this.fileDom = this.wrapperDom.find('#file'),
 
-        this.outputDom = $('#aetherupload-output'),
+            this.outputDom = this.wrapperDom.find('#output'),
 
-        this.progressBarDom = $('#aetherupload-progressbar'),
+            this.progressBarDom = this.wrapperDom.find('#progressbar'),
 
-        this.savedPathDom = $('#aetherupload-savedpath'),
+            this.savedPathDom = this.wrapperDom.find('#savedpath'),
 
-        this.file = this.fileDom[0].files[0],
+            this.file = this.fileDom[0].files[0],
 
-        this.fileName = this.file.name,
+            this.fileName = this.file.name,
 
-        this.fileSize = this.file.size,
+            this.fileSize = this.file.size,
 
-        this.uploadBaseName = "",
+            this.uploadBaseName = "",
 
-        this.uploadExt = "",
+            this.uploadExt = "",
 
-        this.chunkSize = 0,
+            this.chunkSize = 0,
 
-        this.chunkCount = 0,
+            this.chunkCount = 0,
 
-        this.group = group,
+            this.subDir = "",
 
-        this.subDir = "",
+            this.savedPath = "",
 
-        this.savedPath = "",
+            this.fileHash = "",
 
-        this.fileHash = "",
+            this.blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice,
 
-        this.blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice,
-
-        this.i = 0;
+            this.i = 0;
 
         this.outputDom.text('开始上传');
 
@@ -169,7 +167,7 @@ var AetherUpload = {
 
                 _this.outputDom.text("秒传成功");
 
-                _this.success();
+                typeof(_this.callback) !== 'undefined'?_this.callback():null;
 
             }
 
@@ -247,7 +245,7 @@ var AetherUpload = {
 
                     _this.outputDom.text("上传完毕");
 
-                    _this.success();
+                    typeof(_this.callback) !== 'undefined'?_this.callback():null;
 
                 }
 
@@ -284,13 +282,38 @@ var AetherUpload = {
             if (new Date().getTime() > wakeUpTime) {
 
                 return;
-
             }
         }
     },
 
-    success: function () {
-        //
+    success: function (callback) {
+
+        this.callback = callback;
+
+        return this;
     }
 
 };
+
+/*
+ * 创建AetherUpload对象的全局方法
+ * file 文件对象
+ * group 分组名
+ */
+function aetherupload(file, group) {
+
+    var newInstance = Object.create(AetherUpload);
+
+    newInstance.wrapperDom = $(file).parents('#aetherupload-wrapper');
+
+    newInstance.group = group;
+
+    return newInstance;
+}
+
+
+
+
+
+
+
