@@ -34,7 +34,7 @@
 
 0 在终端内切换到你的laravel项目根目录，执行`composer require peinhu/aetherupload-laravel ~1.0`  
 
-1 在`config/app.php`的`providers`数组中添加一行`Peinhu\AetherUpload\AetherUploadServiceProvider::class,`  
+1 在`config/app.php`的`providers`数组中添加一行`AetherUpload\AetherUploadServiceProvider::class,`  
   
 2 执行`php artisan aetherupload:publish`来发布一些文件和目录  
   
@@ -75,7 +75,7 @@
 在`app/Console/Kernel.php`中的`schedule`方法中添加以下代码：
 ```php
   $schedule->call(function () {
-      \Peinhu\AetherUpload\ResourceHandler::cleanUpDir();
+      \AetherUpload\ResourceHandler::cleanUpDir();
   })->daily();
 ```  
 * 设置每天自动重建Redis中的hash清单。  
@@ -85,7 +85,7 @@
 在`app/Console/Kernel.php`中的`schedule`方法中添加以下代码：
 ```php
   $schedule->call(function () {
-      \Peinhu\AetherUpload\RedisHandler::build();
+      \AetherUpload\RedisHandler::build();
   })->daily();
 ```
 * 提高临时文件读写速度。  
@@ -126,6 +126,10 @@ AetherUpload并未使用Content-Type(Mime-Type)来检测上传文件类型，而
 虽然做了诸多安全工作，但恶意文件上传是防不胜防的，建议确保所有上传目录权限为755，文件权限为644。  
 
 # 更新日志  
+**2017-09-11 v1.0.6**  
+添加多控件调用支持  
+简化命名空间
+
 **2017-08-03 v1.0.5**  
 添加上传完成前事件  
 添加上传完成后事件
