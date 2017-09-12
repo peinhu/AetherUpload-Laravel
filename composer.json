@@ -25,5 +25,12 @@
     "psr-4": {
       "AetherUpload\\": "src/"
     }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "AetherUpload\\AetherUploadServiceProvider"
+      ]
+    }
   }
 }
