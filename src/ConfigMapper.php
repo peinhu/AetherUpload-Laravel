@@ -54,10 +54,12 @@ class ConfigMapper
         $this->MIDDLEWARE_DOWNLOAD = config('aetherupload.GROUPS.' . $group . '.MIDDLEWARE_DOWNLOAD');
         $this->EVENT_BEFORE_UPLOAD_COMPLETE = config('aetherupload.GROUPS.' . $group . '.EVENT_BEFORE_UPLOAD_COMPLETE');
         $this->EVENT_UPLOAD_COMPLETE = config('aetherupload.GROUPS.' . $group . '.EVENT_UPLOAD_COMPLETE');
+
         return $this;
     }
 
-    public static function get($property){
+    public static function get($property)
+    {
         return self::getInstance()->{$property};
     }
 

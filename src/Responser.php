@@ -18,7 +18,7 @@ class Responser
         }
 
         $result = [
-            'error' => '错误：' . $message,
+            'error' => $message,
         ];
 
         return response()->json($result);

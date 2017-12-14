@@ -4,17 +4,17 @@ var AetherUpload = {
 
         $.ajaxSetup({
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
             }
         });
 
-        this.fileDom = this.wrapperDom.find('#file'),
+        this.fileDom = this.wrapperDom.find("#file"),
 
-            this.outputDom = this.wrapperDom.find('#output'),
+            this.outputDom = this.wrapperDom.find("#output"),
 
-            this.progressBarDom = this.wrapperDom.find('#progressbar'),
+            this.progressBarDom = this.wrapperDom.find("#progressbar"),
 
-            this.savedPathDom = this.wrapperDom.find('#savedpath'),
+            this.savedPathDom = this.wrapperDom.find("#savedpath"),
 
             this.file = this.fileDom[0].files[0],
 
@@ -38,19 +38,23 @@ var AetherUpload = {
 
             this.blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice,
 
-            this.i = 0;
+            this.i = 0,
 
-        this.outputDom.text('开始上传');
+            this.locale,
+
+            this.messages = this.getLocalizedMessages();
+
+        this.outputDom.text(this.messages.status_upload_begin);
 
         if (!this.blobSlice) {
 
-            this.outputDom.text("上传组件不被此浏览器支持");
+            this.outputDom.text(this.messages.error_unsupported_browser);
 
             return;
 
         }
 
-        if (!('FileReader' in window) || !('File' in window)) {
+        if (!("FileReader" in window) || !("File" in window)) {
 
             this.preprocess(); //浏览器不支持读取本地文件，跳过计算hash
 
@@ -82,7 +86,7 @@ var AetherUpload = {
 
             ++currentChunk;
 
-            _this.outputDom.text('正在hash ' + parseInt(currentChunk / chunks * 100) + '%');
+            _this.outputDom.text(_this.messages.status_hashing + ' ' + parseInt(currentChunk / chunks * 100) + "%");
 
             if (currentChunk < chunks) {
 
@@ -121,7 +125,7 @@ var AetherUpload = {
 
         var _this = this;
 
-        $.post('/aetherupload/preprocess', {
+        $.post("/aetherupload/preprocess", {
 
             file_name: _this.fileName,
 
@@ -129,11 +133,13 @@ var AetherUpload = {
 
             file_hash: _this.fileHash,
 
+            locale: _this.locale,
+
             group: _this.group
 
         }, function (rst) {
 
-            if (rst.error != 0) {
+            if (rst.error) {
 
                 _this.outputDom.text(rst.error);
 
@@ -153,6 +159,8 @@ var AetherUpload = {
 
             if (rst.savedPath.length === 0) {
 
+                _this.outputDom.text(_this.messages.status_uploading + " 0%");
+
                 _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk, _this), 0);
 
             } else {
@@ -163,15 +171,15 @@ var AetherUpload = {
 
                 _this.savedPathDom.val(_this.savedPath);
 
-                _this.fileDom.attr('disabled', 'disabled');
+                _this.fileDom.attr("disabled", "disabled");
 
-                _this.outputDom.text("秒传成功");
+                _this.outputDom.text(_this.messages.status_instant_completion_success);
 
-                typeof(_this.callback) !== 'undefined'?_this.callback():null;
+                typeof(_this.callback) !== "undefined" ? _this.callback() : null;
 
             }
 
-        }, 'json');
+        }, "json");
 
     },
 
@@ -199,6 +207,8 @@ var AetherUpload = {
 
         form.append("sub_dir", this.subDir);
 
+        form.append("locale", this.locale);
+
         $.ajax({
 
             url: "/aetherupload/uploading",
@@ -207,7 +217,7 @@ var AetherUpload = {
 
             data: form,
 
-            dataType: 'json',
+            dataType: "json",
 
             async: false,
 
@@ -217,7 +227,7 @@ var AetherUpload = {
 
             success: function (rst) {
 
-                if (rst.error != 0) {
+                if (rst.error) {
 
                     _this.outputDom.text(rst.error);
 
@@ -231,7 +241,7 @@ var AetherUpload = {
 
                 _this.progressBarDom.css("width", percent + "%");
 
-                _this.outputDom.text("正在上传 " + percent + "%");
+                _this.outputDom.text(_this.messages.status_uploading + " " + percent + "%");
 
                 if (_this.i + 1 === _this.chunkCount) {
 
@@ -241,11 +251,11 @@ var AetherUpload = {
 
                     _this.savedPathDom.val(_this.savedPath);
 
-                    _this.fileDom.attr('disabled', 'disabled');
+                    _this.fileDom.attr("disabled", "disabled");
 
-                    _this.outputDom.text("上传完毕");
+                    _this.outputDom.text(_this.messages.status_upload_success);
 
-                    typeof(_this.callback) !== 'undefined'?_this.callback():null;
+                    typeof(_this.callback) !== "undefined" ? _this.callback() : null;
 
                 }
 
@@ -256,13 +266,13 @@ var AetherUpload = {
 
                 if (XMLHttpRequest.status === 0) {
 
-                    _this.outputDom.text('网络故障，正在重试……');
+                    _this.outputDom.text(_this.messages.status_retrying);
 
                     _this.sleep(3000);
 
                 } else {
 
-                    _this.outputDom.text('发生故障，上传失败。');
+                    _this.outputDom.text(_this.messages.error_upload_fail);
 
                     clearInterval(_this.uploadChunkInterval);
 
@@ -291,7 +301,55 @@ var AetherUpload = {
         this.callback = callback;
 
         return this;
+    },
+
+    getLocalizedMessages: function () {
+
+        var lang = navigator.language ? navigator.language : navigator.browserLanguage;
+
+        var locales = Object.getOwnPropertyNames(this.text);
+
+        for (var k in locales) {
+
+            if (lang.indexOf(locales[k]) > -1) {
+
+                this.locale = locales[k];
+
+                return this.text[this.locale];
+
+            }
+
+        }
+
+        this.locale = "en";
+
+        return this.text[this.locale];
+
+    },
+
+    text: {
+        en: {
+            status_upload_begin: "upload begin",
+            error_unsupported_browser: "Error: unsupported browser",
+            status_hashing: "hashing",
+            status_instant_completion_success: "upload success (instant completion) ",
+            status_uploading: "uploading",
+            status_upload_success: "upload success",
+            status_retrying: "network problem, retrying...",
+            error_upload_fail: "Error: upload failed"
+        },
+        zh: {
+            status_upload_begin: "开始上传",
+            error_unsupported_browser: "错误：上传组件不被此浏览器支持",
+            status_hashing: "正在哈希",
+            status_instant_completion_success: "上传成功（秒传）",
+            status_uploading: "正在上传",
+            status_upload_success: "上传成功",
+            status_retrying: "网络故障，正在重试……",
+            error_upload_fail: "错误：上传失败"
+        }
     }
+
 
 };
 
@@ -304,7 +362,7 @@ function aetherupload(file, group) {
 
     var newInstance = Object.create(AetherUpload);
 
-    newInstance.wrapperDom = $(file).parents('#aetherupload-wrapper');
+    newInstance.wrapperDom = $(file).parents("#aetherupload-wrapper");
 
     newInstance.group = group;
 

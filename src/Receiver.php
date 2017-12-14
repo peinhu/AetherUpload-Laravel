@@ -23,7 +23,7 @@ class Receiver
         $this->uploadHead = $this->getUploadHeadPath();
 
         if ( ! (@touch($this->uploadPartialFile) && @touch($this->uploadHead)) ) {
-            return '无法创建文件';
+            return trans('aetherupload::messages.create_file_fail');
         }
 
         return false;
@@ -36,11 +36,11 @@ class Receiver
     {
         # 写入上传文件内容
         if ( @file_put_contents($this->uploadPartialFile, @file_get_contents($this->file->getRealPath()), FILE_APPEND) === false ) {
-            return '写文件失败';
+            return trans('aetherupload::messages.write_file_fail');
         }
         # 写入头文件内容
         if ( @file_put_contents($this->uploadHead, $this->chunkIndex) === false ) {
-            return '写头文件失败';
+            return trans('aetherupload::messages.write_head_fail');
         }
 
         return false;

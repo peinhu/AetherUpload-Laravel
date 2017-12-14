@@ -8,6 +8,7 @@ class UploadHandler extends \Illuminate\Routing\Controller
 
     public function __construct(Receiver $receiver)
     {
+        \App::setLocale(request('locale'));
         $this->receiver = $receiver;
         ConfigMapper::getInstance()->applyGroupConfig(request('group'));
         $this->middleware(ConfigMapper::get('MIDDLEWARE_PREPROCESS'))->only('preprocess');
@@ -33,7 +34,7 @@ class UploadHandler extends \Illuminate\Routing\Controller
         ];
 
         if ( ! ($fileName && $fileSize) ) {
-            return Responser::reportError('缺少必要的文件参数');
+            return Responser::reportError(trans('aetherupload::messages.invalid_file_params'));
         }
 
         $this->receiver->uploadExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
@@ -88,11 +89,11 @@ class UploadHandler extends \Illuminate\Routing\Controller
         ];
 
         if ( ! ($this->receiver->chunkTotalCount && $this->receiver->chunkIndex && $this->receiver->uploadExt && $this->receiver->uploadBaseName && $subDir) ) {
-            return Responser::reportError('缺少必要的文件块参数', true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
+            return Responser::reportError(trans('aetherupload::messages.invalid_chunk_params'), true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
         }
         # 防止被人为跳过验证过程直接调用保存方法，从而上传恶意文件
         if ( ! is_file($this->receiver->uploadPartialFile) ) {
-            return Responser::reportError('此文件不被允许上传', true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
+            return Responser::reportError(trans('aetherupload::messages.invalid_operation'), true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
         }
 
         if ( $this->receiver->file->getError() > 0 ) {
@@ -100,7 +101,7 @@ class UploadHandler extends \Illuminate\Routing\Controller
         }
 
         if ( ! $this->receiver->file->isValid() ) {
-            return Responser::reportError('文件必须通过HTTP POST上传', true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
+            return Responser::reportError(trans('aetherupload::messages.http_post_only'), true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
         }
         # 头文件指针验证，防止断线造成的重复传输某个文件块
         if ( @file_get_contents($this->receiver->uploadHead) != $this->receiver->chunkIndex - 1 ) {
@@ -119,7 +120,7 @@ class UploadHandler extends \Illuminate\Routing\Controller
             }
 
             if ( ! ($result['savedPath'] = $this->receiver->renameTempFile()) ) {
-                return Responser::reportError('重命名文件失败', true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
+                return Responser::reportError(trans('aetherupload::messages.rename_file_fail'), true, $this->receiver->uploadHead, $this->receiver->uploadPartialFile);
             }
 
             RedisHandler::setOneHash(pathinfo($this->receiver->savedPath, PATHINFO_FILENAME), $this->receiver->savedPath);
@@ -133,28 +134,40 @@ class UploadHandler extends \Illuminate\Routing\Controller
         return Responser::returnResult($result);
     }
 
+    /**
+     * @param $fileSize
+     * @return bool|string
+     */
     public function filterBySize($fileSize)
     {
         $MAXSIZE = ConfigMapper::get('FILE_MAXSIZE') * 1000 * 1000;
         # 文件大小过滤
         if ( $fileSize > $MAXSIZE && $MAXSIZE != 0 ) {
-            return '文件过大';
+            return trans('aetherupload::messages.invalid_file_size');
         }
 
         return false;
     }
 
+    /**
+     * @param $uploadExt
+     * @return bool|string
+     */
     public function filterByExt($uploadExt)
     {
         $EXTENSIONS = ConfigMapper::get('FILE_EXTENSIONS');
         # 文件类型过滤
         if ( ($EXTENSIONS != '' && ! in_array($uploadExt, explode(',', $EXTENSIONS))) || in_array($uploadExt, static::getDangerousExtList()) ) {
-            return '文件类型不正确';
+            return trans('aetherupload::messages.invalid_file_type');
         }
 
         return false;
     }
 
+    /**
+     * get the extensions that may harm a server
+     * @return array
+     */
     private static function getDangerousExtList()
     {
         return ['php', 'part', 'html', 'shtml', 'htm', 'shtm', 'js', 'jsp', 'asp', 'java', 'py', 'sh', 'bat', 'exe', 'dll', 'cgi', 'htaccess', 'reg', 'aspx', 'vbs'];

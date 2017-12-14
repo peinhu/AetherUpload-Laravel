@@ -16,12 +16,16 @@ class AetherUploadServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__ . '/../views', 'aetherupload');
 
+        $this->loadTranslationsFrom(__DIR__.'/../translations', 'aetherupload');
+
         $this->publishes([
             __DIR__ . '/../config/aetherupload.php'   => config_path('aetherupload.php'),
             __DIR__ . '/../assets/aetherupload.js'    => public_path('js/aetherupload.js'),
             __DIR__ . '/../assets/spark-md5.min.js'   => public_path('js/spark-md5.min.js'),
             __DIR__ . '/../uploads/aetherupload_file' => storage_path('app/aetherupload/file'),
             __DIR__ . '/../uploads/aetherupload_head' => storage_path('app/aetherupload/_head'),
+            __DIR__.'/../translations/zh/messages.php' => resource_path('lang/vendor/aetherupload/zh/messages.php'),
+            __DIR__.'/../translations/en/messages.php' => resource_path('lang/vendor/aetherupload/en/messages.php'),
         ], 'aetherupload');
 
         if ( ! $this->app->routesAreCached() ) {
