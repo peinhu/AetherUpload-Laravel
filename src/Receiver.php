@@ -15,14 +15,16 @@ class Receiver
 
     /**
      * filter and create the file
+     * @param $uploadBaseName
+     * @param $uploadExt
+     * @return array|bool|\Illuminate\Contracts\Translation\Translator|null|string
      */
-    public function createFile()
+    public function createFile($uploadBaseName, $uploadExt)
     {
-        $this->uploadBaseName = $this->generateTempFileName();
-        $this->uploadPartialFile = $this->getUploadPartialFilePath();
-        $this->uploadHead = $this->getUploadHeadPath();
+        $uploadPartialFile = $this->generateUploadPartialFilePath($uploadBaseName, $uploadExt);
+        $uploadHead = $this->generateUploadHeadPath($uploadBaseName);
 
-        if ( ! (@touch($this->uploadPartialFile) && @touch($this->uploadHead)) ) {
+        if ( ! (@touch($uploadPartialFile) && @touch($uploadHead)) ) {
             return trans('aetherupload::messages.create_file_fail');
         }
 
@@ -63,13 +65,19 @@ class Receiver
         return $this->savedPath;
     }
 
-    public function getUploadPartialFilePath($subDir = null)
+    public function generateUploadPartialFilePath($uploadBaseName, $uploadExt)
     {
-        if ( $subDir === null ) {
-            $subDir = ConfigMapper::get('FILE_SUB_DIR');
-        }
+        return ConfigMapper::get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . ConfigMapper::get('FILE_DIR') . DIRECTORY_SEPARATOR . ConfigMapper::get('FILE_SUB_DIR') . DIRECTORY_SEPARATOR . $uploadBaseName . '.' . $uploadExt . '.part';
+    }
 
+    public function getUploadPartialFilePath($subDir)
+    {
         return ConfigMapper::get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . ConfigMapper::get('FILE_DIR') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . $this->uploadBaseName . '.' . $this->uploadExt . '.part';
+    }
+
+    public function generateUploadHeadPath($uploadBaseName)
+    {
+        return ConfigMapper::get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . ConfigMapper::get('HEAD_DIR') . DIRECTORY_SEPARATOR . $uploadBaseName . '.head';
     }
 
     public function getUploadHeadPath()
@@ -87,7 +95,7 @@ class Receiver
         return md5_file($filePath);
     }
 
-    protected function generateTempFileName()
+    public function generateTempFileName()
     {
         return time() . mt_rand(100, 999);
     }

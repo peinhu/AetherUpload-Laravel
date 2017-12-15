@@ -37,34 +37,30 @@ class UploadHandler extends \Illuminate\Routing\Controller
             return Responser::reportError(trans('aetherupload::messages.invalid_file_params'));
         }
 
-        $this->receiver->uploadExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-
         if ( $error = $this->filterBySize($fileSize) ) {
             return Responser::reportError($error);
         }
 
-        if ( $error = $this->filterByExt($this->receiver->uploadExt) ) {
+        if ( $error = $this->filterByExt($uploadExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION))) ) {
             return Responser::reportError($error);
         }
         # 检测是否可以秒传
-        if ( $fileHash ) {
-            if ( RedisHandler::hashExists($fileHash) ) {
-                $result['savedPath'] = RedisHandler::getFilePathByHash($fileHash);
+        if ( $fileHash && RedisHandler::hashExists($fileHash) ) {
+            $result['savedPath'] = RedisHandler::getFilePathByHash($fileHash);
 
-                return Responser::returnResult($result);
-            }
+            return Responser::returnResult($result);
         }
         # 创建子目录
         if ( ! is_dir($uploadFileSubFolderPath = $this->receiver->getUploadFileSubFolderPath()) ) {
             @mkdir($uploadFileSubFolderPath, 0755);
         }
         # 预创建文件
-        if ( $error = $this->receiver->createFile() ) {
+        if ( $error = $this->receiver->createFile($uploadBaseName = $this->receiver->generateTempFileName(), $uploadExt) ) {
             return Responser::reportError($error);
         }
 
-        $result['uploadExt'] = $this->receiver->uploadExt;
-        $result['uploadBaseName'] = $this->receiver->uploadBaseName;
+        $result['uploadExt'] = $uploadExt;
+        $result['uploadBaseName'] = $uploadBaseName;
 
         return Responser::returnResult($result);
     }
