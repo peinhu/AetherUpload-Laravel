@@ -159,8 +159,6 @@ var AetherUpload = {
 
             if (rst.savedPath.length === 0) {
 
-                _this.outputDom.text(_this.messages.status_uploading + " 0%");
-
                 _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk, _this), 0);
 
             } else {

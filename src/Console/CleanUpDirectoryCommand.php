@@ -3,7 +3,7 @@
 namespace AetherUpload\Console;
 
 use Illuminate\Console\Command;
-use AetherUpload\ResourceHandler;
+use AetherUpload\ResourceController;
 
 class CleanUpDirectoryCommand extends Command
 {
@@ -33,7 +33,7 @@ class CleanUpDirectoryCommand extends Command
 
     public function handle()
     {
-        ResourceHandler::cleanUpDir();
+        ResourceController::cleanUpDir();
         $this->info('done');
     }
 }

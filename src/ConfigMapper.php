@@ -18,6 +18,9 @@ class ConfigMapper
     private $MIDDLEWARE_DOWNLOAD;
     private $EVENT_BEFORE_UPLOAD_COMPLETE;
     private $EVENT_UPLOAD_COMPLETE;
+    private $REDIS_FILE_HASH_KEY;
+    private $REDIS_HEADER_KEY;
+    private $HEADER_DRIVER;
 
     private function __construct()
     {
@@ -39,6 +42,9 @@ class ConfigMapper
         $this->CHUNK_SIZE = config('aetherupload.CHUNK_SIZE');
         $this->HEAD_DIR = config('aetherupload.HEAD_DIR');
         $this->FILE_SUB_DIR = config('aetherupload.FILE_SUB_DIR');
+        $this->REDIS_FILE_HASH_KEY = config('aetherupload.REDIS_FILE_HASH_KEY');
+        $this->REDIS_HEADER_KEY = config('aetherupload.REDIS_HEADER_KEY');
+        $this->HEADER_DRIVER = config('aetherupload.HEADER_DRIVER');
 
         return $this;
     }
