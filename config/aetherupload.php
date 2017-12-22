@@ -4,12 +4,12 @@ return [
 
     "ENABLE_EXAMPLE_PAGE" => true, # 启用示例页面，访问域名/aetherupload，生产环境下请将该选项设置为false
     "CHUNK_SIZE"          => 1 * 1000 * 1000, # 上传时的分块大小（B），默认为1M，越大传输越快，需要小于web服务器和php.ini中设置的上传限值
-    "UPLOAD_PATH"         => storage_path() . DIRECTORY_SEPARATOR . "app" . DIRECTORY_SEPARATOR . "aetherupload", # 上传目录的本地物理路径
-    "HEAD_DIR"            => "_head", # 指针头文件目录的名称，建议保持默认
+    "UPLOAD_PATH"         => storage_path() . DIRECTORY_SEPARATOR . "app" . DIRECTORY_SEPARATOR . "aetherupload", # 上传目录的本地绝对路径
+    "HEAD_DIR"            => "_header", # 指针头文件目录的名称，建议保持默认
     "FILE_SUB_DIR"        => @date("Ym", time()), #资源文件目录的子目录生成规则，变量或常量均可
-    "REDIS_FILE_HASH_KEY" => "aetherupload_file_hashes", #redis中存放所有文件哈希值的key名称
-    "REDIS_HEADER_KEY"    => "aetherupload_headers", #redis中存放所有头文件的key名称
-    "HEADER_DRIVER"       => "file", #头文件的储存驱动，file|redis
+    "REDIS_FILE_HASH_KEY" => "aetherupload_file_hashes", #redis中存放所有文件哈希值的key名称，建议保持默认
+    "REDIS_HEADER_KEY"    => "aetherupload_headers", #redis中存放所有头文件的key名称，建议保持默认
+    "HEADER_DRIVER"       => "file", #头文件的储存方式，file|redis
     "GROUPS"              => [ # 分组，可设置多个不同分组，各自拥有独立配置
         "file" => [ # 新增分组请尽量使用video、audio等有意义的分组名
             "FILE_MAXSIZE"                 => 0, # 被允许的资源文件大小（MB），0为不限制

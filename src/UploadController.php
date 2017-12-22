@@ -2,7 +2,7 @@
 
 namespace AetherUpload;
 
-use App\User;
+use Mockery\Exception;
 
 class UploadController extends \Illuminate\Routing\Controller
 {
@@ -28,6 +28,7 @@ class UploadController extends \Illuminate\Routing\Controller
         $fileName = request('file_name', 0);
         $fileSize = request('file_size', 0);
         $fileHash = request('file_hash', 0);
+
         $result = [
             'error'          => 0,
             'chunkSize'      => ConfigMapper::get('CHUNK_SIZE'),
@@ -37,38 +38,39 @@ class UploadController extends \Illuminate\Routing\Controller
             'savedPath'      => '',
         ];
 
-        if ( ! ($fileName && $fileSize) ) {
-            return Responser::reportError(trans('aetherupload::messages.invalid_file_params'));
-        }
+        try {
 
-        if ( $error = $this->filterBySize($fileSize) ) {
-            return Responser::reportError($error);
-        }
+            if ( ! ($fileName && $fileSize) ) {
+                throw new \Exception(trans('aetherupload::messages.invalid_file_params'));
+            }
 
-        if ( $error = $this->filterByExt($uploadExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION))) ) {
-            return Responser::reportError($error);
-        }
+            # 文件大小过滤
+            $this->filterBySize($fileSize);
 
-        # 检测是否可以秒传
-        if ( $fileHash && FileHashHandler::hashExists($fileHash) ) {
-            $result['savedPath'] = FileHashHandler::getFilePathByHash($fileHash);
+            # 文件类型过滤
+            $this->filterByExt($uploadExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION)));
 
-            return Responser::returnResult($result);
-        }
+            # 检测是否可以秒传
+            if ( $fileHash && FileHashHandler::hashExists($fileHash) ) {
+                $result['savedPath'] = FileHashHandler::getFilePathByHash($fileHash);
 
-        # 创建文件子目录
-        if ( ! is_dir($uploadFileSubFolderPath = $this->partialFileHandler->getUploadFileSubFolderPath()) ) {
-            @mkdir($uploadFileSubFolderPath, 0755);
-        }
+                return Responser::returnResult($result);
+            }
 
-        # 预创建头文件
-        if ( $error = $this->headerHandler->createHeader($uploadBaseName = $this->generateTempFileName()) ) {
-            return Responser::reportError($error);
-        }
+            # 创建文件子目录
+            if ( ! is_dir($this->partialFileHandler->getUploadFileSubFolderPath()) ) {
+                $this->partialFileHandler->createUploadFileSubFolder();
+            }
 
-        # 预创建文件
-        if ( $error = $this->partialFileHandler->createFile($uploadBaseName, $uploadExt) ) {
-            return Responser::reportError($error);
+            # 预创建头文件
+            $this->headerHandler->createHeader($uploadBaseName = $this->generateTempFileName());
+
+            # 预创建文件
+            $this->partialFileHandler->createFile($uploadBaseName, $uploadExt);
+
+        } catch ( \Exception $e ) {
+
+            return Responser::reportError($e->getMessage());
         }
 
         $result['uploadExt'] = $uploadExt;
@@ -89,7 +91,7 @@ class UploadController extends \Illuminate\Routing\Controller
         UploadInfo::instance()->uploadExt = request('upload_ext', 0); # 文件扩展名
         UploadInfo::instance()->file = request()->file('file', 0);# 文件
         UploadInfo::instance()->subDir = request('sub_dir', 0);# 子目录名
-        UploadInfo::instance()->uploadPartialFile = $this->partialFileHandler->getUploadPartialFilePath(UploadInfo::uploadBaseName(),UploadInfo::uploadExt());
+        UploadInfo::instance()->uploadPartialFile = $this->partialFileHandler->getUploadPartialFilePath(UploadInfo::uploadBaseName(), UploadInfo::uploadExt());
 
         $result = [
             'error'     => 0,
@@ -115,27 +117,35 @@ class UploadController extends \Illuminate\Routing\Controller
         if ( $this->headerHandler->readHeader(UploadInfo::uploadBaseName()) != UploadInfo::chunkIndex() - 1 ) {
             return Responser::returnResult($result);
         }
-        # 写入数据到预创建的文件
+        # 更新预创建的头文件
+        if ( $error = $this->headerHandler->writeHeader(UploadInfo::uploadBaseName(), UploadInfo::chunkIndex()) ) {
+            return Responser::reportError($error);
+        }
+
+        # 追加数据到预创建的文件
         if ( $error = $this->partialFileHandler->appendFile() ) {
-            return Responser::reportError($error, true, $this->fileHandler->uploadHead, $this->fileHandler->uploadPartialFile);
+            return Responser::reportError($error);
         }
         # 判断文件传输完成
-        if ( $this->fileHandler->chunkIndex === $this->fileHandler->chunkTotalCount ) {
-            @unlink($this->fileHandler->uploadHead);
+        if ( UploadInfo::chunkIndex() === UploadInfo::chunkTotalCount() ) {
+            $this->headerHandler->deleteHeader(UploadInfo::uploadBaseName());
             # 触发上传完成前事件
             if ( ! empty($beforeUploadCompleteEvent = ConfigMapper::get('EVENT_BEFORE_UPLOAD_COMPLETE')) ) {
-                event(new $beforeUploadCompleteEvent($this->fileHandler));
+                event(new $beforeUploadCompleteEvent($this->partialFileHandler));
             }
 
-            if ( ! ($result['savedPath'] = $this->fileHandler->renameTempFile()) ) {
-                return Responser::reportError(trans('aetherupload::messages.rename_file_fail'), true, $this->fileHandler->uploadHead, $this->fileHandler->uploadPartialFile);
+            if ( ! (UploadInfo::instance()->savedPath = $this->partialFileHandler->renameTempFile()) ) {
+
+                return Responser::reportError(trans('aetherupload::messages.rename_file_fail'));
             }
 
-            FileHashHandler::setOneHash(pathinfo($this->fileHandler->savedPath, PATHINFO_FILENAME), $this->fileHandler->savedPath);
+            FileHashHandler::setOneHash(pathinfo(UploadInfo::savedPath(), PATHINFO_FILENAME), UploadInfo::savedPath());
             # 触发上传完成事件
             if ( ! empty($uploadCompleteEvent = ConfigMapper::get('EVENT_UPLOAD_COMPLETE')) ) {
-                event(new $uploadCompleteEvent($this->fileHandler));
+                event(new $uploadCompleteEvent($this->partialFileHandler));
             }
+
+            $result['savedPath'] = UploadInfo::savedPath();
 
         }
 
@@ -173,7 +183,7 @@ class UploadController extends \Illuminate\Routing\Controller
     }
 
     /**
-     * get the extensions that may harm a server
+     * get the file extensions that may harm a server
      * @return array
      */
     private static function getDangerousExtList()

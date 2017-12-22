@@ -2,54 +2,45 @@
 
 namespace AetherUpload;
 
-use AetherUpload\File\Header as FileHeader;
-use AetherUpload\Redis\Header as RedisHeader;
-
 class HeaderHandler
 {
     public $header;
 
     public function __construct()
     {
-        $headerDriver = ucfirst(ConfigMapper::get('HEADER_DRIVER')) . "Header";
-
-        $this->header = new $headerDriver();
+        $headerDriver = __NAMESPACE__.'\\'.ucfirst(ConfigMapper::get('HEADER_DRIVER')) .'Header';
+        $this->header = new $headerDriver;
     }
 
     public function createHeader($name)
     {
-        if ( ! $this->header->create($name) ) {
-            return trans('aetherupload::messages.create_file_fail');
+        if ( $this->header->create($name) === false ) {
+            throw new \Exception(trans('aetherupload::messages.create_header_fail'));
         }
-
-        return false;
     }
 
     public function writeHeader($name,$content)
     {
-        if ( ! $this->header->write($name,$content) ) {
-            return trans('aetherupload::messages.write_file_fail');
+        if ( $this->header->write($name,$content) === false) {
+            throw new \Exception(trans('aetherupload::messages.write_header_fail'));
         }
 
-        return false;
     }
 
     public function readHeader($name)
     {
-        if ( ! $this->header->read($name) ) {
-            return trans('aetherupload::messages.read_file_fail');
+        if($content = $this->header->read($name) === false){
+            throw new \Exception(trans('aetherupload::messages.read_header_fail'));
         }
-
-        return false;
+        return $content;
     }
 
     public function deleteHeader($name)
     {
-        if ( ! $this->header->delete($name) ) {
-            return trans('aetherupload::messages.delete_file_fail');
+        if ( $this->header->delete($name) === false) {
+            throw new \Exception(trans('aetherupload::messages.delete_header_fail'));
         }
 
-        return false;
     }
 
 

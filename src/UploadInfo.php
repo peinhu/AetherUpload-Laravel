@@ -13,6 +13,7 @@ class UploadInfo
     private $subDir;
     private $uploadHead;
     private $uploadPartialFile;
+    private $savedPath;
 
     private function __construct()
     {

@@ -16,7 +16,7 @@ class PartialFileHandler
 
     public function appendFile()
     {
-        if ( ! @file_put_contents(UploadInfo::uploadPartialFile(), @file_get_contents(UploadInfo::uploadExt()->getRealPath()), FILE_APPEND)){
+        if ( ! @file_put_contents(UploadInfo::uploadPartialFile(), @file_get_contents(UploadInfo::file()->getRealPath()), FILE_APPEND)){
 
             return trans('aetherupload::messages.write_file_fail');
         }
@@ -42,7 +42,6 @@ class PartialFileHandler
         return false;
     }
 
-//???
     public function renameTempFile()
     {
         $savedFileHash = $this->calculateSavedFileHash($this->getUploadPartialFilePath(UploadInfo::uploadBaseName(), UploadInfo::uploadExt()));
@@ -58,6 +57,11 @@ class PartialFileHandler
         }
 
         return $savedPath;
+    }
+
+    public function createUploadFileSubFolder()
+    {
+        @mkdir($this->getUploadFileSubFolderPath(), 0755);
     }
 
     public function getUploadFileSubFolderPath()
