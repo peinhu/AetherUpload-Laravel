@@ -2,8 +2,6 @@
 
 namespace AetherUpload;
 
-use Mockery\Exception;
-
 class UploadController extends \Illuminate\Routing\Controller
 {
     private $partialFileHandler;
