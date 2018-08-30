@@ -24,7 +24,8 @@
   "autoload": {
     "psr-4": {
       "AetherUpload\\": "src/"
-    }
+    },
+    "files": [ "src/helpers.php" ]
   },
   "extra": {
     "laravel": {

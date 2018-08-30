@@ -1,40 +1,48 @@
 <?php
 
-if ( Config::get('aetherupload.ENABLE_EXAMPLE_PAGE') === true ) {
+Route::group(['middleware' => 'web'], function () {
 
-    Route::get('aetherupload', function () {
+    if ( Config::get('aetherupload.ENABLE_EXAMPLE_PAGE') === true ) {
 
-        return view('aetherupload::example');
-    });
+        Route::get('aetherupload', function () {
 
-    Route::post('aetherupload', function () {
+            return view('aetherupload::example');
+        });
 
-        echo '表单提交的数据(由脚本在上传完成后自动填入)：';
-        echo '<pre>';
-        print_r(request()->all());
-        echo PHP_EOL;
-        echo '通过请求"/aetherupload/display/"+file1 ';
-        echo '<a href="/aetherupload/display/' . request()->input('file1') . '" target="_blank">获得file1</a>' . PHP_EOL;
-        echo '通过请求"/aetherupload/download/"+file1+"/"+newname ';
-        echo '<a href="/aetherupload/download/' . request()->input('file1') . '/newname">下载file1</a>' . PHP_EOL;
-        echo PHP_EOL;
-        echo '通过请求"/aetherupload/display/"+file2 ';
-        echo '<a href="/aetherupload/display/' . request()->input('file2') . '" target="_blank">获得file2</a>' . PHP_EOL;
-        echo '通过请求"/aetherupload/download/"+file2+"/"+newname ';
-        echo '<a href="/aetherupload/download/' . request()->input('file2') . '/newname">下载file2</a>' . PHP_EOL;
-    });
+        Route::post('aetherupload', function () {
 
-    Route::get('aetherupload/example_source', function () {
+            echo '表单提交的数据：';
+            echo '<pre>';
+            print_r(request()->all());
+            echo PHP_EOL;
+            echo '通过请求路由"/aetherupload/display/"+file1 或 \AetherUpload\ResourceHandler::getDisplayLink($file1) ';
+            echo '<a href="' . \AetherUpload\ResourceHandler::getDisplayLink(request()->input('file1')) . '" target="_blank">获得file1</a>' . PHP_EOL;
+            echo '通过请求路由"/aetherupload/download/"+file1+"/"+newname 或 \AetherUpload\ResourceHandler::getDownloadLink($file1,$newname) ';
+            echo '<a href="' . \AetherUpload\ResourceHandler::getDownloadLink(request()->input('file1'), "newname") . '">下载file1</a>' . PHP_EOL;
+            echo PHP_EOL;
+            echo '通过请求路由"/aetherupload/display/"+file2 或 \AetherUpload\ResourceHandler::getDisplayLink($file2) ';
+            echo '<a href="' . \AetherUpload\ResourceHandler::getDisplayLink(request()->input('file2')) . '" target="_blank">获得file2</a>' . PHP_EOL;
+            echo '通过请求路由"/aetherupload/download/"+file2+"/"+newname 或 \AetherUpload\ResourceHandler::getDownloadLink($file2,$newname) ';
+            echo '<a href="' . \AetherUpload\ResourceHandler::getDownloadLink(request()->input('file2'), "newname") . '">下载file2</a>' . PHP_EOL;
+        });
 
-        return '<html><body style="background:#222;color:#bbb;"><pre>' . htmlspecialchars(File::get(__DIR__ . '/../views/example.blade.php')) . '</pre></body></html>';
-    });
-}
+        Route::get('aetherupload/example_source', function () {
 
-Route::post('aetherupload/preprocess', '\AetherUpload\UploadController@preprocess');
+            return '<html><body style="background:#222;color:#bbb;"><pre>' . htmlspecialchars(File::get(__DIR__ . '/../views/example.blade.php')) . '</pre></body></html>';
+        });
+    }
 
-Route::post('aetherupload/uploading', '\AetherUpload\UploadController@saveChunk');
+    Route::post('aetherupload/preprocess', '\AetherUpload\UploadController@preprocess');
 
-Route::get('aetherupload/display/{group}/{subDir}/{resourceName}', '\AetherUpload\ResourceController@displayResource');
+    Route::options('aetherupload/preprocess', '\AetherUpload\UploadController@options');
 
-Route::get('aetherupload/download/{group}/{subDir}/{resourceName}/{newName}', '\AetherUpload\ResourceController@downloadResource');
+    Route::post('aetherupload/uploading', '\AetherUpload\UploadController@saveChunk');
 
+    Route::options('aetherupload/uploading', '\AetherUpload\UploadController@options');
+
+    Route::get('aetherupload/display/{uri}', '\AetherUpload\ResourceController@displayResource');
+
+    Route::get('aetherupload/download/{uri}/{newName}', '\AetherUpload\ResourceController@downloadResource');
+
+
+});

@@ -23,7 +23,6 @@ class PublishCommand extends Command
     /**
      * Create a new command instance.
      *
-     * @return void
      */
     public function __construct()
     {
@@ -34,7 +33,7 @@ class PublishCommand extends Command
     public function handle()
     {
         $this->call('vendor:publish', [
-            '--tag' => 'aetherupload', '--force' => true
+            '--tag' => 'aetherupload', '--force' => true,
         ]);
     }
 }

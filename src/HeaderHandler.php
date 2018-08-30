@@ -2,45 +2,56 @@
 
 namespace AetherUpload;
 
+use Illuminate\Support\Facades\Storage;
+
 class HeaderHandler
 {
-    public $header;
+    public $disk;
 
     public function __construct()
     {
-        $headerDriver = __NAMESPACE__.'\\'.ucfirst(ConfigMapper::get('HEADER_DRIVER')) .'Header';
-        $this->header = new $headerDriver;
+        $this->disk = Storage::disk(ConfigMapper::get('HEADER_STORAGE_DISK'));
     }
 
     public function createHeader($name)
     {
-        if ( $this->header->create($name) === false ) {
+        if ( $this->disk->put($this->getHeaderPath($name), "0") === false ) {
             throw new \Exception(trans('aetherupload::messages.create_header_fail'));
         }
     }
 
-    public function writeHeader($name,$content)
+    public function writeHeader($name, $content)
     {
-        if ( $this->header->write($name,$content) === false) {
+        if ( $this->disk->put($this->getHeaderPath($name), $content) === false ) {
             throw new \Exception(trans('aetherupload::messages.write_header_fail'));
         }
-
     }
 
     public function readHeader($name)
     {
-        if($content = $this->header->read($name) === false){
+        if ( ($content = $this->disk->read($this->getHeaderPath($name))) === false ) {
             throw new \Exception(trans('aetherupload::messages.read_header_fail'));
         }
+
         return $content;
     }
 
     public function deleteHeader($name)
     {
-        if ( $this->header->delete($name) === false) {
+        if ( $this->disk->delete($this->getHeaderPath($name)) === false ) {
             throw new \Exception(trans('aetherupload::messages.delete_header_fail'));
         }
 
+    }
+
+    public function files($dir)
+    {
+        return $this->disk->files($dir);
+    }
+
+    private function getHeaderPath($name)
+    {
+        return ConfigMapper::get('ROOT_DIR') . DIRECTORY_SEPARATOR . '_header' . DIRECTORY_SEPARATOR . $name;
     }
 
 

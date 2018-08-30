@@ -2,120 +2,176 @@
 
 namespace AetherUpload;
 
-class ResourceHandler extends \Illuminate\Routing\Controller
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use League\Flysystem\Adapter\Polyfill\StreamedCopyTrait;
+
+class ResourceHandler
 {
+    public $disk;
 
     public function __construct()
     {
-        ConfigMapper::getInstance()->applyGroupConfig(request()->route('group'));
-        $this->middleware(ConfigMapper::get('MIDDLEWARE_DISPLAY'))->only('displayResource');
-        $this->middleware(ConfigMapper::get('MIDDLEWARE_DOWNLOAD'))->only('downloadResource');
+        $this->disk = Storage::disk('local');
     }
 
-    /**
-     * display the uploaded file
-     * @param $group
-     * @param $subDir
-     * @param $resourceName
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
-     */
-    public function displayResource($group, $subDir, $resourceName)
+    public function createResource($name, $subDirName, $group)
     {
-        $uploadedFile = ConfigMapper::get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . ConfigMapper::get('FILE_DIR') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . $resourceName;
-
-        if ( ! is_file($uploadedFile) ) {
-            abort(404);
+        if ( $this->createSubFolder($subDirName, $group) === false ) {
+            throw new \Exception(trans('aetherupload::messages.create_subfolder_fail'));
         }
 
-        return response()->download($uploadedFile, '', [], 'inline');
-    }
-
-    /**
-     * download the uploaded file
-     * @param $group
-     * @param $subDir
-     * @param $resourceName
-     * @param $newName
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
-     */
-    public function downloadResource($group, $subDir, $resourceName, $newName)
-    {
-        $uploadedFile = ConfigMapper::get('UPLOAD_PATH') . DIRECTORY_SEPARATOR . ConfigMapper::get('FILE_DIR') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . $resourceName;
-
-        $ext = pathinfo($uploadedFile, PATHINFO_EXTENSION);
-
-        if ( ! is_file($uploadedFile) ) {
-            abort(404);
+        if ( $this->disk->put($this->getPartialResourceRelativePath($name, $subDirName, $group), "") === false ) {
+            throw new \Exception(trans('aetherupload::messages.create_resource_fail'));
         }
 
-        return response()->download($uploadedFile, $newName . '.' . $ext, [], 'attachment');
     }
 
-    /**
-     * get the absolute path of the uploaded file on disk
-     * @param $savedPath
-     * @return string
-     */
-    public static function getResourcePath($savedPath)
+    public function appendResource($name, $subDirName, $group, $resourceRealPath)
     {
-        return config('aetherupload.UPLOAD_PATH') . DIRECTORY_SEPARATOR . $savedPath;
-    }
+        $handle = $this->getStreamHandle($resourceRealPath, 'rb');
 
-    /**
-     * remove partial files which are created a few days ago
-     */
-    public static function cleanUpDir()
-    {
-        $dueTime = strtotime('-2 day');
-        $uploadPath = config('aetherupload.UPLOAD_PATH');
-        $headDir = config('aetherupload.HEAD_DIR');
-        $headFileNames = scandir($uploadPath . DIRECTORY_SEPARATOR . $headDir);
-
-        foreach ( $headFileNames as $headFileName ) {
-            $headFile = $uploadPath . DIRECTORY_SEPARATOR . $headDir . DIRECTORY_SEPARATOR . $headFileName;
-
-            if ( pathinfo($headFile, PATHINFO_EXTENSION) != 'head' ) {
-                continue;
-            }
-
-            $createTime = substr(pathinfo($headFile, PATHINFO_BASENAME), 0, 10);
-
-            if ( $createTime < $dueTime ) {
-                @unlink($headFile);
-            }
+        if ( File::append($this->getPartialResourcePath($name, $subDirName, $group), $handle) === false ) {
+            throw new \Exception(trans('aetherupload::messages.write_resource_fail'));
         }
 
-        $groupNames = array_keys(config('aetherupload.GROUPS'));
+        fclose($handle);
+    }
 
-        foreach ( $groupNames as $groupName ) {
-            $subDirNames = scandir($uploadPath . DIRECTORY_SEPARATOR . $groupName);
+    public function deleteResource($name, $subDirName, $group)
+    {
+        if ( $this->disk->delete($this->getPartialResourceRelativePath($name, $subDirName, $group)) === false ) {
+            throw new \Exception(trans('aetherupload::messages.delete_resource_fail'));
+        }
 
-            foreach ( $subDirNames as $subDirName ) {
-                $subDir = $uploadPath . DIRECTORY_SEPARATOR . $groupName . DIRECTORY_SEPARATOR . $subDirName;
+    }
 
-                if ( $subDirName === '.' || $subDirName === '..' || ! is_dir($subDir) ) {
-                    continue;
-                }
+    public function renameResource($uploadName, $subDirName, $group, $saveName)
+    {
+        $completeResource = $this->getResourceRelativePath($saveName, $subDirName, $group);
 
-                $fileNames = scandir($subDir);
+        if ( $this->disk->exists($completeResource) === false ) {
 
-                foreach ( $fileNames as $fileName ) {
-                    $uploadedFile = $subDir . DIRECTORY_SEPARATOR . $fileName;
-
-                    if ( $fileName === '.' || $fileName === '..' || pathinfo($uploadedFile, PATHINFO_EXTENSION) != 'part' ) {
-                        continue;
-                    }
-
-                    $createTime = substr(pathinfo($uploadedFile, PATHINFO_BASENAME), 0, 10);
-
-                    if ( $createTime < $dueTime ) {
-                        @unlink($uploadedFile);
-                    }
-                }
+            if ( $this->disk->move($this->getPartialResourceRelativePath($uploadName, $subDirName, $group), $completeResource) === false ) {
+                throw new \Exception(trans('aetherupload::messages.rename_resource_fail'));
             }
 
         }
 
+    }
+
+    public function partialResourceExists($resourceTempName, $subDirName, $group)
+    {
+        return $this->disk->exists($this->getPartialResourceRelativePath($resourceTempName, $subDirName, $group));
+    }
+
+    public function resourceExists($resourceName, $subDirName, $group)
+    {
+        return $this->disk->exists($this->getResourceRelativePath($resourceName, $subDirName, $group));
+    }
+
+    public function createSubFolder($subDirName, $group)
+    {
+        $resourceSubDir = $this->getSubFolderRelativePath($subDirName, $group);
+
+        if ( $this->disk->exists($resourceSubDir) === false ) {
+            if ( $this->disk->makeDirectory($resourceSubDir) === false ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function calculateHash($name, $subDirName, $group)
+    {
+        return md5_file($this->getPartialResourcePath($name, $subDirName, $group));
+    }
+
+    public function getResourceSavedPath($resourceHash, $uploadExt, $subDirName, $group)
+    {
+        return $group . "_" . $subDirName . "_" . $resourceHash . "." . $uploadExt;
+    }
+
+    public function getSubFolderRelativePath($subDirName, $group)
+    {
+        return ConfigMapper::get('ROOT_DIR') . DIRECTORY_SEPARATOR . $group . DIRECTORY_SEPARATOR . $subDirName;
+    }
+
+    public function getPartialResourceRelativePath($uploadName, $subDirName, $group)
+    {
+        return ConfigMapper::get('ROOT_DIR') . DIRECTORY_SEPARATOR . $group . DIRECTORY_SEPARATOR . $subDirName . DIRECTORY_SEPARATOR . $uploadName . ".part";
+    }
+
+    public function getResourceRelativePath($name, $subDirName, $group)
+    {
+        return ConfigMapper::get('ROOT_DIR') . DIRECTORY_SEPARATOR . $group . DIRECTORY_SEPARATOR . $subDirName . DIRECTORY_SEPARATOR . $name;
+    }
+
+    public function getResourceName($baseName, $ext)
+    {
+        return $baseName . "." . $ext;
+    }
+
+    public function getResourcePath($name, $subDirName, $group)
+    {
+        return storage_path('app/') . $this->getResourceRelativePath($name, $subDirName, $group);
+    }
+
+    public function getPartialResourcePath($name, $subDirName, $group)
+    {
+        return storage_path('app/') . $this->getPartialResourceRelativePath($name, $subDirName, $group);
+    }
+
+    public static function getDisplayLink($savedPath)
+    {
+        $storageHost = ConfigMapper::get('DISTRIBUTED_DEPLOYMENT_ENABLE') ? ConfigMapper::get('DISTRIBUTED_DEPLOYMENT_STORAGE_HOST') : '';
+
+        return $storageHost . "/aetherupload/display/" . $savedPath;
+    }
+
+    public static function getDownloadLink($savedPath, $newName)
+    {
+        $storageHost = ConfigMapper::get('DISTRIBUTED_DEPLOYMENT_ENABLE') ? ConfigMapper::get('DISTRIBUTED_DEPLOYMENT_STORAGE_HOST') : '';
+
+        return $storageHost . "/aetherupload/download/" . $savedPath . "/" . $newName;
+    }
+
+    public function generateResourceSubDirName()
+    {
+        switch ( ConfigMapper::get('RESOURCE_SUBDIR_RULE') ) {
+            case "year":
+                $name = @date("Y", time());
+                break;
+            case "month":
+                $name = @date("Ym", time());
+                break;
+            case "date":
+                $name = @date("Ymd", time());
+                break;
+            case "static":
+                $name = "subdir";
+                break;
+            default :
+                $name = @date("Ym", time());
+                break;
+        }
+
+        return $name;
+    }
+
+    private function getStreamHandle($path, $mode)
+    {
+        return @fopen($path, $mode);
+    }
+
+    public function __call($name, $arguments)
+    {
+        if ( method_exists($this->disk, $name) ) {
+            return call_user_func_array([$this->disk, $name], $arguments);
+        }
+
+        return null;
     }
 
 

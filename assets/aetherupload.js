@@ -8,7 +8,7 @@ var AetherUpload = {
             }
         });
 
-        this.fileDom = this.wrapperDom.find("#file"),
+        this.resourceDom = this.wrapperDom.find("#resource"),
 
             this.outputDom = this.wrapperDom.find("#output"),
 
@@ -16,25 +16,25 @@ var AetherUpload = {
 
             this.savedPathDom = this.wrapperDom.find("#savedpath"),
 
-            this.file = this.fileDom[0].files[0],
+            this.resource = this.resourceDom[0].files[0],
 
-            this.fileName = this.file.name,
+            this.resourceName = this.resource.name,
 
-            this.fileSize = this.file.size,
+            this.resourceSize = this.resource.size,
 
-            this.uploadBaseName = "",
+            this.resourceTempBaseName = "",
 
-            this.uploadExt = "",
+            this.resourceExt = "",
 
             this.chunkSize = 0,
 
             this.chunkCount = 0,
 
-            this.subDir = "",
+            this.resourceSubDir = "",
 
             this.savedPath = "",
 
-            this.fileHash = "",
+            this.resourceHash = "",
 
             this.blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice,
 
@@ -42,7 +42,9 @@ var AetherUpload = {
 
             this.locale,
 
-            this.messages = this.getLocalizedMessages();
+            this.messages = this.getLocalizedMessages(),
+
+            this.storageHost = $("#aetherupload-storage-host").val();
 
         this.outputDom.text(this.messages.status_upload_begin);
 
@@ -72,7 +74,7 @@ var AetherUpload = {
 
             chunkSize = 2000000,
 
-            chunks = Math.ceil(_this.file.size / chunkSize),
+            chunks = Math.ceil(_this.resource.size / chunkSize),
 
             currentChunk = 0,
 
@@ -94,7 +96,7 @@ var AetherUpload = {
 
             } else {
 
-                _this.fileHash = spark.end();
+                _this.resourceHash = spark.end();
 
                 _this.preprocess();
 
@@ -111,9 +113,9 @@ var AetherUpload = {
 
             var start = currentChunk * chunkSize,
 
-                end = start + chunkSize >= _this.file.size ? _this.file.size : start + chunkSize;
+                end = start + chunkSize >= _this.resource.size ? _this.resource.size : start + chunkSize;
 
-            fileReader.readAsArrayBuffer(_this.blobSlice.call(_this.file, start, end));
+            fileReader.readAsArrayBuffer(_this.blobSlice.call(_this.resource, start, end));
 
         }
 
@@ -125,59 +127,83 @@ var AetherUpload = {
 
         var _this = this;
 
-        $.post("/aetherupload/preprocess", {
+        $.ajax({
 
-            file_name: _this.fileName,
+            url: _this.storageHost + "/aetherupload/preprocess",
 
-            file_size: _this.fileSize,
+            type: "POST",
 
-            file_hash: _this.fileHash,
+            dataType: "json",
 
-            locale: _this.locale,
+            xhrFields: {
+                withCredentials: true
+            },
 
-            group: _this.group
+            async: false,
 
-        }, function (rst) {
+            crossDomain: true,
 
-            if (rst.error) {
+            data: {
 
-                _this.outputDom.text(rst.error);
+                aetherupload_resource_name: _this.resourceName,
 
-                return;
+                aetherupload_resource_size: _this.resourceSize,
+
+                aetherupload_resource_hash: _this.resourceHash,
+
+                aetherupload_locale: _this.locale,
+
+                aetherupload_group: _this.group
+
+            },
+            success: function (rst) {
+
+                if (rst.error) {
+
+                    _this.outputDom.text(rst.error);
+
+                    return;
+
+                }
+
+                _this.resourceTempBaseName = rst.resourceTempBaseName;
+
+                _this.resourceExt = rst.resourceExt;
+
+                _this.chunkSize = rst.chunkSize;
+
+                _this.chunkCount = Math.ceil(_this.resourceSize / _this.chunkSize);
+
+                _this.resourceSubDir = rst.resourceSubDir;
+
+                if (rst.savedPath.length === 0) {
+
+                    _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk, _this), 0);
+
+                } else {
+
+                    _this.progressBarDom.css("width", "100%");
+
+                    _this.savedPath = rst.savedPath;
+
+                    _this.savedPathDom.val(_this.savedPath);
+
+                    _this.resourceDom.attr("disabled", "disabled");
+
+                    _this.outputDom.text(_this.messages.status_instant_completion_success);
+
+                    typeof(_this.callback) !== "undefined" ? _this.callback() : null;
+
+                }
+
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+                _this.outputDom.text(_this.messages.error_upload_fail);
 
             }
 
-            _this.uploadBaseName = rst.uploadBaseName;
-
-            _this.uploadExt = rst.uploadExt;
-
-            _this.chunkSize = rst.chunkSize;
-
-            _this.chunkCount = Math.ceil(_this.fileSize / _this.chunkSize);
-
-            _this.subDir = rst.subDir;
-
-            if (rst.savedPath.length === 0) {
-
-                _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk, _this), 0);
-
-            } else {
-
-                _this.progressBarDom.css("width", "100%");
-
-                _this.savedPath = rst.savedPath;
-
-                _this.savedPathDom.val(_this.savedPath);
-
-                _this.fileDom.attr("disabled", "disabled");
-
-                _this.outputDom.text(_this.messages.status_instant_completion_success);
-
-                typeof(_this.callback) !== "undefined" ? _this.callback() : null;
-
-            }
-
-        }, "json");
+        });
 
     },
 
@@ -187,35 +213,43 @@ var AetherUpload = {
 
             start = this.i * this.chunkSize,
 
-            end = Math.min(this.fileSize, start + this.chunkSize),
+            end = Math.min(this.resourceSize, start + this.chunkSize),
 
             form = new FormData();
 
-        form.append("file", this.file.slice(start, end));
+        form.append("aetherupload_resource", this.resource.slice(start, end));
 
-        form.append("upload_ext", this.uploadExt);
+        form.append("aetherupload_resource_ext", this.resourceExt);
 
-        form.append("chunk_total", this.chunkCount);
+        form.append("aetherupload_chunk_total", this.chunkCount);
 
-        form.append("chunk_index", this.i + 1);
+        form.append("aetherupload_chunk_index", this.i + 1);
 
-        form.append("upload_basename", this.uploadBaseName);
+        form.append("aetherupload_resource_temp_basename", this.resourceTempBaseName);
 
-        form.append("group", this.group);
+        form.append("aetherupload_group", this.group);
 
-        form.append("sub_dir", this.subDir);
+        form.append("aetherupload_sub_dir", this.resourceSubDir);
 
-        form.append("locale", this.locale);
+        form.append("aetherupload_locale", this.locale);
+
+        form.append("aetherupload_resource_hash", this.resourceHash);
 
         $.ajax({
 
-            url: "/aetherupload/uploading",
+            url: _this.storageHost + "/aetherupload/uploading",
 
             type: "POST",
 
             data: form,
 
             dataType: "json",
+
+            xhrFields: {
+                withCredentials: true
+            },
+
+            crossDomain: true,
 
             async: false,
 
@@ -225,7 +259,16 @@ var AetherUpload = {
 
             success: function (rst) {
 
-                if (rst.error) {
+                if ((rst instanceof Object) !== true) {
+
+                    _this.outputDom.text(_this.messages.error_invalid_server_return);
+
+                    clearInterval(_this.uploadChunkInterval);
+
+                    return;
+                }
+
+                if (rst.error === "undefined" || rst.error) {
 
                     _this.outputDom.text(rst.error);
 
@@ -241,7 +284,7 @@ var AetherUpload = {
 
                 _this.outputDom.text(_this.messages.status_uploading + " " + percent + "%");
 
-                if (_this.i + 1 === _this.chunkCount) {
+                if (rst.savedPath !== "undefined" && rst.savedPath !== "") {
 
                     clearInterval(_this.uploadChunkInterval);
 
@@ -249,9 +292,11 @@ var AetherUpload = {
 
                     _this.savedPathDom.val(_this.savedPath);
 
-                    _this.fileDom.attr("disabled", "disabled");
+                    _this.resourceDom.attr("disabled", "disabled");
 
-                    _this.outputDom.text(_this.messages.status_upload_success);
+                    _this.outputDom.text(_this.messages.status_upload_succeed);
+
+                    _this.progressBarDom.css("width", "100%");
 
                     typeof(_this.callback) !== "undefined" ? _this.callback() : null;
 
@@ -330,11 +375,12 @@ var AetherUpload = {
             status_upload_begin: "upload begin",
             error_unsupported_browser: "Error: unsupported browser",
             status_hashing: "hashing",
-            status_instant_completion_success: "upload success (instant completion) ",
+            status_instant_completion_success: "upload succeed (instant completion) ",
             status_uploading: "uploading",
-            status_upload_success: "upload success",
+            status_upload_succeed: "upload succeed",
             status_retrying: "network problem, retrying...",
-            error_upload_fail: "Error: upload failed"
+            error_upload_fail: "Error: upload fail",
+            error_invalid_server_return: "Error: invalid server return value"
         },
         zh: {
             status_upload_begin: "开始上传",
@@ -342,9 +388,10 @@ var AetherUpload = {
             status_hashing: "正在哈希",
             status_instant_completion_success: "上传成功（秒传）",
             status_uploading: "正在上传",
-            status_upload_success: "上传成功",
+            status_upload_succeed: "上传成功",
             status_retrying: "网络故障，正在重试……",
-            error_upload_fail: "错误：上传失败"
+            error_upload_fail: "错误：上传失败",
+            error_invalid_server_return: "错误：无效的服务器返回值"
         }
     }
 
@@ -353,14 +400,14 @@ var AetherUpload = {
 
 /*
  * 创建AetherUpload对象的全局方法
- * file 文件对象
+ * resource 文件对象
  * group 分组名
  */
-function aetherupload(file, group) {
+function aetherupload(resource, group) {
 
     var newInstance = Object.create(AetherUpload);
 
-    newInstance.wrapperDom = $(file).parents("#aetherupload-wrapper");
+    newInstance.wrapperDom = $(resource).parents("#aetherupload-wrapper");
 
     newInstance.group = group;
 

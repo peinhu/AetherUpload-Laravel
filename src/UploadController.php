@@ -4,184 +4,208 @@ namespace AetherUpload;
 
 class UploadController extends \Illuminate\Routing\Controller
 {
-    private $partialFileHandler;
+    private $resourceHandler;
     private $headerHandler;
+    private $group;
 
-    public function __construct(PartialFileHandler $partialFileHandler, HeaderHandler $headerHandler)
+    public function __construct(ResourceHandler $resourceHandler, HeaderHandler $headerHandler)
     {
-        \App::setLocale(request('locale'));
-        $this->partialFileHandler = $partialFileHandler;
+        $this->resourceHandler = $resourceHandler;
         $this->headerHandler = $headerHandler;
-        ConfigMapper::getInstance()->applyGroupConfig(request('group'));
+        ConfigMapper::getInstance()->applyGroupConfig($this->group = request('aetherupload_group', 'file'));
+        if ( ConfigMapper::get('DISTRIBUTED_DEPLOYMENT_ENABLE') === true && ConfigMapper::get('DISTRIBUTED_DEPLOYMENT_ROLE') === "storage" ) {
+            $this->middleware(ConfigMapper::get('DISTRIBUTED_DEPLOYMENT_MIDDLEWARE_CORS'))->only(['preprocess', 'saveChunk', 'options']);
+        }
         $this->middleware(ConfigMapper::get('MIDDLEWARE_PREPROCESS'))->only('preprocess');
         $this->middleware(ConfigMapper::get('MIDDLEWARE_SAVE_CHUNK'))->only('saveChunk');
     }
 
     /**
-     * preprocess the upload request
+     * Preprocess the upload request
      * @return \Illuminate\Http\JsonResponse
      */
     public function preprocess()
     {
-        $fileName = request('file_name', 0);
-        $fileSize = request('file_size', 0);
-        $fileHash = request('file_hash', 0);
+        $resourceName = request('aetherupload_resource_name', false);
+        $resourceSize = request('aetherupload_resource_size', false);
+        $resourceHash = request('aetherupload_resource_hash', false);
 
         $result = [
-            'error'          => 0,
-            'chunkSize'      => ConfigMapper::get('CHUNK_SIZE'),
-            'subDir'         => ConfigMapper::get('FILE_SUB_DIR'),
-            'uploadBaseName' => '',
-            'uploadExt'      => '',
-            'savedPath'      => '',
+            'error'                => 0,
+            'chunkSize'            => ConfigMapper::get('CHUNK_SIZE'),
+            'resourceSubDir'       => "",
+            'resourceTempBaseName' => "",
+            'resourceExt'          => "",
+            'savedPath'            => "",
         ];
 
         try {
 
-            if ( ! ($fileName && $fileSize) ) {
-                throw new \Exception(trans('aetherupload::messages.invalid_file_params'));
+            if ( ConfigMapper::get('DISTRIBUTED_DEPLOYMENT_ENABLE') === true && ConfigMapper::get('DISTRIBUTED_DEPLOYMENT_ROLE') === "web" ) {
+                throw new \Exception(trans('aetherupload::messages.upload_error'));
             }
 
-            # 文件大小过滤
-            $this->filterBySize($fileSize);
+            if ( $resourceSize === false || $resourceName === false ) {
+                throw new \Exception(trans('aetherupload::messages.invalid_resource_params'));
+            }
 
-            # 文件类型过滤
-            $this->filterByExt($uploadExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION)));
+            $this->filterBySize($resourceSize);
 
-            # 检测是否可以秒传
-            if ( $fileHash && FileHashHandler::hashExists($fileHash) ) {
-                $result['savedPath'] = FileHashHandler::getFilePathByHash($fileHash);
+            $this->filterByExt($resourceExt = strtolower(pathinfo($resourceName, PATHINFO_EXTENSION)));
+
+            # Determine if this upload meets the condition of instant completion
+            if ( $resourceHash !== false && ResourceHashHandler::hashExists($this->group.$resourceHash) ) {
+                $result['savedPath'] = ResourceHashHandler::getPathByHash($this->group.$resourceHash);
 
                 return Responser::returnResult($result);
             }
 
-            # 创建文件子目录
-            if ( ! is_dir($this->partialFileHandler->getUploadFileSubFolderPath()) ) {
-                $this->partialFileHandler->createUploadFileSubFolder();
-            }
+            # Create header file
+            $this->headerHandler->createHeader($resourceTempBaseName = $this->generateTempName());
 
-            # 预创建头文件
-            $this->headerHandler->createHeader($uploadBaseName = $this->generateTempFileName());
-
-            # 预创建文件
-            $this->partialFileHandler->createFile($uploadBaseName, $uploadExt);
+            # Create resource file
+            $this->resourceHandler->createResource($this->resourceHandler->getResourceName($resourceTempBaseName, $resourceExt), $resourceSubDirName = $this->resourceHandler->generateResourceSubDirName(), ConfigMapper::get('RESOURCE_DIR'));
 
         } catch ( \Exception $e ) {
 
-            return Responser::reportError($e->getMessage());
+            return Responser::reportError($result, $e->getMessage());
         }
 
-        $result['uploadExt'] = $uploadExt;
-        $result['uploadBaseName'] = $uploadBaseName;
+        $result['resourceSubDir'] = $resourceSubDirName;
+        $result['resourceExt'] = $resourceExt;
+        $result['resourceTempBaseName'] = $resourceTempBaseName;
 
         return Responser::returnResult($result);
     }
 
     /**
-     * handle and save the uploaded data
+     * Handle and save the uploaded chunks
      * @return \Illuminate\Http\JsonResponse
      */
     public function saveChunk()
     {
-        UploadInfo::instance()->chunkTotalCount = request('chunk_total', 0);# 分片总数
-        UploadInfo::instance()->chunkIndex = request('chunk_index', 0);# 当前分片号
-        UploadInfo::instance()->uploadBaseName = request('upload_basename', 0);# 文件临时名
-        UploadInfo::instance()->uploadExt = request('upload_ext', 0); # 文件扩展名
-        UploadInfo::instance()->file = request()->file('file', 0);# 文件
-        UploadInfo::instance()->subDir = request('sub_dir', 0);# 子目录名
-        UploadInfo::instance()->uploadPartialFile = $this->partialFileHandler->getUploadPartialFilePath(UploadInfo::uploadBaseName(), UploadInfo::uploadExt());
+        $chunkTotalCount = request('aetherupload_chunk_total', false);
+        $chunkIndex = request('aetherupload_chunk_index', false);
+        $resourceTempBaseName = request('aetherupload_resource_temp_basename', false);
+        $resourceExt = request('aetherupload_resource_ext', false);
+        $resource = request()->file('aetherupload_resource', false);
+        $resourceSubDir = request('aetherupload_sub_dir', false);
+        $resourceHash = request('aetherupload_resource_hash', false);
+        $resourceTempName = $this->resourceHandler->getResourceName($resourceTempBaseName, $resourceExt);
+        $group = ConfigMapper::get('RESOURCE_DIR');
 
         $result = [
             'error'     => 0,
             'savedPath' => '',
         ];
 
-        if ( ! (UploadInfo::chunkTotalCount() && UploadInfo::chunkIndex() && UploadInfo::uploadExt() && UploadInfo::uploadBaseName() && UploadInfo::subDir()) ) {
-            return Responser::reportError(trans('aetherupload::messages.invalid_chunk_params'));
-        }
-        # 防止被人为跳过验证过程直接调用保存方法，从而上传恶意文件
-        if ( ! is_file(UploadInfo::uploadPartialFile()) ) {
-            return Responser::reportError(trans('aetherupload::messages.invalid_operation'));
-        }
+        try {
 
-        if ( UploadInfo::file()->getError() > 0 ) {
-            return Responser::reportError(UploadInfo::file()->getErrorMessage());
-        }
-
-        if ( ! UploadInfo::file()->isValid() ) {
-            return Responser::reportError(trans('aetherupload::messages.http_post_only'));
-        }
-        # 头文件指针验证，防止断线造成的重复传输某个文件块
-        if ( $this->headerHandler->readHeader(UploadInfo::uploadBaseName()) != UploadInfo::chunkIndex() - 1 ) {
-            return Responser::returnResult($result);
-        }
-        # 更新预创建的头文件
-        if ( $error = $this->headerHandler->writeHeader(UploadInfo::uploadBaseName(), UploadInfo::chunkIndex()) ) {
-            return Responser::reportError($error);
-        }
-
-        # 追加数据到预创建的文件
-        if ( $error = $this->partialFileHandler->appendFile() ) {
-            return Responser::reportError($error);
-        }
-        # 判断文件传输完成
-        if ( UploadInfo::chunkIndex() === UploadInfo::chunkTotalCount() ) {
-            $this->headerHandler->deleteHeader(UploadInfo::uploadBaseName());
-            # 触发上传完成前事件
-            if ( ! empty($beforeUploadCompleteEvent = ConfigMapper::get('EVENT_BEFORE_UPLOAD_COMPLETE')) ) {
-                event(new $beforeUploadCompleteEvent($this->partialFileHandler));
+            if ( $chunkTotalCount === false || $chunkIndex === false || $resourceExt === false || $resourceTempBaseName === false || $resourceSubDir === false || $resource === false || $resourceHash === false ) {
+                throw new \Exception(trans('aetherupload::messages.invalid_chunk_params'));
             }
 
-            if ( ! (UploadInfo::instance()->savedPath = $this->partialFileHandler->renameTempFile()) ) {
-
-                return Responser::reportError(trans('aetherupload::messages.rename_file_fail'));
+            # Do a check of preventing security intrusions
+            if ( $this->resourceHandler->partialResourceExists($resourceTempName, $resourceSubDir, $group) === false ) {
+                throw new \Exception(trans('aetherupload::messages.invalid_operation'));
             }
 
-            FileHashHandler::setOneHash(pathinfo(UploadInfo::savedPath(), PATHINFO_FILENAME), UploadInfo::savedPath());
-            # 触发上传完成事件
-            if ( ! empty($uploadCompleteEvent = ConfigMapper::get('EVENT_UPLOAD_COMPLETE')) ) {
-                event(new $uploadCompleteEvent($this->partialFileHandler));
+            # Determine if this upload meets the condition of instant completion
+            if ( $resourceHash !== false && ResourceHashHandler::hashExists($this->group.$resourceHash) ) {
+                $this->headerHandler->deleteHeader($resourceTempBaseName);
+                $this->resourceHandler->deleteResource($resourceTempName, $resourceSubDir, $group);
+                $result['savedPath'] = ResourceHashHandler::getPathByHash($this->group.$resourceHash);
+
+                return Responser::returnResult($result);
             }
 
-            $result['savedPath'] = UploadInfo::savedPath();
+            if ( $resource->getError() > 0 ) {
+                throw new \Exception(trans('aetherupload::messages.upload_error'));
+            }
 
+            if ( $resource->isValid() === false ) {
+                throw new \Exception(trans('aetherupload::messages.http_post_only'));
+            }
+
+            # Validate the data in header file to avoid the errors when network issue occurs
+            if ( intval($this->headerHandler->readHeader($resourceTempBaseName)) !== $chunkIndex - 1 ) {
+                return Responser::returnResult($result);
+            }
+
+            # Write data to the header file
+            $this->headerHandler->writeHeader($resourceTempBaseName, $chunkIndex);
+
+            # Write data to the resource file
+            $this->resourceHandler->appendResource($resourceTempName, $resourceSubDir, $group, $resource->getRealPath());
+
+            # Determine if the resource file is completed
+            if ( $chunkIndex === $chunkTotalCount ) {
+                # Trigger the event before an upload completes
+                if ( empty($beforeUploadCompleteEvent = ConfigMapper::get('EVENT_BEFORE_UPLOAD_COMPLETE')) === false ) {
+                    event(new $beforeUploadCompleteEvent($this->resourceHandler->getPartialResourceRelativePath($resourceTempName, $resourceSubDir, $group)));
+                }
+
+                $resourceHash = $this->resourceHandler->calculateHash($resourceTempName, $resourceSubDir, $group);
+
+                $this->resourceHandler->renameResource($this->resourceHandler->getResourceName($resourceTempBaseName,$resourceExt), $resourceSubDir, $group, $saveName = $this->resourceHandler->getResourceName($resourceHash, $resourceExt));
+
+                $savedPath = $this->resourceHandler->getResourceSavedPath($resourceHash, $resourceExt, $resourceSubDir, $group);
+
+                ResourceHashHandler::setOneHash($this->group.$resourceHash, $savedPath);
+
+                $this->headerHandler->deleteHeader($resourceTempBaseName);
+
+                # Trigger the event when an upload completes
+                if ( empty($uploadCompleteEvent = ConfigMapper::get('EVENT_UPLOAD_COMPLETE')) === false ) {
+                    event(new $uploadCompleteEvent($this->resourceHandler->getResourceRelativePath($saveName, $resourceSubDir, $group)));
+                }
+
+                $result['savedPath'] = $savedPath;
+
+            }
+
+        } catch ( \Exception $e ) {
+            $this->headerHandler->deleteHeader($resourceTempBaseName);
+            $this->resourceHandler->deleteResource($resourceTempName, $resourceSubDir, $group);
+
+            return Responser::reportError($result, $e->getMessage());
         }
 
         return Responser::returnResult($result);
+
     }
 
     /**
-     * @param $fileSize
-     * @return bool|string
+     * Filter by size
+     * @param $resourceSize
+     * @throws \Exception
      */
-    public function filterBySize($fileSize)
+    public function filterBySize($resourceSize)
     {
-        $MAXSIZE = ConfigMapper::get('FILE_MAXSIZE') * 1000 * 1000;
-        # 文件大小过滤
-        if ( $fileSize > $MAXSIZE && $MAXSIZE != 0 ) {
-            return trans('aetherupload::messages.invalid_file_size');
+        $MAXSIZE = ConfigMapper::get('RESOURCE_MAXSIZE') * 1000 * 1000;
+
+        if ( $resourceSize > $MAXSIZE && $MAXSIZE !== 0 ) {
+            throw new \Exception(trans('aetherupload::messages.invalid_resource_size'));
         }
 
-        return false;
     }
 
     /**
-     * @param $uploadExt
-     * @return bool|string
+     * Filter by extension
+     * @param $resourceExt
+     * @throws \Exception
      */
-    public function filterByExt($uploadExt)
+    public function filterByExt($resourceExt)
     {
-        $EXTENSIONS = ConfigMapper::get('FILE_EXTENSIONS');
-        # 文件类型过滤
-        if ( ($EXTENSIONS != '' && ! in_array($uploadExt, explode(',', $EXTENSIONS))) || in_array($uploadExt, static::getDangerousExtList()) ) {
-            return trans('aetherupload::messages.invalid_file_type');
-        }
+        $EXTENSIONS = ConfigMapper::get('RESOURCE_EXTENSIONS');
 
-        return false;
+        if ( (empty($EXTENSIONS) === false && in_array($resourceExt, $EXTENSIONS) === false) || in_array($resourceExt, static::getDangerousExtList()) === true ) {
+            throw new \Exception(trans('aetherupload::messages.invalid_resource_type'));
+        }
     }
 
     /**
-     * get the file extensions that may harm a server
+     * Get the resource extensions that may harm a server
      * @return array
      */
     private static function getDangerousExtList()
@@ -189,9 +213,24 @@ class UploadController extends \Illuminate\Routing\Controller
         return ['php', 'part', 'html', 'shtml', 'htm', 'shtm', 'js', 'jsp', 'asp', 'java', 'py', 'sh', 'bat', 'exe', 'dll', 'cgi', 'htaccess', 'reg', 'aspx', 'vbs'];
     }
 
-    public function generateTempFileName()
+    /**
+     * The rule of naming a temporary file
+     * @return string
+     */
+    public function generateTempName()
     {
-        return time() . mt_rand(100, 999);
+        return time() . mt_rand(100000, 999999);
+    }
+
+    /**
+     * Handle the request of option method in CORS
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+     */
+    public function options()
+    {
+        \Illuminate\Support\Facades\Config::set('session.driver', 'array');
+
+        return response('');
     }
 
 
