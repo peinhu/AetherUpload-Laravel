@@ -2,41 +2,44 @@
 
 namespace AetherUpload;
 
+use Illuminate\Support\Facades\Request;
+
 class ResourceController extends \Illuminate\Routing\Controller
 {
-    public $resourceHandler, $group, $resourceSubDir, $resourceName;
+    public $group, $groupSubdir, $resourceName;
 
-    public function __construct(ResourceHandler $resourceHandler)
+    public function __construct()
     {
-        $this->resourceHandler = $resourceHandler;
-        list($this->group, $this->resourceSubDir, $this->resourceName) = explode('_', request()->route('uri'));
-        ConfigMapper::getInstance()->applyGroupConfig($this->group);
-        $this->middleware(ConfigMapper::get('MIDDLEWARE_DISPLAY'))->only('displayResource');
-        $this->middleware(ConfigMapper::get('MIDDLEWARE_DOWNLOAD'))->only('downloadResource');
+        if ( request('uri') !== null ) {
+            list($this->group, $this->groupSubdir, $this->resourceName) = explode('_', Request::route('uri'));
+            ConfigMapper::instance()->applyGroupConfig($this->group);
+            $this->middleware(ConfigMapper::get('middleware_display'))->only('display');
+            $this->middleware(ConfigMapper::get('middleware_download'))->only('download');
+        }
     }
 
-    public function displayResource($uri)
+    public function display($uri)
     {
-        if ( $this->resourceHandler->resourceExists($this->resourceName, $this->resourceSubDir, $this->group) === false ) {
+        $resource = new Resource($this->resourceName, $this->groupSubdir);
+
+        if ( $resource->exists($resource->path) === false ) {
             abort(404);
         }
 
-        $resource = $this->resourceHandler->getResourcePath($this->resourceName, $this->resourceSubDir, $this->group);
-
-        return response()->download($resource, '', [], 'inline');
+        return response()->download($resource->getRealPath(), '', [], 'inline');
     }
 
-    public function downloadResource($uri, $newName = null)
+    public function download($uri, $newName = null)
     {
-        if ( $this->resourceHandler->resourceExists($this->resourceName, $this->resourceSubDir, $this->group) === false ) {
+        $resource = new Resource($this->resourceName, $this->groupSubdir);
+
+        if ( $resource->exists($resource->path) === false ) {
             abort(404);
         }
 
-        $resource = $this->resourceHandler->getResourcePath($this->resourceName, $this->resourceSubDir, $this->group);
+        $newResource = Util::getFileName($newName, pathinfo($resource->name, PATHINFO_EXTENSION));
 
-        $newResource = $this->resourceHandler->getResourceName($newName, pathinfo($resource, PATHINFO_EXTENSION));
-
-        return response()->download($resource, $newResource, [], 'attachment');
+        return response()->download($resource->getRealPath(), $newResource, [], 'attachment');
     }
 
 

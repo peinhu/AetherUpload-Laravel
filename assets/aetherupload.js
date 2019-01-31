@@ -4,17 +4,17 @@ var AetherUpload = {
 
         $.ajaxSetup({
             headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
 
-        this.resourceDom = this.wrapperDom.find("#resource"),
+        this.resourceDom = this.wrapperDom.find('#aetherupload-resource'),
 
-            this.outputDom = this.wrapperDom.find("#output"),
+            this.outputDom = this.wrapperDom.find('#aetherupload-output'),
 
-            this.progressBarDom = this.wrapperDom.find("#progressbar"),
+            this.progressBarDom = this.wrapperDom.find('#aetherupload-progressbar'),
 
-            this.savedPathDom = this.wrapperDom.find("#savedpath"),
+            this.savedPathDom = this.wrapperDom.find('#aetherupload-savedpath'),
 
             this.resource = this.resourceDom[0].files[0],
 
@@ -22,19 +22,19 @@ var AetherUpload = {
 
             this.resourceSize = this.resource.size,
 
-            this.resourceTempBaseName = "",
+            this.resourceTempBaseName = '',
 
-            this.resourceExt = "",
+            this.resourceExt = '',
 
             this.chunkSize = 0,
 
             this.chunkCount = 0,
 
-            this.resourceSubDir = "",
+            this.groupSubdir = '',
 
-            this.savedPath = "",
+            this.savedPath = '',
 
-            this.resourceHash = "",
+            this.resourceHash = '',
 
             this.blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice,
 
@@ -44,9 +44,7 @@ var AetherUpload = {
 
             this.messages = this.getLocalizedMessages(),
 
-            this.storageHost = $("#aetherupload-storage-host").val();
-
-        this.outputDom.text(this.messages.status_upload_begin);
+            this.storageHost = $('#aetherupload-storage-host').val();
 
         if (!this.blobSlice) {
 
@@ -56,7 +54,25 @@ var AetherUpload = {
 
         }
 
-        if (!("FileReader" in window) || !("File" in window)) {
+        if (this.resourceSize === 0) {
+
+            this.outputDom.text(this.messages.error_invalid_resource_size);
+
+            return;
+
+        }
+
+        if (this.resourceName.substring(this.resourceName.lastIndexOf('.') + 1, this.resourceName.length) === '') {
+
+            this.outputDom.text(this.messages.error_invalid_resource_type);
+
+            return;
+
+        }
+
+        this.outputDom.text(this.messages.status_upload_begin);
+
+        if (!('FileReader' in window) || !('File' in window)) {
 
             this.preprocess(); //浏览器不支持读取本地文件，跳过计算hash
 
@@ -88,7 +104,7 @@ var AetherUpload = {
 
             ++currentChunk;
 
-            _this.outputDom.text(_this.messages.status_hashing + ' ' + parseInt(currentChunk / chunks * 100) + "%");
+            _this.outputDom.text(_this.messages.status_hashing + ' ' + parseInt(currentChunk / chunks * 100) + '%');
 
             if (currentChunk < chunks) {
 
@@ -129,33 +145,32 @@ var AetherUpload = {
 
         $.ajax({
 
-            url: _this.storageHost + "/aetherupload/preprocess",
+            url: _this.storageHost + '/aetherupload/preprocess',
 
-            type: "POST",
+            type: 'POST',
 
-            dataType: "json",
+            dataType: 'json',
 
             xhrFields: {
                 withCredentials: true
             },
 
-            async: false,
-
             crossDomain: true,
 
             data: {
 
-                aetherupload_resource_name: _this.resourceName,
+                resource_name: _this.resourceName,
 
-                aetherupload_resource_size: _this.resourceSize,
+                resource_size: _this.resourceSize,
 
-                aetherupload_resource_hash: _this.resourceHash,
+                resource_hash: _this.resourceHash,
 
-                aetherupload_locale: _this.locale,
+                locale: _this.locale,
 
-                aetherupload_group: _this.group
+                group: _this.group
 
             },
+
             success: function (rst) {
 
                 if (rst.error) {
@@ -163,7 +178,6 @@ var AetherUpload = {
                     _this.outputDom.text(rst.error);
 
                     return;
-
                 }
 
                 _this.resourceTempBaseName = rst.resourceTempBaseName;
@@ -174,7 +188,7 @@ var AetherUpload = {
 
                 _this.chunkCount = Math.ceil(_this.resourceSize / _this.chunkSize);
 
-                _this.resourceSubDir = rst.resourceSubDir;
+                _this.groupSubdir = rst.groupSubdir;
 
                 if (rst.savedPath.length === 0) {
 
@@ -182,17 +196,17 @@ var AetherUpload = {
 
                 } else {
 
-                    _this.progressBarDom.css("width", "100%");
+                    _this.progressBarDom.css('width', '100%');
 
                     _this.savedPath = rst.savedPath;
 
                     _this.savedPathDom.val(_this.savedPath);
 
-                    _this.resourceDom.attr("disabled", "disabled");
+                    _this.resourceDom.attr('disabled', 'disabled');
 
                     _this.outputDom.text(_this.messages.status_instant_completion_success);
 
-                    typeof(_this.callback) !== "undefined" ? _this.callback() : null;
+                    typeof(_this.callback) !== 'undefined' ? _this.callback() : null;
 
                 }
 
@@ -217,37 +231,39 @@ var AetherUpload = {
 
             form = new FormData();
 
-        form.append("aetherupload_resource", this.resource.slice(start, end));
+        form.append('resource_chunk', this.resource.slice(start, end));
 
-        form.append("aetherupload_resource_ext", this.resourceExt);
+        form.append('resource_ext', this.resourceExt);
 
-        form.append("aetherupload_chunk_total", this.chunkCount);
+        form.append('chunk_total', this.chunkCount);
 
-        form.append("aetherupload_chunk_index", this.i + 1);
+        form.append('chunk_index', this.i + 1);
 
-        form.append("aetherupload_resource_temp_basename", this.resourceTempBaseName);
+        form.append('resource_temp_basename', this.resourceTempBaseName);
 
-        form.append("aetherupload_group", this.group);
+        form.append('group', this.group);
 
-        form.append("aetherupload_sub_dir", this.resourceSubDir);
+        form.append('group_subdir', this.groupSubdir);
 
-        form.append("aetherupload_locale", this.locale);
+        form.append('locale', this.locale);
 
-        form.append("aetherupload_resource_hash", this.resourceHash);
+        form.append('resource_hash', this.resourceHash);
 
         $.ajax({
 
-            url: _this.storageHost + "/aetherupload/uploading",
+            url: _this.storageHost + '/aetherupload/uploading',
 
-            type: "POST",
+            type: 'POST',
 
             data: form,
 
-            dataType: "json",
+            dataType: 'json',
 
             xhrFields: {
                 withCredentials: true
             },
+
+            cache: false,
 
             crossDomain: true,
 
@@ -268,7 +284,7 @@ var AetherUpload = {
                     return;
                 }
 
-                if (rst.error === "undefined" || rst.error) {
+                if (rst.error === 'undefined' || rst.error) {
 
                     _this.outputDom.text(rst.error);
 
@@ -280,11 +296,11 @@ var AetherUpload = {
 
                 var percent = parseInt((_this.i + 1) / _this.chunkCount * 100);
 
-                _this.progressBarDom.css("width", percent + "%");
+                _this.progressBarDom.css('width', percent + '%');
 
-                _this.outputDom.text(_this.messages.status_uploading + " " + percent + "%");
+                _this.outputDom.text(_this.messages.status_uploading + ' ' + percent + '%');
 
-                if (rst.savedPath !== "undefined" && rst.savedPath !== "") {
+                if (rst.savedPath !== 'undefined' && rst.savedPath !== '') {
 
                     clearInterval(_this.uploadChunkInterval);
 
@@ -292,13 +308,13 @@ var AetherUpload = {
 
                     _this.savedPathDom.val(_this.savedPath);
 
-                    _this.resourceDom.attr("disabled", "disabled");
+                    _this.resourceDom.attr('disabled', 'disabled');
 
                     _this.outputDom.text(_this.messages.status_upload_succeed);
 
-                    _this.progressBarDom.css("width", "100%");
+                    _this.progressBarDom.css('width', '100%');
 
-                    typeof(_this.callback) !== "undefined" ? _this.callback() : null;
+                    typeof(_this.callback) !== 'undefined' ? _this.callback() : null;
 
                 }
 
@@ -364,7 +380,7 @@ var AetherUpload = {
 
         }
 
-        this.locale = "en";
+        this.locale = 'en';
 
         return this.text[this.locale];
 
@@ -372,26 +388,30 @@ var AetherUpload = {
 
     text: {
         en: {
-            status_upload_begin: "upload begin",
-            error_unsupported_browser: "Error: unsupported browser",
-            status_hashing: "hashing",
-            status_instant_completion_success: "upload succeed (instant completion) ",
-            status_uploading: "uploading",
-            status_upload_succeed: "upload succeed",
-            status_retrying: "network problem, retrying...",
-            error_upload_fail: "Error: upload fail",
-            error_invalid_server_return: "Error: invalid server return value"
+            status_upload_begin: 'upload begin',
+            error_unsupported_browser: 'Error: unsupported browser',
+            status_hashing: 'hashing',
+            status_instant_completion_success: 'upload succeed (instant completion) ',
+            status_uploading: 'uploading',
+            status_upload_succeed: 'upload succeed',
+            status_retrying: 'network problem, retrying...',
+            error_upload_fail: 'Error: upload fail',
+            error_invalid_server_return: 'Error: invalid server return value',
+            error_invalid_resource_size: 'Error: invalid resource size',
+            error_invalid_resource_type: 'Error: invalid resource type'
         },
         zh: {
-            status_upload_begin: "开始上传",
-            error_unsupported_browser: "错误：上传组件不被此浏览器支持",
-            status_hashing: "正在哈希",
-            status_instant_completion_success: "上传成功（秒传）",
-            status_uploading: "正在上传",
-            status_upload_succeed: "上传成功",
-            status_retrying: "网络故障，正在重试……",
-            error_upload_fail: "错误：上传失败",
-            error_invalid_server_return: "错误：无效的服务器返回值"
+            status_upload_begin: '开始上传',
+            error_unsupported_browser: '错误：上传组件不被此浏览器支持',
+            status_hashing: '正在哈希',
+            status_instant_completion_success: '上传成功（秒传）',
+            status_uploading: '正在上传',
+            status_upload_succeed: '上传成功',
+            status_retrying: '网络故障，正在重试……',
+            error_upload_fail: '错误：上传失败',
+            error_invalid_server_return: '错误：无效的服务器返回值',
+            error_invalid_resource_size: '错误：无效的文件大小',
+            error_invalid_resource_type: '错误：无效的文件类型'
         }
     }
 
@@ -407,7 +427,7 @@ function aetherupload(resource, group) {
 
     var newInstance = Object.create(AetherUpload);
 
-    newInstance.wrapperDom = $(resource).parents("#aetherupload-wrapper");
+    newInstance.wrapperDom = $(resource).parents('#aetherupload-wrapper');
 
     newInstance.group = group;
 

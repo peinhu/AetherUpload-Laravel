@@ -47,7 +47,7 @@ class RedisClient
         return $result;
     }
 
-    public function listContents()
+    public function listContents($directory)
     {
         $result = [];
         $contents = Redis::hkeys('aetherupload_header');
@@ -56,8 +56,10 @@ class RedisClient
             throw new \Exception('list error');
         }
 
-        foreach ($contents as $content) {
-            $result[]['path'] = $content;
+        foreach ( $contents as $content ) {
+            $arr['path'] = $directory . DIRECTORY_SEPARATOR . $content;
+            $arr['type'] = 'file';
+            $result[] = $arr;
         }
 
         return $result;

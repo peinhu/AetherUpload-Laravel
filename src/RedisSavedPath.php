@@ -5,13 +5,13 @@ namespace AetherUpload;
 use Illuminate\Support\Facades\Redis;
 use Predis\Connection\ConnectionException;
 
-class ResourceHashHandler
+class RedisSavedPath
 {
     /**
      * @param $resourceHash
      * @return bool
      */
-    public static function hashExists($resourceHash)
+    public static function exists($resourceHash)
     {
         $result = false;
 
@@ -30,7 +30,7 @@ class ResourceHashHandler
      * @param $resourceHash
      * @return string
      */
-    public static function getPathByHash($resourceHash)
+    public static function get($resourceHash)
     {
         $filePath = "";
 
@@ -51,7 +51,7 @@ class ResourceHashHandler
      * @param $savedPath
      * @return bool
      */
-    public static function setOneHash($resourceHash, $savedPath)
+    public static function set($resourceHash, $savedPath)
     {
         $result = false;
 
@@ -67,10 +67,29 @@ class ResourceHashHandler
     }
 
     /**
+     * @param $resourceHashArr
+     * @return bool
+     */
+    public static function setMulti($resourceHashArr)
+    {
+        $result = false;
+
+        if ( class_exists('\Predis\Connection\ConnectionException') ) {
+            try {
+                $result = Redis::hmset('aetherupload_resource', $resourceHashArr);
+            } catch ( ConnectionException $e ) {
+
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * @param $resourceHash
      * @return bool
      */
-    public static function deleteOneHash($resourceHash)
+    public static function delete($resourceHash)
     {
         $result = false;
 
@@ -85,7 +104,7 @@ class ResourceHashHandler
         return $result;
     }
 
-    public static function deleteAllHashes()
+    public static function deleteAll()
     {
         $result = false;
 

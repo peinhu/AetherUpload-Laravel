@@ -2,32 +2,132 @@
 
 return [
 
-    "ENABLE_EXAMPLE_PAGE"    => true, # 启用示例页面，访问域名/aetherupload，生产环境下请将该选项设置为false
-    "DISTRIBUTED_DEPLOYMENT" => [
-        "ENABLE"  => false, # 启用分布式部署，使应用服务与储存服务分离
-        "ROLE"    => "web", # web|storage 服务器角色
-        "WEB"     => [
-            "STORAGE_HOST" => "", # 角色为web时，储存服务器的host
+    /*
+    |--------------------------------------------------------------------------
+    | 自定义上传根目录名
+    |--------------------------------------------------------------------------
+    |
+    | 更改后需执行artisan命令aetherupload:groups生成相关目录。
+    |
+    */
+
+    'root_dir' => 'aetherupload',
+
+    /*
+    |--------------------------------------------------------------------------
+    | 自定义资源访问和下载路由前缀
+    |--------------------------------------------------------------------------
+    |
+    */
+
+    'route_display' => '/aetherupload/display',
+
+    'route_download' => '/aetherupload/download',
+
+    /*
+    |--------------------------------------------------------------------------
+    | 上传分块大小（B）
+    |--------------------------------------------------------------------------
+    |
+    | 建议1M～4M之间，较小值占用内存少效率低，较大值占用内存多效率高，需要小于web服务器和php.ini中的上传限值。
+    |
+    */
+
+    'chunk_size' => 1000000,
+
+    /*
+    |--------------------------------------------------------------------------
+    | 资源目录的子目录生成规则
+    |--------------------------------------------------------------------------
+    |
+    | 分为按年分、按月份、按日期、常量subdir。
+    |
+    | Supported: 'year', 'month', 'date', 'const'
+    |
+    */
+
+    'resource_subdir_rule' => 'month',
+
+    /*
+    |--------------------------------------------------------------------------
+    | 头文件储存disk的配置名称
+    |--------------------------------------------------------------------------
+    |
+    | 如果为"redis"，需在config/filesystems.php中添加以下配置
+    | 'disks' => [
+    |     ...
+    |     'redis' => [
+    |        'driver' => 'redis',
+    |        'disable_asserts'=>true,
+    |     ],
+    |     ...
+    | ]
+    |
+    | Supported: 'local', 'redis'
+    |
+    */
+
+    'header_storage_disk' => 'local',
+
+    /*
+    |--------------------------------------------------------------------------
+    | 资源文件后缀名黑名单
+    |--------------------------------------------------------------------------
+    |
+    | 被禁止资源文件的后缀名集合，可在一定程度上防范恶意文件上传。
+    | 凡是匹配成功的资源文件都会被阻止上传，即使后缀名在资源分组的resource_extensions白名单中。
+    |
+    */
+
+    'forbidden_extensions' => ['php', 'part', 'html', 'shtml', 'htm', 'shtm', 'xhtml', 'xml', 'js', 'jsp', 'asp', 'java', 'py', 'sh', 'bat', 'exe', 'dll', 'cgi', 'htaccess', 'reg', 'aspx', 'vbs'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | 分布式部署
+    |--------------------------------------------------------------------------
+    |
+    | 使应用服务与储存服务分离。
+    |
+    */
+
+    'distributed_deployment' => [
+
+        'enable' => false, # 是否启用
+
+        'role' => 'web', # 服务器角色，Supported: 'web', 'storage'
+
+        'web' => [
+            'storage_host' => '', # 角色为web时，储存服务器的host，如http://storage.example.com
         ],
-        "STORAGE" => [
-            "MIDDLEWARE_CORS" => "", # 角色为storage时，跨域中间件AetherUploadCORS在Kernel.php中注册的名称
-            "WEB_HOSTS"       => [], # 角色为storage时，跨域中间件AetherUploadCORS中允许的来源host
+
+        'storage' => [
+            'middleware_cors' => '', # 角色为storage时，跨域中间件AetherUploadCORS在Kernel.php中注册的名称
+            'web_hosts'       => [], # 角色为storage时，跨域中间件AetherUploadCORS中允许的来源host，如http://www.example.com
         ],
+
     ],
-    "ROOT_DIR"               => "aetherupload", # 上传根目录的名称
-    "CHUNK_SIZE"             => 1 * 1000 * 1000, # 上传时的分块大小（B），建议1M～4M之间，需要小于web服务器和php.ini中的上传限值
-    "RESOURCE_SUBDIR_RULE"   => "month", # year|month|date|static 资源目录的子目录生成规则
-    "HEADER_STORAGE_DISK"    => "local", # local|redis 头文件所储存disk的配置名称，详见config/filesystems.php
-    "GROUPS"                 => [ # 资源分组，可设置多个不同分组，各自拥有独立配置
-        "file"  => [ # 分组名
-            "RESOURCE_MAXSIZE"             => 0, # 被允许的资源文件大小（MB），0为不限制
-            "RESOURCE_EXTENSIONS"          => [], # 被允许的资源文件扩展名，空为不限制
-            "MIDDLEWARE_PREPROCESS"        => [], # 上传预处理时的路由中间件
-            "MIDDLEWARE_SAVE_CHUNK"        => [], # 上传文件分块时的路由中间件
-            "MIDDLEWARE_DISPLAY"           => [], # 文件展示时的路由中间件
-            "MIDDLEWARE_DOWNLOAD"          => [], # 文件下载时的路由中间件
-            "EVENT_BEFORE_UPLOAD_COMPLETE" => "", # 上传完成前触发的事件（临时文件），PartialFileHandler的实例被注入
-            "EVENT_UPLOAD_COMPLETE"        => "", # 上传完成后触发的事件（已存文件），PartialFileHandler的实例被注入
+
+    /*
+    |--------------------------------------------------------------------------
+    | 资源分组
+    |--------------------------------------------------------------------------
+    |
+    | 可设置多个不同分组，各自拥有独立配置。新增分组并配置后，使用artisan命令aetherupload:groups自动创建对应目录。
+    |
+    */
+
+    'groups' => [
+
+        'file' => [ # 分组名
+            'group_dir'                    => 'file', # 分组对应储存目录名
+            'resource_maxsize'             => 0, # 被允许的资源文件最大值(B)，0为不限制，32位系统最大值为2147483647(大约2G)
+            'resource_extensions'          => [], # 被允许的资源文件扩展名(白名单)，空为不限制
+            'middleware_preprocess'        => [], # 上传预处理时的路由中间件
+            'middleware_save_chunk'        => [], # 上传文件分块时的路由中间件
+            'middleware_display'           => [], # 文件展示时的路由中间件
+            'middleware_download'          => [], # 文件下载时的路由中间件
+            'event_before_upload_complete' => '', # 上传完成前触发的事件(完整临时文件)，PartialResource的实例被注入
+            'event_upload_complete'        => '', # 上传完成后触发的事件(完整已存文件)，Resource的实例被注入
         ],
 
     ],

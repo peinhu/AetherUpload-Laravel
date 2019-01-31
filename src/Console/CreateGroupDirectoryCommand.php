@@ -2,7 +2,8 @@
 
 namespace AetherUpload\Console;
 
-use AetherUpload\ResourceHandler;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Console\Command;
 
 class CreateGroupDirectoryCommand extends Command
@@ -25,43 +26,47 @@ class CreateGroupDirectoryCommand extends Command
 
     /**
      * Create a new command instance.
-     * @param ResourceHandler $resourceHandler
      */
-    public function __construct(ResourceHandler $resourceHandler)
+    public function __construct()
     {
         parent::__construct();
-        $this->resourceHandler = $resourceHandler;
-
     }
 
 
     public function handle()
     {
-        $groupNames = array_keys(config('aetherupload.GROUPS'));
+        $rootDir = Config::get('aetherupload.root_dir');
 
-        $rootDir = config('aetherupload.ROOT_DIR');
+        if ( ! Storage::exists($rootDir) ) {
+            Storage::makeDirectory($rootDir . DIRECTORY_SEPARATOR . '_header');
+            $this->info('Root directory "' . $rootDir . '" has been created.');
+        }
 
-        $directories = array_map(function ($item) {
-            return basename($item);
-        }, $this->resourceHandler->directories($rootDir));
+        $directories = array_map(function ($directory) {
+            return basename($directory);
+        }, Storage::directories($rootDir));
 
-        foreach ( $groupNames as $groupName ) {
-            if ( in_array($groupName, $directories) ) {
+        $groupDirs = array_map(function ($v) {
+            return $v['group_dir'];
+        }, Config::get('aetherupload.groups'));
+
+        foreach ( $groupDirs as $groupDir ) {
+            if ( in_array($groupDir, $directories) ) {
                 continue;
             } else {
-                if ( $this->resourceHandler->makeDirectory($rootDir . DIRECTORY_SEPARATOR . $groupName) ) {
-                    $this->info('Directory "' . $rootDir . DIRECTORY_SEPARATOR . $groupName . '" is created.');
+                if ( Storage::makeDirectory($rootDir . DIRECTORY_SEPARATOR . $groupDir) ) {
+                    $this->info('Directory "' . $rootDir . DIRECTORY_SEPARATOR . $groupDir . '" has been created.');
                 } else {
-                    $this->error('Fail to create directory "' . $rootDir . DIRECTORY_SEPARATOR . $groupName . '".');
+                    $this->error('Fail to create directory "' . $rootDir . DIRECTORY_SEPARATOR . $groupDir . '".');
                 }
             }
         }
 
-        $this->info('Group List:');
+        $this->info('Group-Directory List:');
 
-        foreach ( $groupNames as $groupName ) {
-            if ( $this->resourceHandler->exists($rootDir . DIRECTORY_SEPARATOR . $groupName) ) {
-                $this->info($groupName);
+        foreach ( Config::get('aetherupload.groups') as $groupName => $groupArr ) {
+            if ( Storage::exists($rootDir . DIRECTORY_SEPARATOR . $groupArr['group_dir']) ) {
+                $this->info($groupName . '-' . $groupArr['group_dir']);
             }
         }
 

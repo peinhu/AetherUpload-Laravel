@@ -2,9 +2,9 @@
 
 return [
     'upload_error'          => 'Error: error occurs during upload',
-    'invalid_resource_params'   => 'Error: resource parameters are invalid',
-    'invalid_resource_size'     => 'Error: resource size exceeds the limit',
-    'invalid_resource_type'     => 'Error: resource type exceeds the limit',
+    'invalid_resource_params'   => 'Error: invalid resource parameters',
+    'invalid_resource_size'     => 'Error: invalid resource size',
+    'invalid_resource_type'     => 'Error: invalid resource type',
     'create_subfolder_fail' => 'Error: fail to create subfolder',
     'invalid_chunk_params'  => 'Error: chunk parameters are invalid',
     'invalid_operation'     => 'Error: operation is forbidden',

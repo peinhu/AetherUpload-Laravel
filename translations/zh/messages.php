@@ -3,8 +3,8 @@
 return [
     'upload_error'          => '错误: 上传发生错误',
     'invalid_resource_params'   => '错误：缺少必要的文件参数',
-    'invalid_resource_size'     => '错误：文件大小超过限制',
-    'invalid_resource_type'     => '错误：文件类型不被支持',
+    'invalid_resource_size'     => '错误：无效的文件大小',
+    'invalid_resource_type'     => '错误：无效的文件类型',
     'create_subfolder_fail' => '错误：创建子文件夹失败',
     'invalid_chunk_params'  => '错误：缺少必要的文件块参数',
     'invalid_operation'     => '错误：非法操作',

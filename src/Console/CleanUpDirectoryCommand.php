@@ -3,8 +3,9 @@
 namespace AetherUpload\Console;
 
 use Illuminate\Console\Command;
-use AetherUpload\ResourceHandler;
-use AetherUpload\HeaderHandler;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
+use AetherUpload\ConfigMapper;
 
 class CleanUpDirectoryCommand extends Command
 {
@@ -22,47 +23,49 @@ class CleanUpDirectoryCommand extends Command
      */
     protected $description = 'Remove partial files which are created a few days ago';
 
-    protected $resourceHandler, $headerHandler;
-
     /**
      * Create a new command instance.
-     * @param HeaderHandler $headerHandler
-     * @param ResourceHandler $resourceHandler
      */
-    public function __construct(HeaderHandler $headerHandler, ResourceHandler $resourceHandler)
+    public function __construct()
     {
         parent::__construct();
-        $this->headerHandler = $headerHandler;
-        $this->resourceHandler = $resourceHandler;
     }
 
     public function handle()
     {
-        $dueTime = strtotime("-".$this->argument('days')." day");
-        $uploadPath = config('aetherupload.ROOT_DIR');
+        $invalidHeaders = [];
+        $invalidFiles = [];
+        $dueTime = strtotime('-' . $this->argument('days') . ' day');
+        $rootDir = ConfigMapper::get('root_dir');
 
-        $headerNames = $this->headerHandler->files($uploadPath . DIRECTORY_SEPARATOR . '_header');
+        $headers = Storage::disk(ConfigMapper::get('header_storage_disk'))->files($rootDir . DIRECTORY_SEPARATOR . '_header');
 
-        foreach ( $headerNames as $headName ) {
+        foreach ( $headers as $header ) {
 
-            if ( pathinfo($headName, PATHINFO_EXTENSION) !== '' ) {
+            if ( pathinfo($header, PATHINFO_EXTENSION) !== '' ) {
                 continue;
             }
 
-            $createTime = substr(basename($headName), 0, 10);
+            $createTime = substr(basename($header), 0, 10);
 
             if ( $createTime < $dueTime ) {
-                $this->headerHandler->deleteHeader(basename($headName));
+                $invalidHeaders[] = $header;
             }
         }
 
-        $groupNames = array_keys(config('aetherupload.GROUPS'));
+        Storage::disk(ConfigMapper::get('header_storage_disk'))->delete($invalidHeaders);
 
-        foreach ( $groupNames as $groupName ) {
-            $subDirNames = $this->resourceHandler->directories($uploadPath . DIRECTORY_SEPARATOR . $groupName);
+        $this->info(count($invalidHeaders) . ' invalid headers have been deleted.');
+
+        $groupDirs = array_map(function ($v) {
+            return $v['group_dir'];
+        }, Config::get('aetherupload.groups'));
+
+        foreach ( $groupDirs as $groupDir ) {
+            $subDirNames = Storage::directories($rootDir . DIRECTORY_SEPARATOR . $groupDir);
 
             foreach ( $subDirNames as $subDirName ) {
-                $files = $this->resourceHandler->files($subDirName);
+                $files = Storage::files($subDirName);
 
                 foreach ( $files as $file ) {
 
@@ -70,16 +73,19 @@ class CleanUpDirectoryCommand extends Command
                         continue;
                     }
 
-                    $createTime = substr($fileBaseName = basename($file, '.part'), 0, 10);
+                    $createTime = substr($fileName = basename($file, '.part'), 0, 10);
 
                     if ( $createTime < $dueTime ) {
-                        $this->resourceHandler->deleteResource($fileBaseName, basename($subDirName), $groupName);
+                        $invalidFiles[] = $file;
                     }
                 }
             }
-
         }
 
-        $this->info('done');
+        Storage::delete($invalidFiles);
+
+        $this->info(count($invalidFiles) . ' invalid files have been deleted.');
+        $this->info('Done.');
+
     }
 }

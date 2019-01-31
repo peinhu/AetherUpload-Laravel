@@ -140,7 +140,7 @@ class RedisAdapter extends AbstractAdapter
     public function listContents($directory = '', $recursive = false)
     {
         try {
-            $result[] = $this->client->listContents();
+            $result = $this->client->listContents($directory);
         } catch ( \Exception $e ) {
             return [];
         }

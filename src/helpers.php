@@ -1,25 +1,32 @@
 <?php
 
-if ( ! function_exists('displayLink') ) {
-    function AetherUploadDisplayLink($savedPath)
+if ( ! function_exists('aetherupload_display_link') ) {
+    function aetherupload_display_link($savedPath)
     {
-        return \AetherUpload\ResourceHandler::getDisplayLink($savedPath);
+        return \AetherUpload\Util::getDisplayLink($savedPath);
     }
 }
 
-if ( ! function_exists('downloadLink') ) {
-    function AetherUploadDownloadLink($savedPath, $newName)
+if ( ! function_exists('aetherupload_download_link') ) {
+    function aetherupload_download_link($savedPath, $newName)
     {
-        return \AetherUpload\ResourceHandler::getDownloadLink($savedPath, $newName);
+        return \AetherUpload\Util::getDownloadLink($savedPath, $newName);
     }
 }
 
 if ( ! function_exists('storage_host_field') ) {
     function storage_host_field()
     {
-        return '<input type="hidden" id="aetherupload-storage-host" value="{{config(\'aetherupload.DISTRIBUTED_DEPLOYMENT.ENABLE\')&&(config(\'aetherupload.DISTRIBUTED_DEPLOYMENT.ROLE\') === \'web\')?config(\'aetherupload.DISTRIBUTED_DEPLOYMENT.WEB.STORAGE_HOST\'):\'\'}}" />';
+        return \AetherUpload\Util::getStorageHostField();
     }
 }
+
+
+
+
+
+
+
 
 
 

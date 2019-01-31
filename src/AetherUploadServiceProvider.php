@@ -38,11 +38,10 @@ class AetherUploadServiceProvider extends ServiceProvider
         }
 
         Storage::extend('redis', function ($app, $config) {
-
             return new Filesystem(new RedisAdapter(new RedisClient()), $config);
         });
 
-        if ($this->app->runningInConsole()) {
+        if ( $this->app->runningInConsole() ) {
             $this->commands([
                 PublishCommand::class,
                 BuildRedisHashesCommand::class,

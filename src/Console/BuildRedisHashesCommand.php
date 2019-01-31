@@ -2,9 +2,11 @@
 
 namespace AetherUpload\Console;
 
-use AetherUpload\ResourceHandler;
+use AetherUpload\ConfigMapper;
 use Illuminate\Console\Command;
-use AetherUpload\ResourceHashHandler;
+use AetherUpload\RedisSavedPath;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
 
 class BuildRedisHashesCommand extends Command
 {
@@ -22,42 +24,45 @@ class BuildRedisHashesCommand extends Command
      */
     protected $description = 'Build the correspondences between hashes and file storage paths in redis';
 
-    protected $resourceHandler;
-
     /**
      * Create a new command instance.
-     * @param ResourceHandler $resourceHandler
      */
-    public function __construct(ResourceHandler $resourceHandler)
+    public function __construct()
     {
         parent::__construct();
-        $this->resourceHandler = $resourceHandler;
     }
 
     public function handle()
     {
-        ResourceHashHandler::deleteAllHashes();
+        $savedPathArr = [];
 
-        $groupNames = array_keys(config('aetherupload.GROUPS'));
-        $rootDir = config('aetherupload.ROOT_DIR');
+        RedisSavedPath::deleteAll();
 
-        foreach ( $groupNames as $groupName ) {
-            $subDirNames = $this->resourceHandler->directories($rootDir . DIRECTORY_SEPARATOR . $groupName);
+        $groupDirs = array_map(function ($v) {
+            return $v['group_dir'];
+        }, Config::get('aetherupload.groups'));
+
+        foreach ( $groupDirs as $groupDir ) {
+            $subDirNames = Storage::directories(ConfigMapper::get('root_dir') . DIRECTORY_SEPARATOR . $groupDir);
 
             foreach ( $subDirNames as $subDirName ) {
-                $fileNames = $this->resourceHandler->files($subDirName);
+                $fileNames = Storage::files($subDirName);
 
                 foreach ( $fileNames as $fileName ) {
                     if ( pathinfo($fileName, PATHINFO_EXTENSION) === 'part' ) {
                         continue;
                     }
 
-                    ResourceHashHandler::setOneHash($groupName.pathinfo($fileName, PATHINFO_FILENAME), $groupName . "_" . basename($subDirName) . "_" . basename($fileName));
+                    $savedPathArr[pathinfo($fileName, PATHINFO_FILENAME)] = $groupDir . '_' . basename($subDirName) . '_' . basename($fileName);
 
                 }
             }
         }
 
-        $this->info('done');
+        RedisSavedPath::setMulti($savedPathArr);
+
+        $this->info(count($savedPathArr) . ' items have been set in Redis.');
+        $this->info('Done.');
+
     }
 }
