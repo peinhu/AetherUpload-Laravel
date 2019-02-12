@@ -12,12 +12,12 @@ class UploadController extends \App\Http\Controllers\Controller
         if ( Request::exists('group') ) {
             \App::setLocale(Request::input('locale'));
             ConfigMapper::instance()->applyGroupConfig(Request::input('group'));
-            // Determine if the distributed deployment is enabled and the server's role is set to storage
-            if ( ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'storage' ) {
-                $this->middleware(ConfigMapper::get('distributed_deployment_middleware_cors'))->only(['preprocess', 'saveChunk', 'options']);
-            }
             $this->middleware(ConfigMapper::get('middleware_preprocess'))->only('preprocess');
             $this->middleware(ConfigMapper::get('middleware_save_chunk'))->only('saveChunk');
+        }
+        // Determine if the distributed deployment is enabled and the server's role is set to storage
+        if ( ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'storage' ) {
+            $this->middleware(ConfigMapper::get('distributed_deployment_middleware_cors'))->only(['preprocess', 'saveChunk', 'options']);
         }
     }
 
