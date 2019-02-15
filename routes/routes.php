@@ -17,20 +17,20 @@ Route::group(['middleware' => 'web'], function () {
 
             echo PHP_EOL;
             echo '获得已上传资源的<b>访问链接</b>' . PHP_EOL;
-            echo 'a.通过请求路由"域名(分布式启用时应当为储存服务器的域名)/配置中自定义的访问路由/"+file1 ';
-            echo '<a href="' . Config::get('aetherupload.route_display') . '/' . request()->input('file1') . '" target="_blank">访问file1</a> ' . PHP_EOL;
-            echo 'b.通过全局帮助方法{{ aetherupload_display_link(file1)  }} ';
+            echo 'a.(手动)通过请求路由"域名(分布式启用时应当为储存服务器的域名)/配置中自定义的访问路由/"+file1 ';
+            echo '<a href="' . (Config::get('aetherupload.distributed_deployment.enable') ? Config::get('aetherupload.distributed_deployment.web.storage_host') : '') . '/aetherupload/display/' . request()->input('file1') . '" target="_blank">访问file1</a> ' . PHP_EOL;
+            echo 'b.(自动)通过全局帮助方法{{ aetherupload_display_link(file1)  }} ';
             echo '<a href="' . aetherupload_display_link(request()->input('file1')) . '" target="_blank">访问file1</a>' . PHP_EOL;
-            echo 'c.通过工具类方法{{ \AetherUpload\Util::getDisplayLink(file1);  }} ';
+            echo 'c.(自动)通过工具类方法{{ \AetherUpload\Util::getDisplayLink(file1)  }} ';
             echo '<a href="' . \AetherUpload\Util::getDisplayLink(request()->input('file1')) . '" target="_blank">访问file1</a>' . PHP_EOL;
 
             echo PHP_EOL;
             echo '获得已上传资源的<b>下载链接</b>' . PHP_EOL;
-            echo 'a.通过请求路由"域名(分布式启用时应当为储存服务器的域名)/配置中自定义的访问路由/"+file1+"/newname" ';
-            echo '<a href="' . Config::get('aetherupload.route_download') . '/' . request()->input('file1') . '/newname" target="_blank">下载file1</a> ' . PHP_EOL;
-            echo 'b.通过全局帮助方法{{ aetherupload_download_link(file1,newname)  }} ';
+            echo 'a.(手动)通过请求路由"域名(分布式启用时应当为储存服务器的域名)/配置中自定义的访问路由/"+file1+"/newname" ';
+            echo '<a href="' . (Config::get('aetherupload.distributed_deployment.enable') ? Config::get('aetherupload.distributed_deployment.web.storage_host') : '') . '/aetherupload/download/' . request()->input('file1') . '/newname" target="_blank">下载file1</a> ' . PHP_EOL;
+            echo 'b.(自动)通过全局帮助方法{{ aetherupload_download_link(file1,newname)  }} ';
             echo '<a href="' . aetherupload_download_link(request()->input('file1'), 'newname') . '" target="_blank">下载file1</a>' . PHP_EOL;
-            echo 'c.通过工具类方法{{ \AetherUpload\Util::getDownloadLink(file1,newname);  }} ';
+            echo 'c.(自动)通过工具类方法{{ \AetherUpload\Util::getDownloadLink(file1,newname)  }} ';
             echo '<a href="' . \AetherUpload\Util::getDownloadLink(request()->input('file1'), 'newname') . '" target="_blank">下载file1</a>' . PHP_EOL;
         });
 

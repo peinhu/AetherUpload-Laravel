@@ -15,7 +15,7 @@ class UploadController extends \App\Http\Controllers\Controller
             $this->middleware(ConfigMapper::get('middleware_preprocess'))->only('preprocess');
             $this->middleware(ConfigMapper::get('middleware_save_chunk'))->only('saveChunk');
         }
-        // Determine if the distributed deployment is enabled and the server's role is set to storage
+        // Add AetherUploadCORS middleware to the storage server when distributed deployment is enabled
         if ( ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'storage' ) {
             $this->middleware(ConfigMapper::get('distributed_deployment_middleware_cors'))->only(['preprocess', 'saveChunk', 'options']);
         }
@@ -42,7 +42,7 @@ class UploadController extends \App\Http\Controllers\Controller
 
         try {
 
-            // Determine if the distributed deployment is enabled and the server's role is set to web
+            // Prevents uploading files to the application server when distributed deployment is enabled
             if ( ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'web' ) {
                 throw new \Exception(trans('aetherupload::messages.upload_error'));
             }
@@ -188,8 +188,6 @@ class UploadController extends \App\Http\Controllers\Controller
      */
     public function options()
     {
-        \Illuminate\Support\Facades\Config::set('session.driver', 'array');
-
         return response('');
     }
 

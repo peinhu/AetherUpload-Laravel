@@ -45,14 +45,14 @@ class Util
     {
         $storageHost = ConfigMapper::get('distributed_deployment_enable') && (ConfigMapper::get('distributed_deployment_role') === 'web') ? ConfigMapper::get('distributed_deployment_storage_host') : '';
 
-        return $storageHost . ConfigMapper::get('route_display') . '/' . $savedPath;
+        return $storageHost . '/aetherupload/display/' . $savedPath;
     }
 
     public static function getDownloadLink($savedPath, $newName)
     {
         $storageHost = ConfigMapper::get('distributed_deployment_enable') && (ConfigMapper::get('distributed_deployment_role') === 'web') ? ConfigMapper::get('distributed_deployment_storage_host') : '';
 
-        return $storageHost . ConfigMapper::get('route_download') . '/' . $savedPath . '/' . $newName;
+        return $storageHost . '/aetherupload/download/' . $savedPath . '/' . $newName;
     }
 
     public static function getStorageHostField()
