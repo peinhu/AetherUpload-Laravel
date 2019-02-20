@@ -40,6 +40,8 @@ Route::group(['middleware' => 'web'], function () {
         });
     }
 
+    if(Config::get('aetherupload.distributed_deployment.enable') && Config::get('aetherupload.distributed_deployment.role') === 'web'){
+
     Route::post('/aetherupload/preprocess', '\AetherUpload\UploadController@preprocess');
 
     Route::options('/aetherupload/preprocess', '\AetherUpload\UploadController@options');
@@ -51,5 +53,6 @@ Route::group(['middleware' => 'web'], function () {
     Route::get(Config::get('aetherupload.route_display') . '/{uri}', '\AetherUpload\ResourceController@display');
 
     Route::get(Config::get('aetherupload.route_download') . '/{uri}/{newName}', '\AetherUpload\ResourceController@download');
+    }
 
 });

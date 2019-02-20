@@ -21,22 +21,24 @@ return [
         'role' => 'web', # 服务器角色，支持选项: 'web', 'storage'
 
         'web' => [ # 角色为应用服务器
-            'storage_host' => 'http://storage.test1.com:8080', # 储存服务器的host，如http://storage.example.com
+            'storage_host' => 'http://storage.test1.com:8080', # 储存服务器的host，如'http://storage.example.com'
         ],
 
         'storage' => [ # 角色为储存服务器
-            'middleware_cors' => '', # 跨域中间件AetherUploadCORS在Kernel.php中注册的名称
-            'web_hosts'       => [], # 跨域中间件AetherUploadCORS中允许的来源应用服务器host，如http://www.example.com
+            'middleware_cors' => '', # 跨域中间件AetherUploadCORS类在Kernel.php中注册的名称
+            'allow_origin'    => [], # 跨域中间件允许的应用服务器来源host，如['http://www.example.com']
         ],
 
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | 上传根目录
+    | 上传根目录名
     |--------------------------------------------------------------------------
     |
-    | 【一般设置】位于 storage/app/ 下，修改默认值后需执行artisan命令aetherupload:groups生成对应目录。注意：确定并投入使用后请勿再更改。
+    | 【一般设置】位于 storage/app/ 下，修改默认值后需执行artisan命令aetherupload:groups生成对应目录。
+    |
+    | 注意：初次确定后请勿再更改！
     |
     */
 
@@ -105,22 +107,22 @@ return [
     | 资源分组
     |--------------------------------------------------------------------------
     |
-    | 【一般设置】可设置多个不同分组，各自拥有独立配置。新增分组并配置后，需使用artisan命令aetherupload:groups创建对应目录。
+    | 【一般设置】可设置多个不同分组，各自拥有独立配置。新增分组并配置后，需执行artisan命令aetherupload:groups创建对应目录。
     |
     */
 
     'groups' => [
 
-        'file'    => [ # 分组名
+        'file' => [ # 分组名
             'group_dir'                    => 'file', # 分组目录名
-            'resource_maxsize'             => 0, # 被允许的资源文件最大值(B)，0为不限制，32位系统最大值为2147483647(大约2G)
+            'resource_maxsize'             => 0, # 被允许的资源文件最大值(B)，0为不限制，32位系统最大值为2147483647(2GB)
             'resource_extensions'          => [], # 被允许的资源文件扩展名(白名单)，空为不限制
             'middleware_preprocess'        => [], # 上传预处理时的路由中间件
             'middleware_save_chunk'        => [], # 上传文件分块时的路由中间件
             'middleware_display'           => [], # 文件展示时的路由中间件
             'middleware_download'          => [], # 文件下载时的路由中间件
-            'event_before_upload_complete' => '', # 上传完成前触发的事件(完整临时文件)，PartialResource的实例被注入
-            'event_upload_complete'        => '', # 上传完成后触发的事件(完整资源文件)，Resource的实例被注入
+            'event_before_upload_complete' => '', # 上传完成前触发的事件(完整临时文件)，PartialResource类的实例被注入
+            'event_upload_complete'        => '', # 上传完成后触发的事件(完整资源文件)，Resource类的实例被注入
         ],
 
     ],

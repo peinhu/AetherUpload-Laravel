@@ -19,14 +19,13 @@ class ConfigMapper
     private $event_before_upload_complete;
     private $event_upload_complete;
     private $header_storage_disk;
-    private $route_display;
-    private $route_download;
     private $distributed_deployment_enable;
     private $distributed_deployment_role;
     private $distributed_deployment_middleware_cors;
     private $distributed_deployment_storage_host;
-    private $distributed_deployment_web_hosts;
+    private $distributed_deployment_allow_origin;
     private $forbidden_extensions;
+
 
     private function __construct()
     {
@@ -49,13 +48,11 @@ class ConfigMapper
         $this->chunk_size = $config->get('aetherupload.chunk_size');
         $this->resource_subdir_rule = $config->get('aetherupload.resource_subdir_rule');
         $this->header_storage_disk = $config->get('aetherupload.header_storage_disk');
-        $this->route_display = $config->get('aetherupload.route_display');
-        $this->route_download = $config->get('aetherupload.route_download');
         $this->distributed_deployment_enable = $config->get('aetherupload.distributed_deployment.enable');
         $this->distributed_deployment_role = $config->get('aetherupload.distributed_deployment.role');
         $this->distributed_deployment_storage_host = $config->get('aetherupload.distributed_deployment.web.storage_host');
         $this->distributed_deployment_middleware_cors = $config->get('aetherupload.distributed_deployment.storage.middleware_cors');
-        $this->distributed_deployment_web_hosts = $config->get('aetherupload.distributed_deployment.storage.web_hosts');
+        $this->distributed_deployment_allow_origin = $config->get('aetherupload.distributed_deployment.storage.allow_origin');
         $this->forbidden_extensions = $config->get('aetherupload.forbidden_extensions');
 
         return $this;

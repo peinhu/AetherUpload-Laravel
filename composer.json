@@ -4,7 +4,8 @@
   "keywords": [
     "大文件",
     "large",
-    "big"
+    "upload",
+    "laravel"
   ],
   "license": "GPL-2.0",
   "authors": [
@@ -33,5 +34,7 @@
         "AetherUpload\\AetherUploadServiceProvider"
       ]
     }
-  }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }
