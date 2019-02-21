@@ -42,7 +42,7 @@
                     <input type="hidden" name="file2" id="aetherupload-savedpath">
                 </div>
             </div>
-            {{ storage_host_field() }} <!--需要标识资源服务器host地址的field。-->
+            {{ storage_host_field() }} <!--（可选）需要标识资源服务器host地址的field，用以支持分布式部署。-->
             {{ csrf_field() }} <!--需要标识csrf token的field。-->
             <button type="submit" class="btn btn-primary">点击提交</button>
         </form>

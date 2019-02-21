@@ -44,7 +44,7 @@ var AetherUpload = {
 
             this.messages = this.getLocalizedMessages(),
 
-            this.storageHost = $('#aetherupload-storage-host').val();
+            this.storageHost = $('#aetherupload-storage-host').length ? $('#aetherupload-storage-host').val() : '';
 
         if (!this.blobSlice) {
 
