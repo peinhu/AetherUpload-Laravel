@@ -9,16 +9,16 @@ class UploadController extends \App\Http\Controllers\Controller
 
     public function __construct()
     {
-        if ( Request::exists('group') ) {
-            \App::setLocale(Request::input('locale'));
-            ConfigMapper::instance()->applyGroupConfig(Request::input('group'));
-//            $this->middleware(ConfigMapper::get('middleware_preprocess'))->only('preprocess');
-//            $this->middleware(ConfigMapper::get('middleware_save_chunk'))->only('saveChunk');
-        }
-        // Add AetherUploadCORS middleware to the storage server when distributed deployment is enabled
+        \App::setLocale(Request::input('locale'));
+        ConfigMapper::instance()->applyGroupConfig(Request::input('group'));
+        $this->middleware(ConfigMapper::get('middleware_preprocess'))->only('preprocess');
+        $this->middleware(ConfigMapper::get('middleware_save_chunk'))->only('saveChunk');
+
+        // add AetherUploadCORS middleware to the storage server when distributed deployment is enabled
         if ( ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'storage' ) {
             $this->middleware(ConfigMapper::get('distributed_deployment_middleware_cors'));
         }
+
     }
 
     /**
@@ -33,7 +33,7 @@ class UploadController extends \App\Http\Controllers\Controller
 
         $result = [
             'error'                => 0,
-            'chunkSize'            => ConfigMapper::get('chunk_size'),
+            'chunkSize'            => 0,
             'groupSubdir'          => '',
             'resourceTempBaseName' => '',
             'resourceExt'          => '',
@@ -42,7 +42,7 @@ class UploadController extends \App\Http\Controllers\Controller
 
         try {
 
-            // Prevents uploading files to the application server when distributed deployment is enabled
+            // prevents uploading files to the application server when distributed deployment is enabled
             if ( ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'web' ) {
                 throw new \Exception(trans('aetherupload::messages.upload_error'));
             }
@@ -54,6 +54,7 @@ class UploadController extends \App\Http\Controllers\Controller
             $result['resourceTempBaseName'] = $resourceTempBaseName = Util::generateTempName();
             $result['resourceExt'] = $resourceExt = strtolower(pathinfo($resourceName, PATHINFO_EXTENSION));
             $result['groupSubdir'] = $resourceSubDirName = Util::generateSubDirName();
+            $result['chunkSize'] = ConfigMapper::get('chunk_size');
 
             $partialResource = new PartialResource($resourceTempBaseName, $resourceExt, $resourceSubDirName);
 
@@ -61,7 +62,7 @@ class UploadController extends \App\Http\Controllers\Controller
 
             $partialResource->filterByExtension($resourceExt);
 
-            // Determine if this upload meets the condition of instant completion
+            // determine if this upload meets the condition of instant completion
             if ( $resourceHash !== false && RedisSavedPath::exists($resourceHash) ) {
                 $result['savedPath'] = RedisSavedPath::get($resourceHash);
 
@@ -107,12 +108,12 @@ class UploadController extends \App\Http\Controllers\Controller
                 throw new \Exception(trans('aetherupload::messages.invalid_chunk_params'));
             }
 
-            // Do a check to prevent security intrusions
+            // do a check to prevent security intrusions
             if ( $partialResource->exists() === false ) {
                 throw new \Exception(trans('aetherupload::messages.invalid_operation'));
             }
 
-            // Determine if this upload meets the condition of instant completion
+            // determine if this upload meets the condition of instant completion
             if ( $resourceHash !== false && RedisSavedPath::exists($resourceHash) ) {
                 $partialResource->delete();
                 unset($partialResource->chunkIndex);
@@ -129,7 +130,7 @@ class UploadController extends \App\Http\Controllers\Controller
                 throw new \Exception(trans('aetherupload::messages.http_post_only'));
             }
 
-            // Validate the data in header file to avoid the errors when network issue occurs
+            // validate the data in header file to avoid the errors when network issue occurs
             if ( (int)($partialResource->chunkIndex) !== (int)$chunkIndex - 1 ) {
                 return Responser::returnResult($result);
             }
@@ -138,14 +139,14 @@ class UploadController extends \App\Http\Controllers\Controller
 
             $partialResource->chunkIndex = $chunkIndex;
 
-            // Determine if the resource file is completed
+            // determine if the resource file is completed
             if ( $chunkIndex === $chunkTotalCount ) {
 
                 $partialResource->checkSize();
 
                 $partialResource->checkMimeType();
 
-                // Trigger the event before an upload completes
+                // trigger the event before an upload completes
                 if ( empty($beforeUploadCompleteEvent = ConfigMapper::get('event_before_upload_complete')) === false ) {
                     event(new $beforeUploadCompleteEvent($partialResource));
                 }
@@ -160,7 +161,7 @@ class UploadController extends \App\Http\Controllers\Controller
 
                 unset($partialResource->chunkIndex);
 
-                // Trigger the event when an upload completes
+                // trigger the event when an upload completes
                 if ( empty($uploadCompleteEvent = ConfigMapper::get('event_upload_complete')) === false ) {
                     event(new $uploadCompleteEvent($resource));
                 }

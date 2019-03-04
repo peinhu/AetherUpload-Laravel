@@ -61,10 +61,12 @@ class ConfigMapper
     public function applyGroupConfig($group)
     {
         $config = app('config');
-        // 前端传递的分组名不在配置中
-        if ( ! in_array($group, array_keys($config->get('aetherupload.groups'))) ) {
-            die('invalid group');
+
+        // invalid group name
+        if ( ! in_array($config, array_keys($config->get('aetherupload.groups'))) ) {
+            return $this;
         }
+
         $this->group = $group;
         $this->group_dir = $config->get('aetherupload.groups.' . $group . '.group_dir');
         $this->resource_maxsize = $config->get('aetherupload.groups.' . $group . '.resource_maxsize');

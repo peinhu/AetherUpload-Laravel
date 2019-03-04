@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use AetherUpload\Console\BuildRedisHashesCommand;
 use AetherUpload\Console\CleanUpDirectoryCommand;
-use AetherUpload\Console\CreateGroupDirectoryCommand;
+use AetherUpload\Console\ListGroupDirectoryCommand;
 use AetherUpload\Console\PublishCommand;
 use League\Flysystem\Filesystem;
 
@@ -42,12 +42,11 @@ class AetherUploadServiceProvider extends ServiceProvider
         });
 
         if ( $this->app->runningInConsole() ) {
-            $this->commands([
-                PublishCommand::class,
-                BuildRedisHashesCommand::class,
-                CleanUpDirectoryCommand::class,
-                CreateGroupDirectoryCommand::class,
-            ]);
+            $commands = [PublishCommand::class];
+            if ( Util::isStorageHost() ) {
+                array_push($commands, BuildRedisHashesCommand::class, CleanUpDirectoryCommand::class, ListGroupDirectoryCommand::class);
+            }
+            $this->commands($commands);
         }
     }
 

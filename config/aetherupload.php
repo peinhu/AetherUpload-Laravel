@@ -2,7 +2,7 @@
 
 return [
 
-    # 【分布式设置】：如启用分布式部署，此类配置项在应用服务器与储存服务器都必须配置。 #
+    # 【分布式设置】：如启用分布式部署，此类配置项必须在应用服务器与储存服务器都进行配置。 #
     # 【一般设置】：只需在储存服务器配置。 #
 
     /*
@@ -16,12 +16,12 @@ return [
 
     'distributed_deployment' => [
 
-        'enable' => true, # 是否启用
+        'enable' => false, # 是否启用
 
         'role' => 'web', # 服务器角色，支持选项: 'web', 'storage'
 
         'web' => [ # 角色为应用服务器
-            'storage_host' => 'http://storage.test1.com:8080', # 储存服务器的host，如'http://storage.example.com'
+            'storage_host' => '', # 储存服务器的host，如'http://storage.example.com'
         ],
 
         'storage' => [ # 角色为储存服务器
@@ -99,7 +99,6 @@ return [
     */
 
     'forbidden_extensions' => ['php', 'part', 'html', 'shtml', 'htm', 'shtm', 'xhtml', 'xml', 'js', 'jsp', 'asp', 'java', 'py', 'sh', 'bat', 'exe', 'dll', 'cgi', 'htaccess', 'reg', 'aspx', 'vbs'],
-
 
     /*
     |--------------------------------------------------------------------------

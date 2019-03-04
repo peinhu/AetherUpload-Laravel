@@ -40,19 +40,19 @@ Route::group(['middleware' => 'web'], function () {
         });
     }
 
-    if(Config::get('aetherupload.distributed_deployment.enable') && Config::get('aetherupload.distributed_deployment.role') === 'web'){
+    if ( \AetherUpload\Util::isStorageHost() ) {
 
-    Route::post('/aetherupload/preprocess', '\AetherUpload\UploadController@preprocess');
+        Route::post('/aetherupload/preprocess', '\AetherUpload\UploadController@preprocess');
 
-    Route::options('/aetherupload/preprocess', '\AetherUpload\UploadController@options');
+        Route::options('/aetherupload/preprocess', '\AetherUpload\UploadController@options');
 
-    Route::post('/aetherupload/uploading', '\AetherUpload\UploadController@saveChunk');
+        Route::post('/aetherupload/uploading', '\AetherUpload\UploadController@saveChunk');
 
-    Route::options('/aetherupload/uploading', '\AetherUpload\UploadController@options');
+        Route::options('/aetherupload/uploading', '\AetherUpload\UploadController@options');
 
-    Route::get(Config::get('aetherupload.route_display') . '/{uri}', '\AetherUpload\ResourceController@display');
+        Route::get('/aetherupload/display/{uri}', '\AetherUpload\ResourceController@display');
 
-    Route::get(Config::get('aetherupload.route_download') . '/{uri}/{newName}', '\AetherUpload\ResourceController@download');
+        Route::get('/aetherupload/download/{uri}/{newName}', '\AetherUpload\ResourceController@download');
     }
 
 });

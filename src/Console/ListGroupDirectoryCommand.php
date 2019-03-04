@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Console\Command;
 
-class CreateGroupDirectoryCommand extends Command
+class ListGroupDirectoryCommand extends Command
 {
     /**
      * The name and signature of the console command.
@@ -20,7 +20,7 @@ class CreateGroupDirectoryCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create directories for the new groups in configuration';
+    protected $description = 'List and create the directories for the groups';
 
     protected $resourceHandler;
 

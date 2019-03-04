@@ -43,21 +43,36 @@ class Util
 
     public static function getDisplayLink($savedPath)
     {
-        $storageHost = ConfigMapper::get('distributed_deployment_enable') && (ConfigMapper::get('distributed_deployment_role') === 'web') ? ConfigMapper::get('distributed_deployment_storage_host') : '';
+        $storageHost = self::isDistributedApplicationHost() ? ConfigMapper::get('distributed_deployment_storage_host') : '';
 
         return $storageHost . '/aetherupload/display/' . $savedPath;
     }
 
     public static function getDownloadLink($savedPath, $newName)
     {
-        $storageHost = ConfigMapper::get('distributed_deployment_enable') && (ConfigMapper::get('distributed_deployment_role') === 'web') ? ConfigMapper::get('distributed_deployment_storage_host') : '';
+        $storageHost = self::isDistributedApplicationHost() ? ConfigMapper::get('distributed_deployment_storage_host') : '';
 
         return $storageHost . '/aetherupload/download/' . $savedPath . '/' . $newName;
     }
 
     public static function getStorageHostField()
     {
-        return new \Illuminate\Support\HtmlString('<input type="hidden" id="aetherupload-storage-host" value="' . (ConfigMapper::get('distributed_deployment_enable') && (ConfigMapper::get('distributed_deployment_role') === 'web') ? ConfigMapper::get('distributed_deployment_storage_host') : '') . '" />');
+        return new \Illuminate\Support\HtmlString('<input type="hidden" id="aetherupload-storage-host" value="' . (self::isDistributedApplicationHost() ? ConfigMapper::get('distributed_deployment_storage_host') : '') . '" />');
+    }
+
+    public static function isStorageHost()
+    {
+        return ! ConfigMapper::get('distributed_deployment_enable') || ConfigMapper::get('distributed_deployment_role') === 'storage';
+    }
+
+    public static function isDistributedStorageHost()
+    {
+        return ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'storage';
+    }
+
+    public static function isDistributedApplicationHost()
+    {
+        return ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'application';
     }
 
 
