@@ -13,7 +13,7 @@ class ConfigMapper
     private $group;
     private $group_dir;
     private $middleware_preprocess;
-    private $middleware_save_chunk;
+    private $middleware_uploading;
     private $middleware_display;
     private $middleware_download;
     private $event_before_upload_complete;
@@ -54,6 +54,10 @@ class ConfigMapper
         $this->distributed_deployment_middleware_cors = $config->get('aetherupload.distributed_deployment.storage.middleware_cors');
         $this->distributed_deployment_allow_origin = $config->get('aetherupload.distributed_deployment.storage.allow_origin');
         $this->forbidden_extensions = $config->get('aetherupload.forbidden_extensions');
+        $this->middleware_preprocess = $config->get('aetherupload.middleware_preprocess');
+        $this->middleware_uploading = $config->get('aetherupload.middleware_uploading');
+        $this->middleware_display = $config->get('aetherupload.middleware_display');
+        $this->middleware_download = $config->get('aetherupload.middleware_download');
 
         return $this;
     }
@@ -62,19 +66,14 @@ class ConfigMapper
     {
         $config = app('config');
 
-        // invalid group name
-        if ( ! in_array($config, array_keys($config->get('aetherupload.groups'))) ) {
-            return $this;
+        if ( ! in_array($group, array_keys($config->get('aetherupload.groups'))) ) {
+            throw new \Exception(trans('aetherupload::messages.invalid_operation'));
         }
 
         $this->group = $group;
         $this->group_dir = $config->get('aetherupload.groups.' . $group . '.group_dir');
         $this->resource_maxsize = $config->get('aetherupload.groups.' . $group . '.resource_maxsize');
         $this->resource_extensions = $config->get('aetherupload.groups.' . $group . '.resource_extensions');
-        $this->middleware_preprocess = $config->get('aetherupload.groups.' . $group . '.middleware_preprocess');
-        $this->middleware_save_chunk = $config->get('aetherupload.groups.' . $group . '.middleware_save_chunk');
-        $this->middleware_display = $config->get('aetherupload.groups.' . $group . '.middleware_display');
-        $this->middleware_download = $config->get('aetherupload.groups.' . $group . '.middleware_download');
         $this->event_before_upload_complete = $config->get('aetherupload.groups.' . $group . '.event_before_upload_complete');
         $this->event_upload_complete = $config->get('aetherupload.groups.' . $group . '.event_upload_complete');
 

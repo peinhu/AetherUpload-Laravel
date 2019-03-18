@@ -43,21 +43,21 @@ class Util
 
     public static function getDisplayLink($savedPath)
     {
-        $storageHost = self::isDistributedApplicationHost() ? ConfigMapper::get('distributed_deployment_storage_host') : '';
+        $storageHost = self::isDistributedWebHost() ? ConfigMapper::get('distributed_deployment_storage_host') : '';
 
         return $storageHost . '/aetherupload/display/' . $savedPath;
     }
 
     public static function getDownloadLink($savedPath, $newName)
     {
-        $storageHost = self::isDistributedApplicationHost() ? ConfigMapper::get('distributed_deployment_storage_host') : '';
+        $storageHost = self::isDistributedWebHost() ? ConfigMapper::get('distributed_deployment_storage_host') : '';
 
         return $storageHost . '/aetherupload/download/' . $savedPath . '/' . $newName;
     }
 
     public static function getStorageHostField()
     {
-        return new \Illuminate\Support\HtmlString('<input type="hidden" id="aetherupload-storage-host" value="' . (self::isDistributedApplicationHost() ? ConfigMapper::get('distributed_deployment_storage_host') : '') . '" />');
+        return new \Illuminate\Support\HtmlString('<input type="hidden" id="aetherupload-storage-host" value="' . (self::isDistributedWebHost() ? ConfigMapper::get('distributed_deployment_storage_host') : '') . '" />');
     }
 
     public static function isStorageHost()
@@ -70,9 +70,9 @@ class Util
         return ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'storage';
     }
 
-    public static function isDistributedApplicationHost()
+    public static function isDistributedWebHost()
     {
-        return ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'application';
+        return ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'web';
     }
 
 

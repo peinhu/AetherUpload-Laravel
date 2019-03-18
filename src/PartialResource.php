@@ -12,19 +12,19 @@ class PartialResource
     public $tempName;
     public $group;
     public $groupDir;
-    public $groupSubdir;
+    public $groupSubDir;
     public $header;
     public $path;
     public $realPath;
     private $chunkIndex = null;
 
-    public function __construct($tempBaseName, $extension, $groupSubdir)
+    public function __construct($tempBaseName, $extension, $groupSubDir)
     {
         $this->disk = Storage::disk('local');
         $this->tempName = Util::getFileName($tempBaseName, $extension);
         $this->group = ConfigMapper::get('group');
         $this->groupDir = ConfigMapper::get('group_dir');
-        $this->groupSubdir = $groupSubdir;
+        $this->groupSubDir = $groupSubDir;
         $this->path = $this->getPath();
         $this->realPath = $this->getRealPath();
         $this->header = new Header($tempBaseName);
@@ -112,14 +112,14 @@ class PartialResource
 
     public function createGroupSubDir()
     {
-        $groupDir = dirname($groupSubdir = $this->getGroupSubDirPath());
+        $groupDir = dirname($groupSubDir = $this->getGroupSubDirPath());
 
         if ( $this->disk->exists($groupDir) === false ) {
             return false;
         }
 
-        if ( $this->disk->exists($groupSubdir) === false ) {
-            if ( $this->disk->makeDirectory($groupSubdir) === false ) {
+        if ( $this->disk->exists($groupSubDir) === false ) {
+            if ( $this->disk->makeDirectory($groupSubDir) === false ) {
                 return false;
             }
         }
@@ -134,7 +134,7 @@ class PartialResource
 
     public function getPath()
     {
-        return ConfigMapper::get('root_dir') . DIRECTORY_SEPARATOR . $this->groupDir . DIRECTORY_SEPARATOR . $this->groupSubdir . DIRECTORY_SEPARATOR . $this->tempName . '.part';
+        return ConfigMapper::get('root_dir') . DIRECTORY_SEPARATOR . $this->groupDir . DIRECTORY_SEPARATOR . $this->groupSubDir . DIRECTORY_SEPARATOR . $this->tempName . '.part';
     }
 
     public function getRealPath()
@@ -144,12 +144,12 @@ class PartialResource
 
     public function getCompletePath($name)
     {
-        return ConfigMapper::get('root_dir') . DIRECTORY_SEPARATOR . $this->groupDir . DIRECTORY_SEPARATOR . $this->groupSubdir . DIRECTORY_SEPARATOR . $name;
+        return ConfigMapper::get('root_dir') . DIRECTORY_SEPARATOR . $this->groupDir . DIRECTORY_SEPARATOR . $this->groupSubDir . DIRECTORY_SEPARATOR . $name;
     }
 
     public function getGroupSubDirPath()
     {
-        return ConfigMapper::get('root_dir') . DIRECTORY_SEPARATOR . $this->groupDir . DIRECTORY_SEPARATOR . $this->groupSubdir;
+        return ConfigMapper::get('root_dir') . DIRECTORY_SEPARATOR . $this->groupDir . DIRECTORY_SEPARATOR . $this->groupSubDir;
     }
 
     public function __set($property, $value)

@@ -6,23 +6,25 @@ use Illuminate\Support\Facades\Request;
 
 class ResourceController extends \Illuminate\Routing\Controller
 {
-    public $group, $groupSubdir, $resourceName;
-
-    public function __construct()
-    {
-        if ( request('uri') !== null ) {
-            list($this->group, $this->groupSubdir, $this->resourceName) = explode('_', Request::route('uri'));
-            ConfigMapper::instance()->applyGroupConfig($this->group);
-            $this->middleware(ConfigMapper::get('middleware_display'))->only('display');
-            $this->middleware(ConfigMapper::get('middleware_download'))->only('download');
-        }
-    }
 
     public function display($uri)
     {
-        $resource = new Resource($this->resourceName, $this->groupSubdir);
+        $resource = null;
 
-        if ( $resource->exists($resource->path) === false ) {
+        try {
+
+            list($group, $groupSubDir, $resourceName) = explode('_', Request::route('uri'));
+
+            ConfigMapper::instance()->applyGroupConfig($group);
+
+            $resource = new Resource($resourceName, $groupSubDir);
+
+            if ( $resource->exists($resource->path) === false ) {
+                throw new \Exception;
+            }
+
+        } catch ( \Exception $e ) {
+
             abort(404);
         }
 
@@ -31,13 +33,26 @@ class ResourceController extends \Illuminate\Routing\Controller
 
     public function download($uri, $newName = null)
     {
-        $resource = new Resource($this->resourceName, $this->groupSubdir);
+        $resource = $newResource = null;
 
-        if ( $resource->exists($resource->path) === false ) {
+        try {
+
+            list($group, $groupSubDir, $resourceName) = explode('_', Request::route('uri'));
+
+            ConfigMapper::instance()->applyGroupConfig($group);
+
+            $resource = new Resource($resourceName, $groupSubDir);
+
+            if ( $resource->exists($resource->path) === false ) {
+                throw new \Exception;
+            }
+
+            $newResource = Util::getFileName($newName, pathinfo($resource->name, PATHINFO_EXTENSION));
+
+        } catch ( \Exception $e ) {
+
             abort(404);
         }
-
-        $newResource = Util::getFileName($newName, pathinfo($resource->name, PATHINFO_EXTENSION));
 
         return response()->download($resource->getRealPath(), $newResource, [], 'attachment');
     }

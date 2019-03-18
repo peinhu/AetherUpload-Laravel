@@ -30,7 +30,7 @@ var AetherUpload = {
 
             this.chunkCount = 0,
 
-            this.groupSubdir = '',
+            this.groupSubDir = '',
 
             this.savedPath = '',
 
@@ -188,7 +188,7 @@ var AetherUpload = {
 
                 _this.chunkCount = Math.ceil(_this.resourceSize / _this.chunkSize);
 
-                _this.groupSubdir = rst.groupSubdir;
+                _this.groupSubDir = rst.groupSubDir;
 
                 if (rst.savedPath.length === 0) {
 
@@ -243,7 +243,7 @@ var AetherUpload = {
 
         form.append('group', this.group);
 
-        form.append('group_subdir', this.groupSubdir);
+        form.append('group_subdir', this.groupSubDir);
 
         form.append('locale', this.locale);
 

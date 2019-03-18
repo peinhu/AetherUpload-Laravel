@@ -9,16 +9,12 @@ class UploadController extends \App\Http\Controllers\Controller
 
     public function __construct()
     {
-        \App::setLocale(Request::input('locale'));
-        ConfigMapper::instance()->applyGroupConfig(Request::input('group'));
-        $this->middleware(ConfigMapper::get('middleware_preprocess'))->only('preprocess');
-        $this->middleware(ConfigMapper::get('middleware_save_chunk'))->only('saveChunk');
+        \App::setLocale(Request::input('locale', 'en'));
 
         // add AetherUploadCORS middleware to the storage server when distributed deployment is enabled
-        if ( ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'storage' ) {
+        if ( Util::isDistributedStorageHost() ) {
             $this->middleware(ConfigMapper::get('distributed_deployment_middleware_cors'));
         }
-
     }
 
     /**
@@ -30,11 +26,12 @@ class UploadController extends \App\Http\Controllers\Controller
         $resourceName = Request::input('resource_name', false);
         $resourceSize = Request::input('resource_size', false);
         $resourceHash = Request::input('resource_hash', false);
+        $group = Request::input('group', false);
 
         $result = [
             'error'                => 0,
             'chunkSize'            => 0,
-            'groupSubdir'          => '',
+            'groupSubDir'          => '',
             'resourceTempBaseName' => '',
             'resourceExt'          => '',
             'savedPath'            => '',
@@ -43,20 +40,22 @@ class UploadController extends \App\Http\Controllers\Controller
         try {
 
             // prevents uploading files to the application server when distributed deployment is enabled
-            if ( ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'web' ) {
+            if ( Util::isDistributedWebHost() ) {
                 throw new \Exception(trans('aetherupload::messages.upload_error'));
             }
 
-            if ( $resourceSize === false || $resourceName === false ) {
+            if ( $resourceSize === false || $resourceName === false || $group === false ) {
                 throw new \Exception(trans('aetherupload::messages.invalid_resource_params'));
             }
 
+            ConfigMapper::instance()->applyGroupConfig($group);
+
             $result['resourceTempBaseName'] = $resourceTempBaseName = Util::generateTempName();
             $result['resourceExt'] = $resourceExt = strtolower(pathinfo($resourceName, PATHINFO_EXTENSION));
-            $result['groupSubdir'] = $resourceSubDirName = Util::generateSubDirName();
+            $result['groupSubDir'] = $groupSubDir = Util::generateSubDirName();
             $result['chunkSize'] = ConfigMapper::get('chunk_size');
 
-            $partialResource = new PartialResource($resourceTempBaseName, $resourceExt, $resourceSubDirName);
+            $partialResource = new PartialResource($resourceTempBaseName, $resourceExt, $groupSubDir);
 
             $partialResource->filterBySize($resourceSize);
 
@@ -93,9 +92,10 @@ class UploadController extends \App\Http\Controllers\Controller
         $resourceTempBaseName = Request::input('resource_temp_basename', false);
         $resourceExt = Request::input('resource_ext', false);
         $chunk = Request::file('resource_chunk', false);
-        $groupSubdir = Request::input('group_subdir', false);
+        $groupSubDir = Request::input('group_subdir', false);
         $resourceHash = Request::input('resource_hash', false);
-        $partialResource = new PartialResource($resourceTempBaseName, $resourceExt, $groupSubdir);
+        $group = Request::input('group', false);
+        $partialResource = null;
 
         $result = [
             'error'     => 0,
@@ -104,9 +104,13 @@ class UploadController extends \App\Http\Controllers\Controller
 
         try {
 
-            if ( $chunkTotalCount === false || $chunkIndex === false || $resourceExt === false || $resourceTempBaseName === false || $groupSubdir === false || $chunk === false || $resourceHash === false ) {
+            if ( $chunkTotalCount === false || $chunkIndex === false || $resourceExt === false || $resourceTempBaseName === false || $groupSubDir === false || $chunk === false || $resourceHash === false || $group === false ) {
                 throw new \Exception(trans('aetherupload::messages.invalid_chunk_params'));
             }
+
+            ConfigMapper::instance()->applyGroupConfig($group);
+
+            $partialResource = new PartialResource($resourceTempBaseName, $resourceExt, $groupSubDir);
 
             // do a check to prevent security intrusions
             if ( $partialResource->exists() === false ) {
@@ -155,7 +159,7 @@ class UploadController extends \App\Http\Controllers\Controller
 
                 $partialResource->rename($completeName = Util::getFileName($resourceHash, $resourceExt));
 
-                $resource = new Resource($completeName, $groupSubdir);
+                $resource = new Resource($completeName, $groupSubDir);
 
                 RedisSavedPath::set($resourceHash, $savedPath = $resource->getSavedPath());
 
@@ -170,6 +174,8 @@ class UploadController extends \App\Http\Controllers\Controller
 
             }
 
+            return Responser::returnResult($result);
+
         } catch ( \Exception $e ) {
 
             $partialResource->delete();
@@ -177,9 +183,6 @@ class UploadController extends \App\Http\Controllers\Controller
 
             return Responser::reportError($result, $e->getMessage());
         }
-
-
-        return Responser::returnResult($result);
 
     }
 

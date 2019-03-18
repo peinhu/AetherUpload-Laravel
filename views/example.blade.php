@@ -21,7 +21,7 @@
             <div class="form-group " id="aetherupload-wrapper"><!--组件最外部需要一个名为aetherupload-wrapper的id，用以包装组件-->
                 <label>文件1(带回调)：</label>
                 <div class="controls">
-                    <input type="file" id="aetherupload-resource" onchange="aetherupload(this,'file444').success(someCallback).upload()"/>
+                    <input type="file" id="aetherupload-resource" onchange="aetherupload(this,'file').success(someCallback).upload()"/>
                     <!--需要一个名为aetherupload-resource的id，用以标识上传的文件，aetherupload(...)中第二个参数为分组名，success(...)可用于声名上传成功后的回调方法名。默认为选择文件后触发上传，也可根据需求手动更改为特定事件触发，如点击提交表单时-->
                     <div class="progress " style="height: 6px;margin-bottom: 2px;margin-top: 10px;width: 200px;">
                         <div id="aetherupload-progressbar" style="background:blue;height:6px;width:0;"></div><!--需要一个名为aetherupload-progressbar的id，用以标识进度条-->
