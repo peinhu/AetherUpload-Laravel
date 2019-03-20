@@ -62,7 +62,7 @@ class UploadController extends \App\Http\Controllers\Controller
             $partialResource->filterByExtension($resourceExt);
 
             // determine if this upload meets the condition of instant completion
-            if ( $resourceHash !== false && RedisSavedPath::exists($resourceHash) ) {
+            if ( $resourceHash !== false && ConfigMapper::get('instant_completion') === true && RedisSavedPath::exists($resourceHash) ) {
                 $result['savedPath'] = RedisSavedPath::get($resourceHash);
 
                 return Responser::returnResult($result);
@@ -118,7 +118,7 @@ class UploadController extends \App\Http\Controllers\Controller
             }
 
             // determine if this upload meets the condition of instant completion
-            if ( $resourceHash !== false && RedisSavedPath::exists($resourceHash) ) {
+            if ( $resourceHash !== false && ConfigMapper::get('instant_completion') === true && RedisSavedPath::exists($resourceHash) ) {
                 $partialResource->delete();
                 unset($partialResource->chunkIndex);
                 $result['savedPath'] = RedisSavedPath::get($resourceHash);
@@ -161,7 +161,11 @@ class UploadController extends \App\Http\Controllers\Controller
 
                 $resource = new Resource($completeName, $groupSubDir);
 
-                RedisSavedPath::set($resourceHash, $savedPath = $resource->getSavedPath());
+                $savedPath = $resource->getSavedPath();
+
+                if ( ConfigMapper::get('instant_completion') === true ) {
+                    RedisSavedPath::set($resourceHash, $savedPath);
+                }
 
                 unset($partialResource->chunkIndex);
 

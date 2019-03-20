@@ -25,6 +25,7 @@ class ConfigMapper
     private $distributed_deployment_storage_host;
     private $distributed_deployment_allow_origin;
     private $forbidden_extensions;
+    private $instant_completion;
 
 
     private function __construct()
@@ -58,6 +59,7 @@ class ConfigMapper
         $this->middleware_uploading = $config->get('aetherupload.middleware_uploading');
         $this->middleware_display = $config->get('aetherupload.middleware_display');
         $this->middleware_download = $config->get('aetherupload.middleware_download');
+        $this->instant_completion = $config->get('aetherupload.instant_completion');
 
         return $this;
     }

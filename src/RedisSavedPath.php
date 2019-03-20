@@ -3,25 +3,17 @@
 namespace AetherUpload;
 
 use Illuminate\Support\Facades\Redis;
-use Predis\Connection\ConnectionException;
 
 class RedisSavedPath
 {
+
     /**
      * @param $resourceHash
      * @return bool
      */
     public static function exists($resourceHash)
     {
-        $result = false;
-
-        if ( class_exists('\Predis\Connection\ConnectionException') ) {
-            try {
-                $result = Redis::hexists('aetherupload_resource', $resourceHash);
-            } catch ( ConnectionException $e ) {
-
-            }
-        }
+        $result = Redis::hexists('aetherupload_resource', $resourceHash);
 
         return $result;
     }
@@ -32,15 +24,7 @@ class RedisSavedPath
      */
     public static function get($resourceHash)
     {
-        $filePath = "";
-
-        if ( class_exists('\Predis\Connection\ConnectionException') ) {
-            try {
-                $filePath = Redis::hget('aetherupload_resource', $resourceHash);
-            } catch ( ConnectionException $e ) {
-
-            }
-        }
+        $filePath = Redis::hget('aetherupload_resource', $resourceHash);
 
         return $filePath;
     }
@@ -53,15 +37,7 @@ class RedisSavedPath
      */
     public static function set($resourceHash, $savedPath)
     {
-        $result = false;
-
-        if ( class_exists('\Predis\Connection\ConnectionException') ) {
-            try {
-                $result = Redis::hset('aetherupload_resource', $resourceHash, $savedPath);
-            } catch ( ConnectionException $e ) {
-
-            }
-        }
+        $result = Redis::hset('aetherupload_resource', $resourceHash, $savedPath);
 
         return $result;
     }
@@ -72,15 +48,7 @@ class RedisSavedPath
      */
     public static function setMulti($resourceHashArr)
     {
-        $result = false;
-
-        if ( class_exists('\Predis\Connection\ConnectionException') ) {
-            try {
-                $result = Redis::hmset('aetherupload_resource', $resourceHashArr);
-            } catch ( ConnectionException $e ) {
-
-            }
-        }
+        $result = Redis::hmset('aetherupload_resource', $resourceHashArr);
 
         return $result;
     }
@@ -91,30 +59,14 @@ class RedisSavedPath
      */
     public static function delete($resourceHash)
     {
-        $result = false;
-
-        if ( class_exists('\Predis\Connection\ConnectionException') ) {
-            try {
-                $result = Redis::hdel('aetherupload_resource', $resourceHash);
-            } catch ( ConnectionException $e ) {
-
-            }
-        }
+        $result = Redis::hdel('aetherupload_resource', $resourceHash);
 
         return $result;
     }
 
     public static function deleteAll()
     {
-        $result = false;
-
-        if ( class_exists('\Predis\Connection\ConnectionException') ) {
-            try {
-                $result = Redis::del('aetherupload_resource');
-            } catch ( ConnectionException $e ) {
-
-            }
-        }
+        $result = Redis::del('aetherupload_resource');
 
         return $result;
     }
