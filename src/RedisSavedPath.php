@@ -15,6 +15,10 @@ class RedisSavedPath
     {
         $result = Redis::hexists('aetherupload_resource', $resourceHash);
 
+        if ( $result !== 1 && $result !== 0 ) {
+            throw new \Exception('exists error');
+        }
+
         return $result;
     }
 
@@ -24,9 +28,13 @@ class RedisSavedPath
      */
     public static function get($resourceHash)
     {
-        $filePath = Redis::hget('aetherupload_resource', $resourceHash);
+        $result = Redis::hget('aetherupload_resource', $resourceHash);
 
-        return $filePath;
+        if ( $result === null) {
+            throw new \Exception('read error');
+        }
+
+        return $result;
     }
 
     /**
@@ -38,6 +46,10 @@ class RedisSavedPath
     public static function set($resourceHash, $savedPath)
     {
         $result = Redis::hset('aetherupload_resource', $resourceHash, $savedPath);
+
+        if ( $result !== 0 && $result !== 1 ) {
+            throw new \Exception('write error');
+        }
 
         return $result;
     }
@@ -60,6 +72,10 @@ class RedisSavedPath
     public static function delete($resourceHash)
     {
         $result = Redis::hdel('aetherupload_resource', $resourceHash);
+
+        if ( $result !== 1 ) {
+            throw new \Exception('delete error');
+        }
 
         return $result;
     }

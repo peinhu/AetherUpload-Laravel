@@ -48,8 +48,6 @@ return [
     |
     | 【一般设置】位于 storage/app/ 下，修改默认值后需执行artisan命令aetherupload:groups生成对应目录。
     |
-    | 注意：确定后请勿再更改。
-    |
     */
 
     'root_dir' => 'aetherupload',
