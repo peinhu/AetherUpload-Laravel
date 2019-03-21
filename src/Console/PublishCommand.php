@@ -33,7 +33,7 @@ class PublishCommand extends Command
     public function handle()
     {
         $this->call('vendor:publish', [
-            '--tag' => 'aetherupload', '--force' => true,
+            '--provider' => 'AetherUpload\AetherUploadServiceProvider', '--force' => true,
         ]);
     }
 }
