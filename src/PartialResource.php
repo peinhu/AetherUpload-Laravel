@@ -2,7 +2,6 @@
 
 namespace AetherUpload;
 
-use Illuminate\Http\Testing\MimeType;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
