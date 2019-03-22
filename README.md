@@ -5,7 +5,7 @@
 [![Latest Unstable Version](https://poser.pugx.org/peinhu/aetherupload-laravel/v/unstable)](https://packagist.org/packages/peinhu/aetherupload-laravel)
 [![License](https://poser.pugx.org/peinhu/aetherupload-laravel/license)](https://packagist.org/packages/peinhu/aetherupload-laravel)  
     
-提供**超大文件**上传的Laravel扩展包，支持**分组配置**、**断线续传**、**秒传**等功能，简单易用，满足多数人的主流需求，**无需编写**适配代码，几乎开箱即用。基于Laravel 5开发，目前支持5.1~5.5版本。  
+提供**超大文件**上传的Laravel扩展包，支持**分组配置**、**断线续传**、**秒传**、**分布式部署**等功能，简单易用，满足多数人的主流需求，**无需编写**适配代码，几乎开箱即用。基于Laravel 5开发，支持5.1+版本。  
 
 我们知道，在以前，文件上传采用的是直接传整个文件的方式，这种方式对付一些小文件是没有问题的。而当需要上传大文件时，此种方式不仅操作繁琐，需要修改web服务器和后端语言的配置，而且会大量占用服务器的内存，导致服务器内存吃紧，严重的甚至传输超时或文件过大无法上传。很显然，普通的文件上传方式已无法满足现在越来越高的要求。  
   
@@ -22,6 +22,7 @@
 - [x] 同步上传 *①*  
 - [x] 断线续传 *②*  
 - [x] 文件秒传 *③* 
+- [x] 分布式部署 *④*
 
 *①：同步上传相比异步上传，在上传带宽足够大的情况下速度稍慢，但同步可在上传同时进行文件的拼合，而异步因文件块上传完成的先后顺序不确定，需要在所有文件块都完成时才能拼合，将会导致异步上传在接近完成时需等待较长时间。同步上传每次只有一个文件块在上传，在单位时间内占用服务器的内存较少，相比异步方式可支持更多人同时上传。*  
 
@@ -29,18 +30,18 @@
 
 *③：文件秒传需服务端Redis和客户端浏览器支持(FileReader、File.slice())，两者缺一则秒传功能无法生效。* 
 
+*④：分布式部署需要在应用服务器与储存服务器进行跨域配置，并共享cookie和session。*
+
 # 用法
 **安装**  
 
-0 在终端内切换到你的laravel项目根目录，执行`composer require peinhu/aetherupload-laravel ~1.0`  
+0 在终端内切换到你的laravel项目根目录，执行`composer require peinhu/aetherupload-laravel ~2.0`  
 
-1 （Laravel 5.5请跳过）在`config/app.php`的`providers`数组中添加一行`AetherUpload\AetherUploadServiceProvider::class,`  
+1 （Laravel 5.5+请跳过）在`config/app.php`的`providers`数组中添加一行`AetherUpload\AetherUploadServiceProvider::class,`  
   
-2 执行`php artisan aetherupload:publish`来发布一些文件和目录  
+2 执行`php artisan aetherupload:publish`来发布一些文件和目录    
   
-3 赋予上传目录相应权限，在项目根目录下，执行`chmod -R 755 storage/app/aetherupload`    
-  
-4 在浏览器访问`http://域名/aetherupload`可到达示例页面  
+3 在浏览器访问`http://域名/aetherupload`可到达示例页面  
 
 *提示：更改相关配置选项请编辑`config/aetherupload.php`。*  
 
@@ -56,15 +57,31 @@
 
 **添加秒传功能（需Redis及浏览器支持）**
 
-安装Redis并启动服务端。安装predis包`composer require predis/predis`，在.env文件中配置Redis的相关参数。确保上传页面引入了spark-md5.min.js文件。
+安装Redis并启动服务端。安装predis包`composer require predis/predis`。确保上传页面引入了spark-md5.min.js文件。
 
-*提示：在Redis中维护了一份与实际资源文件对应的hash清单，文件的md5哈希值为资源文件的唯一标识符，实际资源文件的增删造成的变化均需要同步到hash清单中，否则会产生脏数据，扩展包已包含新增部分，删除（deleteOneHash）则需要使用者自行调用相关方法处理，详情参考RedisHandler类。*   
+*提示：在Redis中维护了一份与实际资源文件对应的hash清单，文件的md5哈希值为资源文件的唯一标识符，实际资源文件的增删造成的变化均需要同步到hash清单中，否则会产生脏数据，扩展包已包含新增部分，当删除资源文件时使用者需自行调用`\AetherUpload\RedisSavedPath::delete($resourceHash)`删除对应hash值。*   
 
+**分布式部署（需Redis及域名跨域支持）**
+
+分布式部署通过将应用服务器与储存服务器分离，可减少应用服务器负载，增加应用并发连接数，降低耦合，减少单点故障风险，提高访问效率。  
+
+安装Redis并启动服务端。安装predis包`composer require predis/predis`。确保上传页面表单中包含`{{ storage_host_field() }}`。
+
+应用服务器配置：  
+在`config/aetherupload.php`中配置`distributed_deployment`项，将`enable`设置为`true`，`role`设置为`web`，`storage_host`设置为`http://storage.your-domain.com`。  
+共享cookie，在`.env`中新增配置`SESSION_DOMAIN=.your-domain.com`。  
+共享session，在`.env`中配置`SESSION_DRIVER=redis`。
+
+储存服务器配置：  
+在`config/aetherupload.php`中配置`distributed_deployment`项，将`enable`设置为`true`，`role`设置为`storage`，`middleware_cors`设置为跨域中间件AetherUploadCORS类在Kernel.php中注册的名称，`allow_origin`设置为`http://www.your-domain.com`。  
+共享cookie，在`.env`中新增配置`SESSION_DOMAIN=.your-domain.com`。  
+共享session，在`.env`中配置`SESSION_DRIVER=redis`。
+  
 **使用方便的artisan命令**  
 
 `php artisan aetherupload:groups` 列出所有分组并自动创建对应目录  
 `php artisan aetherupload:build` 在Redis中重建资源文件的hash清单  
-`php artisan aetherupload:clean` 清除几天前的无效临时文件  
+`php artisan aetherupload:clean 2` 清除2天前的无效临时文件  
 `php artisan aetherupload:publish` vendor:publish的简化命令，覆盖发布一些目录和文件
 
 # 优化建议
@@ -75,9 +92,24 @@
 在`app/Console/Kernel.php`中的`schedule`方法中添加以下代码：
 ```php
   $schedule->call(function () {
-      \AetherUpload\ResourceHandler::cleanUpDir();
+      \Illuminate\Support\Facades\Artisan::call('aetherupload:clean 2');
   })->daily();
 ```  
+* （推荐）提高头文件读写效率。  
+通过将头文件的文件系统由本地硬盘改为Redis，提高头文件读写效率。  
+在`app/Console/Kernel.php`中将`header_storage_disk`项对应值改为`redis`。  
+在`config/filesystems.php`中添加以下配置：
+```php
+    'disks' => [
+        ...
+        'redis' => [
+           'driver' => 'redis',
+           'disable_asserts'=>true,
+        ],
+        ...
+    ]
+```  
+
 * 设置每天自动重建Redis中的hash清单。  
 不恰当的处理和某些极端情况可能使hash清单中出现脏数据，从而影响到秒传功能的准确性，重建hash清单可消除脏数据，恢复与实际资源文件的同步。  
 在Linux中运行`crontab -e`命令，确保文件中包含这行代码：  
@@ -85,11 +117,17 @@
 在`app/Console/Kernel.php`中的`schedule`方法中添加以下代码：
 ```php
   $schedule->call(function () {
-      \AetherUpload\RedisHandler::build();
+      \Illuminate\Support\Facades\Artisan::call('aetherupload:build');
   })->daily();
-```
-* 提高临时文件读写速度。  
-利用Linux的tmpfs文件系统，来达到将临时文件放到内存中快速读写的目的。执行以下命令：    
+```  
+
+* 提高上传临时文件读写速度（仅对PHP生效）。  
+利用Linux的tmpfs文件系统，来达到将上传临时文件放到内存中快速读写的目的，将会占用部分内存空间。  
+将php.ini中上传临时目录`upload_tmp_dir`项的值设置为`"/dev/shm"`，重启fpm或apache服务。  
+
+* 提高上传临时文件读写速度（对系统临时目录生效）。  
+利用Linux的tmpfs文件系统，来达到将上传临时文件放到内存中快速读写的目的，将会占用部分内存空间。  
+执行以下命令：    
 `mkdir /dev/shm/tmp`  
 `chmod 1777 /dev/shm/tmp`  
 `mount --bind /dev/shm/tmp /tmp`  
@@ -121,47 +159,25 @@
 </table>
 
 # 安全性
-AetherUpload并未使用Content-Type(Mime-Type)来检测上传文件类型，而是以白名单的形式直接限制了保存文件扩展名，来阻止上传可执行文件(默认屏蔽了常见的可执行文件扩展名)，因为Content-Type(Mime-Type)也可伪造，无法起到应有的作用，安全起见白名单一栏不应留空。  
+AetherUpload在上传前使用白名单+黑名单的形式进行文件后缀名过滤，上传后再检查文件的Mime-Type类型。白名单直接限制了保存文件扩展名，来阻止上传可执行文件，黑名单默认屏蔽了常见的可执行文件扩展名。安全起见白名单一栏不应留空。  
 
-虽然做了诸多安全工作，但恶意文件上传是防不胜防的，建议确保所有上传目录权限为755，文件权限为644。  
+虽然做了诸多安全工作，但恶意文件上传是防不胜防的，建议正确设置上传目录权限，确保程序所在的用户对上传文件没有执行权限。
 
 # 更新日志  
+**2019-03-22 v2.0.0**  
+添加分布式部署支持  
+添加Mime-Type检查      
+添加头文件redis储存驱动  
+添加跨域中间件  
+添加秒传开关配置项  
+添加自定义黑名单配置项  
+代码重构优化
+
 **2017-12-14 v1.0.7**  
 支持Laravel 5.5 包自动发现特性  
 添加多语言支持（中、英），根据客户端语言自动判断  
 
-**2017-09-11 v1.0.6**  
-添加多控件调用支持  
-简化命名空间
-
-**2017-08-03 v1.0.5**  
-添加上传完成前事件  
-添加上传完成后事件
-
-**2017-07-31 v1.0.4**  
-添加自动创建分组目录的artisan命令  
-修正当predis不存在时会报错的情况  
-
-**2017-07-18 v1.0.3**  
-添加文件秒传支持  
-添加方便的artisan命令  
-
-**2017-05-08 v1.0.2**  
-添加分组配置支持  
-添加子目录支持  
-
-**2017-04-27 v1.0.1**  
-修正[局部刷新导致的上传无响应问题](https://github.com/peinhu/AetherUpload-Laravel/issues/6)  
-后端代码结构大幅优化  
-后端代码格式统一规范化  
-前端代码改进  
-一些其它改进  
-
-**2016-07-13 v1.0.0正式版**  
-添加完整说明，修正一些小问题。  
-
-**2016-06-24 v1.0.0测试版**  
-初次提交
+更多详见[CHANGELOG.md](https://github.com/peinhu/AetherUpload-Laravel/blob/master/CHANGELOG.md)
 
 # 许可证
 使用GPLv2许可证, 查看LICENCE文件以获得更多信息。
