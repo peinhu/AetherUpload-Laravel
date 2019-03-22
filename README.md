@@ -69,13 +69,11 @@
 
 应用服务器配置：  
 在`config/aetherupload.php`中配置`distributed_deployment`项，将`enable`设置为`true`，`role`设置为`web`，`storage_host`设置为`http://storage.your-domain.com`。  
-共享cookie，在`.env`中新增配置`SESSION_DOMAIN=.your-domain.com`。  
-共享session，在`.env`中配置`SESSION_DRIVER=redis`。
+在`.env`中将`APP_NAME`和`APP_KEY`配置项改为对应特定值，与储存服务器配置一致。新增配置`SESSION_DOMAIN=.your-domain.com`，用以共享cookie。配置`SESSION_DRIVER=redis`，用以共享session。  
 
 储存服务器配置：  
 在`config/aetherupload.php`中配置`distributed_deployment`项，将`enable`设置为`true`，`role`设置为`storage`，`middleware_cors`设置为跨域中间件AetherUploadCORS类在Kernel.php中注册的名称，`allow_origin`设置为`http://www.your-domain.com`。  
-共享cookie，在`.env`中新增配置`SESSION_DOMAIN=.your-domain.com`。  
-共享session，在`.env`中配置`SESSION_DRIVER=redis`。
+在`.env`中将`APP_NAME`和`APP_KEY`配置项改为对应特定值，与应用服务器配置一致。新增配置`SESSION_DOMAIN=.your-domain.com`，用以共享cookie。配置`SESSION_DRIVER=redis`，用以共享session。  
   
 **使用方便的artisan命令**  
 
@@ -98,7 +96,7 @@
 * （推荐）提高头文件读写效率。  
 通过将头文件的文件系统由本地硬盘改为Redis，提高头文件读写效率。  
 在`app/Console/Kernel.php`中将`header_storage_disk`项对应值改为`redis`。  
-在`config/filesystems.php`中添加以下配置：
+在`config/filesystems.php`的`disks`项中添加`redis`配置：
 ```php
     'disks' => [
         ...
