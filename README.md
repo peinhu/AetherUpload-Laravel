@@ -95,7 +95,7 @@
 ```  
 * （推荐）提高头文件读写效率。  
 通过将头文件的文件系统由本地硬盘改为Redis，提高头文件读写效率。  
-在`app/Console/Kernel.php`中将`header_storage_disk`项对应值改为`redis`。  
+在`config/aetherupload.php`中将`header_storage_disk`项对应值改为`redis`。  
 在`config/filesystems.php`的`disks`项中添加`redis`配置：
 ```php
     'disks' => [
