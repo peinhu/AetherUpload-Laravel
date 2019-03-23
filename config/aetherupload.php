@@ -15,6 +15,7 @@ return [
     */
 
     'distributed_deployment' => [
+    	
         'enable' => false, # 是否启用
 
         'role' => 'web', # 服务器角色，支持选项: 'web', 'storage'
@@ -118,7 +119,7 @@ return [
     */
 
     'middleware_preprocess'        => [], # 上传预处理时的路由中间件
-    'middleware_save_chunk'        => [], # 上传文件分块时的路由中间件
+    'middleware_uploading'        => [], # 上传文件分块时的路由中间件
     'middleware_display'           => [], # 文件展示时的路由中间件
     'middleware_download'          => [], # 文件下载时的路由中间件
 
