@@ -1,3 +1,6 @@
+**2019-03-23 v2.0.1**  
+修正[#33](https://github.com/peinhu/AetherUpload-Laravel/issues/33)
+
 **2019-03-22 v2.0.0**  
 添加分布式部署支持  
 添加Mime-Type检查      

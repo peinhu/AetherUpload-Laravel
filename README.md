@@ -162,6 +162,9 @@ AetherUpload在上传前使用白名单+黑名单的形式进行文件后缀名�
 虽然做了诸多安全工作，但恶意文件上传是防不胜防的，建议正确设置上传目录权限，确保程序所在的用户对上传文件没有执行权限。
 
 # 更新日志  
+**2019-03-23 v2.0.1**  
+修正[#33](https://github.com/peinhu/AetherUpload-Laravel/issues/33)
+
 **2019-03-22 v2.0.0**  
 添加分布式部署支持  
 添加Mime-Type检查      
@@ -170,10 +173,6 @@ AetherUpload在上传前使用白名单+黑名单的形式进行文件后缀名�
 添加秒传开关配置项  
 添加自定义黑名单配置项  
 代码重构优化
-
-**2017-12-14 v1.0.7**  
-支持Laravel 5.5 包自动发现特性  
-添加多语言支持（中、英），根据客户端语言自动判断  
 
 更多详见[CHANGELOG.md](https://github.com/peinhu/AetherUpload-Laravel/blob/master/CHANGELOG.md)
 
