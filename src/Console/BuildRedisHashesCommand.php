@@ -3,6 +3,7 @@
 namespace AetherUpload\Console;
 
 use AetherUpload\ConfigMapper;
+use AetherUpload\Util;
 use Illuminate\Console\Command;
 use AetherUpload\RedisSavedPath;
 use Illuminate\Support\Facades\Config;
@@ -38,12 +39,8 @@ class BuildRedisHashesCommand extends Command
 
         RedisSavedPath::deleteAll();
 
-        $groupDirs = array_map(function ($v) {
-            return $v['group_dir'];
-        }, Config::get('aetherupload.groups'));
-
-        foreach ( $groupDirs as $groupDir ) {
-            $subDirNames = Storage::directories(ConfigMapper::get('root_dir') . DIRECTORY_SEPARATOR . $groupDir);
+        foreach ( Config::get('aetherupload.groups') as $groupName => $group ) {
+            $subDirNames = Storage::directories(ConfigMapper::get('root_dir') . DIRECTORY_SEPARATOR . $group['group_dir']);
 
             foreach ( $subDirNames as $subDirName ) {
                 $fileNames = Storage::files($subDirName);
@@ -53,7 +50,7 @@ class BuildRedisHashesCommand extends Command
                         continue;
                     }
 
-                    $savedPathArr[pathinfo($fileName, PATHINFO_FILENAME)] = $groupDir . '_' . basename($subDirName) . '_' . basename($fileName);
+                    $savedPathArr[Util::getSavedPathKey($groupName,pathinfo($fileName, PATHINFO_FILENAME))] = $group['group_dir'] . '_' . basename($subDirName) . '_' . basename($fileName);
 
                 }
             }
