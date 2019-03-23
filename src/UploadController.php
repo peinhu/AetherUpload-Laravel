@@ -62,8 +62,8 @@ class UploadController extends \App\Http\Controllers\Controller
             $partialResource->filterByExtension($resourceExt);
 
             // determine if this upload meets the condition of instant completion
-            if ( $resourceHash !== false && ConfigMapper::get('instant_completion') === true && RedisSavedPath::exists($resourceHash) ) {
-                $result['savedPath'] = RedisSavedPath::get($resourceHash);
+            if ( $resourceHash !== false && ConfigMapper::get('instant_completion') === true && RedisSavedPath::exists($savedPathKey = Util::getSavedPathKey($group, $resourceHash)) ) {
+                $result['savedPath'] = RedisSavedPath::get($savedPathKey);
 
                 return Responser::returnResult($result);
             }
@@ -95,6 +95,7 @@ class UploadController extends \App\Http\Controllers\Controller
         $groupSubDir = Request::input('group_subdir', false);
         $resourceHash = Request::input('resource_hash', false);
         $group = Request::input('group', false);
+        $savedPathKey = Util::getSavedPathKey($group, $resourceHash);
         $partialResource = null;
 
         $result = [
@@ -118,10 +119,10 @@ class UploadController extends \App\Http\Controllers\Controller
             }
 
             // determine if this upload meets the condition of instant completion
-            if ( $resourceHash !== false && ConfigMapper::get('instant_completion') === true && RedisSavedPath::exists($resourceHash) ) {
+            if ( $resourceHash !== false && ConfigMapper::get('instant_completion') === true && RedisSavedPath::exists($savedPathKey) ) {
                 $partialResource->delete();
                 unset($partialResource->chunkIndex);
-                $result['savedPath'] = RedisSavedPath::get($resourceHash);
+                $result['savedPath'] = RedisSavedPath::get($savedPathKey);
 
                 return Responser::returnResult($result);
             }
@@ -164,7 +165,7 @@ class UploadController extends \App\Http\Controllers\Controller
                 $savedPath = $resource->getSavedPath();
 
                 if ( ConfigMapper::get('instant_completion') === true ) {
-                    RedisSavedPath::set($resourceHash, $savedPath);
+                    RedisSavedPath::set($savedPathKey, $savedPath);
                 }
 
                 unset($partialResource->chunkIndex);

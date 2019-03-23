@@ -75,5 +75,10 @@ class Util
         return ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'web';
     }
 
+    public static function getSavedPathKey($group, $hash)
+    {
+        return $group . '_' . $hash;
+    }
+
 
 }
