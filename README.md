@@ -178,8 +178,7 @@ AetherUpload在上传前使用白名单+黑名单的形式进行文件后缀名�
 更多详见[CHANGELOG.md](https://github.com/peinhu/AetherUpload-Laravel/blob/master/CHANGELOG.md)  
 
 # 衍生项目  
-laravel-admin表单扩展  
-[large-file-upload](https://github.com/laravel-admin-extensions/large-file-upload)
+laravel-admin表单扩展：[large-file-upload](https://github.com/laravel-admin-extensions/large-file-upload)
 
 # 许可证
 使用GPLv2许可证, 查看[LICENCE](https://github.com/peinhu/AetherUpload-Laravel/blob/master/LICENSE)文件以获得更多信息。
