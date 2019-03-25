@@ -5,7 +5,7 @@
 [![Latest Unstable Version](https://poser.pugx.org/peinhu/aetherupload-laravel/v/unstable)](https://packagist.org/packages/peinhu/aetherupload-laravel)
 [![License](https://poser.pugx.org/peinhu/aetherupload-laravel/license)](https://packagist.org/packages/peinhu/aetherupload-laravel)  
     
-提供**超大文件**上传的Laravel扩展包，支持**分组配置**、**断线续传**、**秒传**、**分布式部署**等功能，简单易用，满足多数人的主流需求。无感知化的设计理念，可实现由扩展自动接管上传和访问请求，开发者专注于业务，**无需关心**上传流程，**无需编写**适配代码，几乎**开箱即用**，节省大量开发时间。基于Laravel 5开发，支持5.1+版本。永久免费不接受赞助！欢迎提出问题和建议！
+提供**超大文件**上传的Laravel扩展包，支持**分组配置**、**断线续传**、**秒传**、**分布式部署**等功能，简单易用，满足多数人的主流需求。**无感知化**的设计理念，可实现由扩展自动接管上传和访问请求，开发者专注于业务，**无需关心**上传流程，**无需编写**适配代码，几乎**开箱即用**，节省大量开发时间。基于Laravel 5开发，支持5.1+版本。永久免费不接受赞助！欢迎提出问题和建议！
 
 我们知道，在以前，文件上传采用的是直接传整个文件的方式，这种方式对付一些小文件是没有问题的。而当需要上传大文件时，此种方式不仅操作繁琐，需要修改web服务器和后端语言的配置，而且会大量占用服务器的内存，导致服务器内存吃紧，严重的甚至传输超时或文件过大无法上传。很显然，普通的文件上传方式已无法满足现在越来越高的要求。  
   
@@ -22,7 +22,7 @@
 - [x] 同步上传 *①*  
 - [x] 断线续传 *②*  
 - [x] 文件秒传 *③* 
-- [x] 分布式部署 *④*
+- [x] 分布式部署 *④*  
 
 *①：同步上传相比异步上传，在上传带宽足够大的情况下速度稍慢，但同步可在上传同时进行文件的拼合，而异步因文件块上传完成的先后顺序不确定，需要在所有文件块都完成时才能拼合，将会导致异步上传在接近完成时需等待较长时间。同步上传每次只有一个文件块在上传，在单位时间内占用服务器的内存较少，相比异步方式可支持更多人同时上传。*  
 
@@ -30,7 +30,7 @@
 
 *③：文件秒传需服务端Redis和客户端浏览器支持(FileReader、File.slice())，两者缺一则秒传功能无法生效。默认关闭，需在配置文件中开启。* 
 
-*④：分布式部署需要在应用服务器与储存服务器进行跨域配置，通过填写相关配置项可实现自动跨域，并共享cookie和session。*
+*④：分布式部署需要在应用服务器与储存服务器进行跨域配置，通过填写相关配置项可实现自动跨域，并共享cookie和session。*  
 
 # 用法
 **安装**  
@@ -178,8 +178,9 @@ AetherUpload在上传前使用白名单+黑名单的形式进行文件后缀名�
 更多详见[CHANGELOG.md](https://github.com/peinhu/AetherUpload-Laravel/blob/master/CHANGELOG.md)  
 
 # 衍生项目  
-
+laravel-admin表单扩展  
+[large-file-upload](https://github.com/laravel-admin-extensions/large-file-upload)
 
 # 许可证
-使用GPLv2许可证, 查看LICENCE文件以获得更多信息。
+使用GPLv2许可证, 查看[LICENCE](https://github.com/peinhu/AetherUpload-Laravel/blob/master/LICENSE)文件以获得更多信息。
 
