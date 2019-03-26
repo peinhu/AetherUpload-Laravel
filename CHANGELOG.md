@@ -1,3 +1,6 @@
+**2019-03-26 v2.0.2**  
+hotfix修正[#45](https://github.com/peinhu/AetherUpload-Laravel/issues/45)  
+
 **2019-03-23 v2.0.1**  
 修正[#33](https://github.com/peinhu/AetherUpload-Laravel/issues/33)  
 修正上传分块中间件命名问题
