@@ -166,15 +166,8 @@ AetherUpload在上传前使用白名单+黑名单的形式进行文件后缀名�
 虽然做了诸多安全工作，但恶意文件上传是防不胜防的，建议正确设置上传目录权限，确保相关程序对资源文件没有执行权限。
 
 # 更新日志  
-**2019-03-26 v2.0.2**  
-hotfix修正[#45](https://github.com/peinhu/AetherUpload-Laravel/issues/45)  
-  
-**2019-03-23 v2.0.1**  
-修正[#33](https://github.com/peinhu/AetherUpload-Laravel/issues/33)  
-修正上传分块中间件命名问题
 
-
-更多详见[CHANGELOG.md](https://github.com/peinhu/AetherUpload-Laravel/blob/master/CHANGELOG.md)  
+详见[CHANGELOG.md](https://github.com/peinhu/AetherUpload-Laravel/blob/master/CHANGELOG.md)  
 
 # 衍生项目  
 laravel-admin表单扩展：[large-file-upload](https://github.com/laravel-admin-extensions/large-file-upload)

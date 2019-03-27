@@ -1,3 +1,7 @@
+**2019-03-27 v2.0.3**  
+添加删除资源文件的辅助方法  
+添加删除秒传记录的辅助方法 
+
 **2019-03-26 v2.0.2**  
 hotfix修正[#45](https://github.com/peinhu/AetherUpload-Laravel/issues/45)  
 
