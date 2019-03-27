@@ -43,9 +43,9 @@ class RedisSavedPath
      * @param $savedPath
      * @return bool
      */
-    public static function set($resourceHash, $savedPath)
+    public static function set($savedPathKey, $savedPath)
     {
-        $result = Redis::hset('aetherupload_resource', $resourceHash, $savedPath);
+        $result = Redis::hset('aetherupload_resource', $savedPathKey, $savedPath);
 
         if ( $result !== 0 && $result !== 1 ) {
             throw new \Exception('write error');

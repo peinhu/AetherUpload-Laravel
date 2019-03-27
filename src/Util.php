@@ -80,5 +80,34 @@ class Util
         return $group . '_' . $hash;
     }
 
+    public static function deleteResource($savedPath)
+    {
+        list($group, $groupSubDir, $name) = explode('_', $savedPath);
+
+        try {
+            ConfigMapper::instance()->applyGroupConfig($group);
+            $resource = new Resource($group, $groupSubDir, $name);
+            $resource->delete($resource->path);
+        }catch (\Exception $e){
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function deleteRedisSavedPath($savedPath)
+    {
+        $savedPathArr = explode('_', $savedPath);
+        $savedPathKey = $savedPathArr[0].'_'.pathinfo($savedPathArr[2],PATHINFO_FILENAME);
+
+        try {
+            RedisSavedPath::delete($savedPathKey);
+        }catch (\Exception $e){
+            return false;
+        }
+
+        return true;
+    }
+
 
 }

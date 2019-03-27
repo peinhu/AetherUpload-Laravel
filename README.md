@@ -59,7 +59,11 @@
 
 安装Redis并启动服务端。安装predis包`composer require predis/predis`。确保上传页面引入了spark-md5.min.js文件。
 
-*提示：在Redis中维护了一份与实际资源文件对应的hash清单，文件的md5哈希值为资源文件的唯一标识符，实际资源文件的增删造成的变化均需要同步到hash清单中，否则会产生脏数据，扩展包已包含新增部分，当删除资源文件时使用者需自行调用`\AetherUpload\RedisSavedPath::delete($resourceHash)`删除对应hash值。*   
+*提示：在Redis中维护了一份与实际资源文件对应的秒传清单，实际资源文件的增删造成的变化均需要同步到秒传清单中，否则会产生脏数据，扩展包已包含新增部分，当删除资源文件时，使用者需手动调用对应方法删除秒传清单中的记录。* 
+```php
+\AetherUpload\Util::deleteResource($savedPath); //删除对应的资源文件
+\AetherUpload\Util::deleteRedisSavedPath($savedPath); //删除对应的redis秒传记录
+```  
 
 **分布式部署（需Redis及域名跨域支持）**
 
