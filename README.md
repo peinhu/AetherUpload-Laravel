@@ -63,7 +63,7 @@
 ```php
 \AetherUpload\Util::deleteResource($savedPath); //删除对应的资源文件
 \AetherUpload\Util::deleteRedisSavedPath($savedPath); //删除对应的redis秒传记录
-```  
+```
 
 **分布式部署（需Redis及域名跨域支持）**
 
