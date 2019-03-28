@@ -14,11 +14,11 @@ class Resource
     public $path;
     public $realPath;
 
-    public function __construct($name, $groupSubDir)
+    public function __construct($group, $groupSubDir, $name)
     {
         $this->disk = Storage::disk('local');
         $this->name = $name;
-        $this->group = ConfigMapper::get('group');
+        $this->group = $group;
         $this->groupDir = ConfigMapper::get('group_dir');
         $this->groupSubDir = $groupSubDir;
         $this->path = $this->getPath();

@@ -160,7 +160,7 @@ class UploadController extends \App\Http\Controllers\Controller
 
                 $partialResource->rename($completeName = Util::getFileName($resourceHash, $resourceExt));
 
-                $resource = new Resource($completeName, $groupSubDir);
+                $resource = new Resource($group, $groupSubDir, $completeName);
 
                 $savedPath = $resource->getSavedPath();
 

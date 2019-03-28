@@ -17,7 +17,7 @@ class ResourceController extends \Illuminate\Routing\Controller
 
             ConfigMapper::instance()->applyGroupConfig($group);
 
-            $resource = new Resource($resourceName, $groupSubDir);
+            $resource = new Resource($group, $groupSubDir, $resourceName);
 
             if ( $resource->exists($resource->path) === false ) {
                 throw new \Exception;
@@ -41,7 +41,7 @@ class ResourceController extends \Illuminate\Routing\Controller
 
             ConfigMapper::instance()->applyGroupConfig($group);
 
-            $resource = new Resource($resourceName, $groupSubDir);
+            $resource = new Resource($group, $groupSubDir ,$resourceName);
 
             if ( $resource->exists($resource->path) === false ) {
                 throw new \Exception;

@@ -22,7 +22,6 @@ class ListGroupDirectoryCommand extends Command
      */
     protected $description = 'List and create the directories for the groups';
 
-    protected $resourceHandler;
 
     /**
      * Create a new command instance.

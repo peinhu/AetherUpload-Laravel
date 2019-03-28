@@ -8,12 +8,12 @@ class RedisSavedPath
 {
 
     /**
-     * @param $resourceHash
+     * @param $key
      * @return bool
      */
-    public static function exists($resourceHash)
+    public static function exists($key)
     {
-        $result = Redis::hexists('aetherupload_resource', $resourceHash);
+        $result = Redis::hexists('aetherupload_resource', $key);
 
         if ( $result !== 1 && $result !== 0 ) {
             throw new \Exception('exists error');
@@ -23,12 +23,12 @@ class RedisSavedPath
     }
 
     /**
-     * @param $resourceHash
+     * @param $key
      * @return string
      */
-    public static function get($resourceHash)
+    public static function get($key)
     {
-        $result = Redis::hget('aetherupload_resource', $resourceHash);
+        $result = Redis::hget('aetherupload_resource', $key);
 
         if ( $result === null) {
             throw new \Exception('read error');
@@ -39,13 +39,13 @@ class RedisSavedPath
 
     /**
      * set or overwrite a hash
-     * @param $resourceHash
+     * @param $key
      * @param $savedPath
      * @return bool
      */
-    public static function set($savedPathKey, $savedPath)
+    public static function set($key, $savedPath)
     {
-        $result = Redis::hset('aetherupload_resource', $savedPathKey, $savedPath);
+        $result = Redis::hset('aetherupload_resource', $key, $savedPath);
 
         if ( $result !== 0 && $result !== 1 ) {
             throw new \Exception('write error');
@@ -55,23 +55,23 @@ class RedisSavedPath
     }
 
     /**
-     * @param $resourceHashArr
+     * @param $keyArr
      * @return bool
      */
-    public static function setMulti($resourceHashArr)
+    public static function setMulti($keyArr)
     {
-        $result = Redis::hmset('aetherupload_resource', $resourceHashArr);
+        $result = Redis::hmset('aetherupload_resource', $keyArr);
 
         return $result;
     }
 
     /**
-     * @param $resourceHash
+     * @param $key
      * @return bool
      */
-    public static function delete($resourceHash)
+    public static function delete($key)
     {
-        $result = Redis::hdel('aetherupload_resource', $resourceHash);
+        $result = Redis::hdel('aetherupload_resource', $key);
 
         if ( $result !== 1 ) {
             throw new \Exception('delete error');
