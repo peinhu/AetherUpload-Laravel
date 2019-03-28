@@ -38,54 +38,60 @@ class CleanUpDirectoryCommand extends Command
         $dueTime = strtotime('-' . $this->argument('days') . ' day');
         $rootDir = ConfigMapper::get('root_dir');
 
-        $headers = Storage::disk(ConfigMapper::get('header_storage_disk'))->files($rootDir . DIRECTORY_SEPARATOR . '_header');
+        try {
+            $headers = Storage::disk(ConfigMapper::get('header_storage_disk'))->files($rootDir . DIRECTORY_SEPARATOR . '_header');
 
-        foreach ( $headers as $header ) {
+            foreach ( $headers as $header ) {
 
-            if ( pathinfo($header, PATHINFO_EXTENSION) !== '' ) {
-                continue;
+                if ( pathinfo($header, PATHINFO_EXTENSION) !== '' ) {
+                    continue;
+                }
+
+                $createTime = substr(basename($header), 0, 10);
+
+                if ( $createTime < $dueTime ) {
+                    $invalidHeaders[] = $header;
+                }
             }
 
-            $createTime = substr(basename($header), 0, 10);
+            Storage::disk(ConfigMapper::get('header_storage_disk'))->delete($invalidHeaders);
 
-            if ( $createTime < $dueTime ) {
-                $invalidHeaders[] = $header;
-            }
-        }
+            $this->info(count($invalidHeaders) . ' invalid headers have been deleted.');
 
-        Storage::disk(ConfigMapper::get('header_storage_disk'))->delete($invalidHeaders);
+            $groupDirs = array_map(function ($v) {
+                return $v['group_dir'];
+            }, Config::get('aetherupload.groups'));
 
-        $this->info(count($invalidHeaders) . ' invalid headers have been deleted.');
+            foreach ( $groupDirs as $groupDir ) {
+                $subDirNames = Storage::directories($rootDir . DIRECTORY_SEPARATOR . $groupDir);
 
-        $groupDirs = array_map(function ($v) {
-            return $v['group_dir'];
-        }, Config::get('aetherupload.groups'));
+                foreach ( $subDirNames as $subDirName ) {
+                    $files = Storage::files($subDirName);
 
-        foreach ( $groupDirs as $groupDir ) {
-            $subDirNames = Storage::directories($rootDir . DIRECTORY_SEPARATOR . $groupDir);
+                    foreach ( $files as $file ) {
 
-            foreach ( $subDirNames as $subDirName ) {
-                $files = Storage::files($subDirName);
+                        if ( pathinfo($file, PATHINFO_EXTENSION) !== 'part' ) {
+                            continue;
+                        }
 
-                foreach ( $files as $file ) {
+                        $createTime = substr($fileName = basename($file, '.part'), 0, 10);
 
-                    if ( pathinfo($file, PATHINFO_EXTENSION) !== 'part' ) {
-                        continue;
-                    }
-
-                    $createTime = substr($fileName = basename($file, '.part'), 0, 10);
-
-                    if ( $createTime < $dueTime ) {
-                        $invalidFiles[] = $file;
+                        if ( $createTime < $dueTime ) {
+                            $invalidFiles[] = $file;
+                        }
                     }
                 }
             }
+
+            Storage::delete($invalidFiles);
+
+            $this->info(count($invalidFiles) . ' invalid files have been deleted.');
+            $this->info('Done.');
+
+        }catch(\Exception $e){
+
+            $this->error($e->getMessage());
         }
-
-        Storage::delete($invalidFiles);
-
-        $this->info(count($invalidFiles) . ' invalid files have been deleted.');
-        $this->info('Done.');
 
     }
 }

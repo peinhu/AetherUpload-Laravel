@@ -93,9 +93,7 @@
 `* * * * * php /项目根目录的绝对路径/artisan schedule:run 1>> /dev/null 2>&1`  
 在`app/Console/Kernel.php`中的`schedule`方法中添加以下代码：
 ```php
-  $schedule->call(function () {
-      \Illuminate\Support\Facades\Artisan::call('aetherupload:clean 2');
-  })->daily();
+  $schedule->command('aetherupload:clean 2')->daily();
 ```  
 * （推荐）提高头文件读写效率。  
 通过将头文件的文件系统由本地硬盘改为Redis，提高头文件读写效率。  
@@ -118,9 +116,7 @@
 `* * * * * php /项目根目录的绝对路径/artisan schedule:run 1>> /dev/null 2>&1`  
 在`app/Console/Kernel.php`中的`schedule`方法中添加以下代码：
 ```php
-  $schedule->call(function () {
-      \Illuminate\Support\Facades\Artisan::call('aetherupload:build');
-  })->daily();
+  $schedule->command('aetherupload:build')->daily();
 ```  
 
 * 提高上传临时文件读写速度（仅对PHP生效）。  

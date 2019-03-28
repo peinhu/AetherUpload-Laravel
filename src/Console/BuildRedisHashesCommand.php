@@ -37,29 +37,36 @@ class BuildRedisHashesCommand extends Command
     {
         $savedPathArr = [];
 
-        RedisSavedPath::deleteAll();
+        try{
 
-        foreach ( Config::get('aetherupload.groups') as $groupName => $group ) {
-            $subDirNames = Storage::directories(ConfigMapper::get('root_dir') . DIRECTORY_SEPARATOR . $group['group_dir']);
+            RedisSavedPath::deleteAll();
 
-            foreach ( $subDirNames as $subDirName ) {
-                $fileNames = Storage::files($subDirName);
+            foreach( Config::get('aetherupload.groups') as $groupName => $group ) {
+                $subDirNames = Storage::directories(ConfigMapper::get('root_dir') . DIRECTORY_SEPARATOR . $group['group_dir']);
 
-                foreach ( $fileNames as $fileName ) {
-                    if ( pathinfo($fileName, PATHINFO_EXTENSION) === 'part' ) {
-                        continue;
+                foreach ( $subDirNames as $subDirName ) {
+                    $fileNames = Storage::files($subDirName);
+
+                    foreach ( $fileNames as $fileName ) {
+                        if ( pathinfo($fileName, PATHINFO_EXTENSION) === 'part' ) {
+                            continue;
+                        }
+
+                        $savedPathArr[Util::getSavedPathKey($groupName,pathinfo($fileName, PATHINFO_FILENAME))] = $group['group_dir'] . '_' . basename($subDirName) . '_' . basename($fileName);
+
                     }
-
-                    $savedPathArr[Util::getSavedPathKey($groupName,pathinfo($fileName, PATHINFO_FILENAME))] = $group['group_dir'] . '_' . basename($subDirName) . '_' . basename($fileName);
-
                 }
             }
+
+            RedisSavedPath::setMulti($savedPathArr);
+
+            $this->info(count($savedPathArr) . ' items have been set in Redis.');
+            $this->info('Done.');
+
+        }catch(\Exception $e){
+
+            $this->error($e->getMessage());
         }
-
-        RedisSavedPath::setMulti($savedPathArr);
-
-        $this->info(count($savedPathArr) . ' items have been set in Redis.');
-        $this->info('Done.');
 
     }
 }

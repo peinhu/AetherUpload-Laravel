@@ -87,12 +87,11 @@ class Util
         try {
             ConfigMapper::instance()->applyGroupConfig($group);
             $resource = new Resource($group, $groupSubDir, $name);
-            $resource->delete($resource->path);
+
+            return $resource->delete($resource->path);
         }catch (\Exception $e){
             return false;
         }
-
-        return true;
     }
 
     public static function deleteRedisSavedPath($savedPath)
@@ -101,12 +100,10 @@ class Util
         $savedPathKey = $savedPathArr[0].'_'.pathinfo($savedPathArr[2],PATHINFO_FILENAME);
 
         try {
-            RedisSavedPath::delete($savedPathKey);
+            return RedisSavedPath::delete($savedPathKey);
         }catch (\Exception $e){
             return false;
         }
-
-        return true;
     }
 
 

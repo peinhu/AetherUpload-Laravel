@@ -34,21 +34,22 @@ class RedisClient
     {
         $result = Redis::hdel('aetherupload_header', $field);
 
-        if ( $result !== 1 ) {
+        if ( $result === 0 ) {
             throw new \Exception('delete error');
         }
     }
-
 
     public function exists($field)
     {
         $result = Redis::hexists('aetherupload_header', $field);
 
-        if ( $result !== 1 && $result !== 0 ) {
+        if ( $result === 1 ) {
+            return true;
+        } elseif ( $result === 0 ) {
+            return false;
+        } else {
             throw new \Exception('exists error');
         }
-
-        return $result;
     }
 
     public function listContents($directory)

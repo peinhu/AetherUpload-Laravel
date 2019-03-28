@@ -36,38 +36,47 @@ class ListGroupDirectoryCommand extends Command
     {
         $rootDir = Config::get('aetherupload.root_dir');
 
-        if ( ! Storage::exists($rootDir) ) {
-            Storage::makeDirectory($rootDir . DIRECTORY_SEPARATOR . '_header');
-            $this->info('Root directory "' . $rootDir . '" has been created.');
-        }
+        try {
 
-        $directories = array_map(function ($directory) {
-            return basename($directory);
-        }, Storage::directories($rootDir));
+            if ( ! Storage::exists($rootDir) ) {
+                Storage::makeDirectory($rootDir . DIRECTORY_SEPARATOR . '_header');
+                $this->info('Root directory "' . $rootDir . '" has been created.');
+            }
 
-        $groupDirs = array_map(function ($v) {
-            return $v['group_dir'];
-        }, Config::get('aetherupload.groups'));
+            $directories = array_map(function ($directory) {
+                return basename($directory);
+            }, Storage::directories($rootDir));
 
-        foreach ( $groupDirs as $groupDir ) {
-            if ( in_array($groupDir, $directories) ) {
-                continue;
-            } else {
-                if ( Storage::makeDirectory($rootDir . DIRECTORY_SEPARATOR . $groupDir) ) {
-                    $this->info('Directory "' . $rootDir . DIRECTORY_SEPARATOR . $groupDir . '" has been created.');
+            $groupDirs = array_map(function ($v) {
+                return $v['group_dir'];
+            }, Config::get('aetherupload.groups'));
+
+            foreach ( $groupDirs as $groupDir ) {
+                if ( in_array($groupDir, $directories) ) {
+                    continue;
                 } else {
-                    $this->error('Fail to create directory "' . $rootDir . DIRECTORY_SEPARATOR . $groupDir . '".');
+                    if ( Storage::makeDirectory($rootDir . DIRECTORY_SEPARATOR . $groupDir) ) {
+                        $this->info('Directory "' . $rootDir . DIRECTORY_SEPARATOR . $groupDir . '" has been created.');
+                    } else {
+                        $this->error('Fail to create directory "' . $rootDir . DIRECTORY_SEPARATOR . $groupDir . '".');
+                    }
                 }
             }
-        }
 
-        $this->info('Group-Directory List:');
+            $this->info('Group-Directory List:');
 
-        foreach ( Config::get('aetherupload.groups') as $groupName => $groupArr ) {
-            if ( Storage::exists($rootDir . DIRECTORY_SEPARATOR . $groupArr['group_dir']) ) {
-                $this->info($groupName . '-' . $groupArr['group_dir']);
+            foreach ( Config::get('aetherupload.groups') as $groupName => $groupArr ) {
+                if ( Storage::exists($rootDir . DIRECTORY_SEPARATOR . $groupArr['group_dir']) ) {
+                    $this->info($groupName . '-' . $groupArr['group_dir']);
+                }
             }
+
+        }catch(\Exception $e){
+
+            $this->error($e->getMessage());
         }
+
+
 
     }
 }
