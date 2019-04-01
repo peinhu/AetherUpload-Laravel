@@ -51,7 +51,7 @@
 
 分组配置：在配置文件的GROUPS下新增分组，运行`php artisan aetherupload:groups`自动创建对应目录。  
 
-自定义中间件：参考laravel文档中间件部分，创建你的中间件并在`Kernel.php`中注册，将你注册的中间件名称填入配置文件对应部分，如['middleware1','middleware2']。  
+自定义中间件：参考laravel文档中间件部分，创建你的中间件并在`Kernel.php`中注册，将你注册的中间件名称填入配置文件对应部分，如`['middleware1','middleware2']`。  
 
 上传完成事件：分为上传完成前和上传完成后事件，参考laravel文档事件系统部分，在`EventServiceProvider`中注册你的事件和监听器，运行`php artisan event:generate`生成事件和监听器，将你注册的事件完整类名填入配置文件对应部分，如'App\Events\OrderShipped'。
 
@@ -72,11 +72,11 @@
 安装Redis并启动服务端。安装predis包`composer require predis/predis`。确保上传页面表单中包含`{{ storage_host_field() }}`。
 
 应用服务器配置：  
-在`config/aetherupload.php`中配置`distributed_deployment`项，将`enable`设置为`true`，`role`设置为`web`，`storage_host`设置为`http://storage.your-domain.com`。  
+在`config/aetherupload.php`中配置`distributed_deployment`项，将`enable`设置为`true`，`role`设置为`web`，`storage_host`设置为储存服务器的域名`http://storage.your-domain.com`。  
 在`.env`中将`APP_NAME`和`APP_KEY`配置项改为对应特定值，与储存服务器配置一致。新增配置`SESSION_DOMAIN=.your-domain.com`，用以共享cookie。配置`SESSION_DRIVER=redis`，用以共享session。  
 
 储存服务器配置：  
-在`config/aetherupload.php`中配置`distributed_deployment`项，将`enable`设置为`true`，`role`设置为`storage`，`middleware_cors`设置为跨域中间件AetherUploadCORS类在Kernel.php中注册的名称，`allow_origin`设置为`http://www.your-domain.com`。  
+在`config/aetherupload.php`中配置`distributed_deployment`项，将`enable`设置为`true`，`role`设置为`storage`，`middleware_cors`设置为跨域中间件AetherUploadCORS类在Kernel.php中注册的名称，`allow_origin`设置为应用服务器的域名`http://www.your-domain.com`。  
 在`.env`中将`APP_NAME`和`APP_KEY`配置项改为对应特定值，与应用服务器配置一致。新增配置`SESSION_DOMAIN=.your-domain.com`，用以共享cookie。配置`SESSION_DRIVER=redis`，用以共享session。  
   
 **使用方便的artisan命令**  
@@ -157,7 +157,7 @@
 </table>
 
 # 安全性
-AetherUpload在上传前使用白名单+黑名单的形式进行文件后缀名过滤，上传后再检查文件的Mime-Type类型。白名单直接限制了保存文件扩展名，来阻止上传可执行文件，黑名单默认屏蔽了常见的可执行文件扩展名。安全起见白名单一栏不应留空。  
+AetherUpload在上传前使用白名单+黑名单的形式进行文件后缀名过滤，上传后再检查文件的Mime-Type类型。白名单直接限制了保存文件扩展名，黑名单默认屏蔽了常见的可执行文件扩展名，来阻止上传恶意文件，安全起见白名单一栏不应留空。  
 
 虽然做了诸多安全工作，但恶意文件上传是防不胜防的，建议正确设置上传目录权限，确保相关程序对资源文件没有执行权限。
 
@@ -166,7 +166,7 @@ AetherUpload在上传前使用白名单+黑名单的形式进行文件后缀名�
 详见[CHANGELOG.md](https://github.com/peinhu/AetherUpload-Laravel/blob/master/CHANGELOG.md)  
 
 # 衍生项目  
-laravel-admin表单扩展：[large-file-upload](https://github.com/laravel-admin-extensions/large-file-upload)
+[laravel-admin](https://github.com/z-song/laravel-admin)表单扩展：[large-file-upload](https://github.com/laravel-admin-extensions/large-file-upload)
 
 # 许可证
 使用GPLv2许可证, 查看[LICENCE](https://github.com/peinhu/AetherUpload-Laravel/blob/master/LICENSE)文件以获得更多信息。
