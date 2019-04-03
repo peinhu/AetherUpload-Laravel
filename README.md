@@ -90,7 +90,9 @@
 * （推荐）设置每天自动清除无效的临时文件。  
 由于上传流程存在意外终止的情况，如在传输过程中强行关闭页面或浏览器，将会导致已产生的文件部分成为无效文件，占据大量的存储空间，我们可以使用Laravel的任务调度功能来定期清除它们。  
 在Linux中运行`crontab -e`命令，确保文件中包含这行代码：  
-`* * * * * php /项目根目录的绝对路径/artisan schedule:run 1>> /dev/null 2>&1`  
+```php
+* * * * * php /项目根目录的绝对路径/artisan schedule:run 1>> /dev/null 2>&1  
+```  
 在`app/Console/Kernel.php`中的`schedule`方法中添加以下代码：
 ```php
   $schedule->command('aetherupload:clean 2')->daily();
@@ -109,16 +111,16 @@
         ...
     ]
 ```  
-
 * 设置每天自动重建Redis中的hash清单。  
 不恰当的处理和某些极端情况可能使hash清单中出现脏数据，从而影响到秒传功能的准确性，重建hash清单可消除脏数据，恢复与实际资源文件的同步。  
 在Linux中运行`crontab -e`命令，确保文件中包含这行代码：  
-`* * * * * php /项目根目录的绝对路径/artisan schedule:run 1>> /dev/null 2>&1`  
+```php
+* * * * * php /项目根目录的绝对路径/artisan schedule:run 1>> /dev/null 2>&1  
+```  
 在`app/Console/Kernel.php`中的`schedule`方法中添加以下代码：
 ```php
   $schedule->command('aetherupload:build')->daily();
 ```  
-
 * 提高上传临时文件读写速度（仅对PHP生效）。  
 利用Linux的tmpfs文件系统，来达到将上传临时文件放到内存中快速读写的目的，将会占用部分内存空间。  
 将php.ini中上传临时目录`upload_tmp_dir`项的值设置为`"/dev/shm"`，重启fpm或apache服务。  
