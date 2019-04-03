@@ -49,7 +49,7 @@
   
 文件上传：参考示例文件注释的部分，在需要上传大文件的页面引入相应文件和代码。可使用自定义中间件来对文件上传进行额外过滤，还可使用上传完成事件对上传的文件进一步处理。  
 
-分组配置：在配置文件的GROUPS下新增分组，运行`php artisan aetherupload:groups`自动创建对应目录。  
+分组配置：在配置文件的groups下新增分组，运行`php artisan aetherupload:groups`自动创建对应目录。  
 
 自定义中间件：参考laravel文档中间件部分，创建你的中间件并在`Kernel.php`中注册，将你注册的中间件名称填入配置文件对应部分，如`['middleware1','middleware2']`。  
 
@@ -73,11 +73,11 @@
 
 应用服务器配置：  
 在`config/aetherupload.php`中配置`distributed_deployment`项，将`enable`设置为`true`，`role`设置为`web`，`storage_host`设置为储存服务器的域名`http://storage.your-domain.com`。  
-在`.env`中将`APP_NAME`和`APP_KEY`配置项改为对应特定值，与储存服务器配置一致。新增配置`SESSION_DOMAIN=.your-domain.com`，用以共享cookie。配置`SESSION_DRIVER=redis`，用以共享session。  
+在`.env`中将`APP_NAME`和`APP_KEY`配置项改为对应特定值，与储存服务器配置一致。新增配置`SESSION_DOMAIN=.your-domain.com`，用以共享cookie。修改配置`SESSION_DRIVER=redis`，用以共享session。  
 
 储存服务器配置：  
 在`config/aetherupload.php`中配置`distributed_deployment`项，将`enable`设置为`true`，`role`设置为`storage`，`middleware_cors`设置为跨域中间件AetherUploadCORS类在Kernel.php中注册的名称，`allow_origin`设置为应用服务器的域名`http://www.your-domain.com`。  
-在`.env`中将`APP_NAME`和`APP_KEY`配置项改为对应特定值，与应用服务器配置一致。新增配置`SESSION_DOMAIN=.your-domain.com`，用以共享cookie。配置`SESSION_DRIVER=redis`，用以共享session。  
+在`.env`中将`APP_NAME`和`APP_KEY`配置项改为对应特定值，与应用服务器配置一致。新增配置`SESSION_DOMAIN=.your-domain.com`，用以共享cookie。修改配置`SESSION_DRIVER=redis`，用以共享session。  
   
 **使用方便的artisan命令**  
 
