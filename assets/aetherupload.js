@@ -14,8 +14,6 @@ var AetherUpload = {
 
             this.progressBarDom = this.wrapperDom.find('#aetherupload-progressbar'),
 
-            this.savedPathDom = this.wrapperDom.find('#aetherupload-savedpath'),
-
             this.resource = this.resourceDom[0].files[0],
 
             this.resourceName = this.resource.name,
@@ -72,7 +70,7 @@ var AetherUpload = {
 
         this.outputDom.text(this.messages.status_upload_begin);
 
-        if (!('FileReader' in window) || !('File' in window)) {
+        if (!('FileReader' in window) || !('File' in window) || typeof SparkMD5 === 'undefined' ) {
 
             this.preprocess(); //浏览器不支持读取本地文件，跳过计算hash
 
@@ -145,7 +143,7 @@ var AetherUpload = {
 
         $.ajax({
 
-            url: _this.storageHost + '/aetherupload/preprocess',
+            url: _this.storageHost + _this.preprocessRoute,
 
             type: 'POST',
 
@@ -251,7 +249,7 @@ var AetherUpload = {
 
         $.ajax({
 
-            url: _this.storageHost + '/aetherupload/uploading',
+            url: _this.storageHost + _this.uploadingRoute,
 
             type: 'POST',
 
@@ -327,7 +325,7 @@ var AetherUpload = {
 
                     _this.outputDom.text(_this.messages.status_retrying);
 
-                    _this.sleep(3000);
+                    _this.sleep(5000);
 
                 } else {
 
@@ -358,6 +356,34 @@ var AetherUpload = {
     success: function (callback) {
 
         this.callback = callback;
+
+        return this;
+    },
+
+    setPreprocessRoute: function (route) {
+
+        this.preprocessRoute = route;
+
+        return this;
+    },
+
+    setUploadingRoute: function (route) {
+
+        this.uploadingRoute = route;
+
+        return this;
+    },
+
+    setGroup: function (group) {
+
+        this.group = group;
+
+        return this;
+    },
+
+    setSavedPathField: function (selector) {
+
+        this.savedPathDom = $(selector);
 
         return this;
     },
@@ -423,13 +449,19 @@ var AetherUpload = {
  * resource 文件对象
  * group 分组名
  */
-function aetherupload(resource, group) {
+function aetherupload(resource) {
 
     var newInstance = Object.create(AetherUpload);
 
     newInstance.wrapperDom = $(resource).parents('#aetherupload-wrapper');
 
-    newInstance.group = group;
+    newInstance.group = 'file'; //分组的默认值
+
+    newInstance.savedPathDom = newInstance.wrapperDom.find('#aetherupload-savedpath'); //资源储存地址所在节点的默认值
+
+    newInstance.preprocessRoute = '/aetherupload/preprocess'; //预处理路由的默认值
+
+    newInstance.uploadingRoute = '/aetherupload/uploading'; //上传路由的默认值
 
     return newInstance;
 }

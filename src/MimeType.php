@@ -822,6 +822,6 @@ class MimeType
      */
     protected static function getMimeTypeFromExtension($extension)
     {
-        return self::$mimes[$extension] ?? 'application/octet-stream';
+        return isset(self::$mimes[$extension]) ? self::$mimes[$extension] : 'application/octet-stream';
     }
 }

@@ -26,7 +26,10 @@ class ConfigMapper
     private $distributed_deployment_allow_origin;
     private $forbidden_extensions;
     private $instant_completion;
-
+    private $route_preprocess;
+    private $route_uploading;
+    private $route_display;
+    private $route_download;
 
     private function __construct()
     {
@@ -60,6 +63,10 @@ class ConfigMapper
         $this->middleware_display = $config->get('aetherupload.middleware_display');
         $this->middleware_download = $config->get('aetherupload.middleware_download');
         $this->instant_completion = $config->get('aetherupload.instant_completion');
+        $this->route_preprocess = $config->get('aetherupload.route_preprocess');
+        $this->route_uploading = $config->get('aetherupload.route_uploading');
+        $this->route_display = $config->get('aetherupload.route_display');
+        $this->route_download = $config->get('aetherupload.route_download');
 
         return $this;
     }
