@@ -1,9 +1,11 @@
 # AetherUpload-Laravel  
+[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
 [![Build Status](https://travis-ci.org/peinhu/AetherUpload-Laravel.svg?branch=master)](https://travis-ci.org/peinhu/AetherUpload-Laravel)
 [![Latest Stable Version](https://poser.pugx.org/peinhu/aetherupload-laravel/v/stable)](https://packagist.org/packages/peinhu/aetherupload-laravel)
 [![Total Downloads](https://poser.pugx.org/peinhu/aetherupload-laravel/downloads)](https://packagist.org/packages/peinhu/aetherupload-laravel)
 [![Latest Unstable Version](https://poser.pugx.org/peinhu/aetherupload-laravel/v/unstable)](https://packagist.org/packages/peinhu/aetherupload-laravel)
-[![License](https://poser.pugx.org/peinhu/aetherupload-laravel/license)](https://github.com/peinhu/AetherUpload-Laravel/blob/master/LICENSE) 
+[![License](https://poser.pugx.org/peinhu/aetherupload-laravel/license)](https://github.com/peinhu/AetherUpload-Laravel/blob/master/LICENSE)
+[![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/peinhu/AetherUpload-Laravel/blob/master/LICENSE_996)
     
 提供**超大文件**上传的Laravel扩展包，支持**分组配置**、**断线续传**、**秒传**、**分布式部署**等功能，简单易用，满足多数人的主流需求。**无感知化**的设计理念，可实现由扩展自动接管上传和访问请求，开发者专注于业务，**无需关心**上传流程，**无需编写**适配代码，几乎**开箱即用**，节省大量开发时间。基于Laravel 5开发，支持5.1+版本。永久免费不接受赞助！欢迎提出问题和建议！
 
@@ -18,6 +20,7 @@
 - [x] 文件类型和大小限制  
 - [x] 分组配置  
 - [x] 自定义中间件   
+- [x] 自定义路由   
 - [x] 上传完成事件   
 - [x] 同步上传 *①*  
 - [x] 断线续传 *②*  
@@ -171,5 +174,5 @@ AetherUpload在上传前使用白名单+黑名单的形式进行文件后缀名�
 [laravel-admin](https://github.com/z-song/laravel-admin)表单扩展：[large-file-upload](https://github.com/laravel-admin-extensions/large-file-upload)
 
 # 许可证
-使用GPLv2许可证, 查看[LICENCE](https://github.com/peinhu/AetherUpload-Laravel/blob/master/LICENSE)文件以获得更多信息。
+使用GPLv2许可证及Anti 996许可证, 查看[LICENCE](https://github.com/peinhu/AetherUpload-Laravel/blob/master/LICENSE)文件及[LICENSE_996](https://github.com/peinhu/AetherUpload-Laravel/blob/master/LICENSE_996)文件以获得更多信息。  
 
