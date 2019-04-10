@@ -1,5 +1,6 @@
 **2019-04-10 v2.0.5**  
 添加自定义路由支持  
+添加反996许可证  
 自定义资源储存路径填充位置  
 修正spark-md5文件未引入时报错问题  
 修正php5.6兼容问题[#48](https://github.com/peinhu/AetherUpload-Laravel/issues/48)
