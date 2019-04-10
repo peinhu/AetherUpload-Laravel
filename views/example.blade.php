@@ -22,12 +22,12 @@
                 <label>文件1(自定义)：</label>
                 <div class="controls">
                     <input type="file" id="aetherupload-resource" onchange="aetherupload(this).setGroup('file').setSavedPathField('#aetherupload-savedpath').setPreprocessRoute('/aetherupload/preprocess').setUploadingRoute('/aetherupload/uploading').success(someCallback).upload()"/>
-                    <!--需要一个名为aetherupload-resource的id，用以标识上传的文件，setGroup(...)设置分组名，putSavedPathTo(...)设置资源存储路径的保存节点，success(...)可用于声名上传成功后的回调方法名。默认为选择文件后触发上传，也可根据需求手动更改为特定事件触发，如点击提交表单时-->
+                    <!--需要一个名为aetherupload-resource的id，用以标识上传的文件，setGroup(...)设置分组名，setSavedPathField(...)设置资源存储路径的保存节点，setPreprocessRoute(...)设置预处理路由，setUploadingRoute(...)设置上传分块路由，success(...)可用于声名上传成功后的回调方法名。默认为选择文件后触发上传，也可根据需求手动更改为特定事件触发，如点击提交表单时-->
                     <div class="progress " style="height: 6px;margin-bottom: 2px;margin-top: 10px;width: 200px;">
                         <div id="aetherupload-progressbar" style="background:blue;height:6px;width:0;"></div><!--需要一个名为aetherupload-progressbar的id，用以标识进度条-->
                     </div>
                     <span style="font-size:12px;color:#aaa;" id="aetherupload-output"></span><!--需要一个名为aetherupload-output的id，用以标识提示信息-->
-                    <input type="hidden" name="file1" id="aetherupload-savedpath"><!--需要一个自定义名称的id，以及一个自定义名称的name值, 用以标识资源储存路径，默认id为aetherupload-savedpath，可根据putSavedPathTo(...)设置为其它任意值-->
+                    <input type="hidden" name="file1" id="aetherupload-savedpath"><!--需要一个自定义名称的id，以及一个自定义名称的name值, 用以标识资源储存路径自动填充位置，默认id为aetherupload-savedpath，可根据setSavedPathField(...)设置为其它任意值-->
                 </div>
             </div>
 

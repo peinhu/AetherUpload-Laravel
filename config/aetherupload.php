@@ -134,8 +134,8 @@ return [
 
     'route_preprocess' => '/aetherupload/preprocess', # 上传预处理的路由
     'route_uploading'  => '/aetherupload/uploading', # 上传文件分块的路由
-    'route_display'    => '/aetherupload/display/{uri}', # 文件展示的路由
-    'route_download'   => '/aetherupload/download/{uri}/{newName}', # 文件下载的路由
+    'route_display'    => '/aetherupload/display', # 文件展示的路由
+    'route_download'   => '/aetherupload/download', # 文件下载的路由
 
     /*
     |--------------------------------------------------------------------------

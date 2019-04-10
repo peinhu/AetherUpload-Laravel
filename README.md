@@ -3,7 +3,7 @@
 [![Latest Stable Version](https://poser.pugx.org/peinhu/aetherupload-laravel/v/stable)](https://packagist.org/packages/peinhu/aetherupload-laravel)
 [![Total Downloads](https://poser.pugx.org/peinhu/aetherupload-laravel/downloads)](https://packagist.org/packages/peinhu/aetherupload-laravel)
 [![Latest Unstable Version](https://poser.pugx.org/peinhu/aetherupload-laravel/v/unstable)](https://packagist.org/packages/peinhu/aetherupload-laravel)
-[![License](https://poser.pugx.org/peinhu/aetherupload-laravel/license)](https://packagist.org/packages/peinhu/aetherupload-laravel)  
+[![License](https://poser.pugx.org/peinhu/aetherupload-laravel/license)](https://github.com/peinhu/AetherUpload-Laravel/blob/master/LICENSE) 
     
 提供**超大文件**上传的Laravel扩展包，支持**分组配置**、**断线续传**、**秒传**、**分布式部署**等功能，简单易用，满足多数人的主流需求。**无感知化**的设计理念，可实现由扩展自动接管上传和访问请求，开发者专注于业务，**无需关心**上传流程，**无需编写**适配代码，几乎**开箱即用**，节省大量开发时间。基于Laravel 5开发，支持5.1+版本。永久免费不接受赞助！欢迎提出问题和建议！
 
