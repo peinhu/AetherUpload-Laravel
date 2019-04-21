@@ -724,6 +724,7 @@ class MimeType
         'jad' => 'text/vnd.sun.j2me.app-descriptor',
         'wml' => 'text/vnd.wap.wml',
         'wmls' => 'text/vnd.wap.wmlscript',
+        'plist'=>'text/xml',
         's' => 'text/x-asm',
         'c' => 'text/x-c',
         'f' => 'text/x-fortran',
