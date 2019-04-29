@@ -527,6 +527,7 @@ class MimeType
         'gtar' => 'application/x-gtar',
         'hdf' => 'application/x-hdf',
         'install' => 'application/x-install-instructions',
+        'ipa' => 'application/x-ios-app',
         'iso' => 'application/x-iso9660-image',
         'jnlp' => 'application/x-java-jnlp-file',
         'latex' => 'application/x-latex',
