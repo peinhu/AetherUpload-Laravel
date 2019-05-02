@@ -579,6 +579,7 @@ class MimeType
         'ustar' => 'application/x-ustar',
         'src' => 'application/x-wais-source',
         'der' => 'application/x-x509-ca-cert',
+        'pkg' => 'application/x-xar',
         'fig' => 'application/x-xfig',
         'xlf' => 'application/x-xliff+xml',
         'xpi' => 'application/x-xpinstall',
