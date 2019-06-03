@@ -19,6 +19,9 @@
   "require": {
     "php": ">=5.5.9"
   },
+  "require-dev": {
+    "phpunit/phpunit": "^7.5"
+  },
   "suggest": {
     "predis/predis": "Needed to support instant completion"
   },
