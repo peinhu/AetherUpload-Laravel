@@ -13,11 +13,11 @@ class ResourceController extends \Illuminate\Routing\Controller
 
         try {
 
-            list($group, $groupSubDir, $resourceName) = explode('_', Request::route('uri'));
+            $params = SavedPathResolver::decode(Request::route('uri'));
 
-            ConfigMapper::instance()->applyGroupConfig($group);
+            ConfigMapper::instance()->applyGroupConfig($params->group);
 
-            $resource = new Resource($group, $groupSubDir, $resourceName);
+            $resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
 
             if ( $resource->exists($resource->path) === false ) {
                 throw new \Exception;
@@ -37,11 +37,11 @@ class ResourceController extends \Illuminate\Routing\Controller
 
         try {
 
-            list($group, $groupSubDir, $resourceName) = explode('_', Request::route('uri'));
+            $params = SavedPathResolver::decode(Request::route('uri'));
 
-            ConfigMapper::instance()->applyGroupConfig($group);
+            ConfigMapper::instance()->applyGroupConfig($params->group);
 
-            $resource = new Resource($group, $groupSubDir ,$resourceName);
+            $resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
 
             if ( $resource->exists($resource->path) === false ) {
                 throw new \Exception;

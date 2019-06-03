@@ -88,7 +88,7 @@ class CleanUpDirectoryCommand extends Command
             $this->info(count($invalidFiles) . ' invalid files have been deleted.');
             $this->info('Done.');
 
-        }catch(\Exception $e){
+        } catch ( \Exception $e ) {
 
             $this->error($e->getMessage());
         }

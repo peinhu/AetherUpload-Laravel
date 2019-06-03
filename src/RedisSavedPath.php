@@ -67,5 +67,10 @@ class RedisSavedPath
         return true;
     }
 
+    public static function getKey($group, $hash)
+    {
+        return $group . '_' . $hash;
+    }
+
 
 }

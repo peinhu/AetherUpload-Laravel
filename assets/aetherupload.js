@@ -190,7 +190,8 @@ var AetherUpload = {
 
                 if (rst.savedPath.length === 0) {
 
-                    _this.uploadChunkInterval = setInterval($.proxy(_this.uploadChunk, _this), 0);
+                    _this.uploadChunk();
+
 
                 } else {
 
@@ -265,8 +266,6 @@ var AetherUpload = {
 
             crossDomain: true,
 
-            async: false,
-
             processData: false,
 
             contentType: false,
@@ -277,16 +276,12 @@ var AetherUpload = {
 
                     _this.outputDom.text(_this.messages.error_invalid_server_return);
 
-                    clearInterval(_this.uploadChunkInterval);
-
                     return;
                 }
 
                 if (rst.error === 'undefined' || rst.error) {
 
                     _this.outputDom.text(rst.error);
-
-                    clearInterval(_this.uploadChunkInterval);
 
                     return;
 
@@ -300,8 +295,6 @@ var AetherUpload = {
 
                 if (rst.savedPath !== 'undefined' && rst.savedPath !== '') {
 
-                    clearInterval(_this.uploadChunkInterval);
-
                     _this.savedPath = rst.savedPath;
 
                     _this.savedPathDom.val(_this.savedPath);
@@ -314,9 +307,14 @@ var AetherUpload = {
 
                     typeof(_this.callback) !== 'undefined' ? _this.callback() : null;
 
+                }else{
+
+                    ++_this.i;
+
+                    _this.uploadChunk();
+
                 }
 
-                ++_this.i;
 
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -327,11 +325,11 @@ var AetherUpload = {
 
                     _this.sleep(5000);
 
+                    _this.uploadChunk();
+
                 } else {
 
                     _this.outputDom.text(_this.messages.error_upload_fail);
-
-                    clearInterval(_this.uploadChunkInterval);
 
                 }
             }

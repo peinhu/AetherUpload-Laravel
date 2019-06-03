@@ -14,12 +14,12 @@ class Resource
     public $path;
     public $realPath;
 
-    public function __construct($group, $groupSubDir, $name)
+    public function __construct($group, $groupDir, $groupSubDir, $name)
     {
         $this->disk = Storage::disk('local');
         $this->name = $name;
         $this->group = $group;
-        $this->groupDir = ConfigMapper::get('group_dir');
+        $this->groupDir = $groupDir;
         $this->groupSubDir = $groupSubDir;
         $this->path = $this->getPath();
         $this->realPath = $this->getRealPath();
@@ -33,11 +33,6 @@ class Resource
     public function getRealPath()
     {
         return storage_path('app/') . $this->path;
-    }
-
-    public function getSavedPath()
-    {
-        return $this->group . '_' . $this->groupSubDir . '_' . $this->name;
     }
 
     public function __call($name, $arguments)

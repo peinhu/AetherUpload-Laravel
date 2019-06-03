@@ -3,6 +3,7 @@
 namespace AetherUpload\Console;
 
 use AetherUpload\ConfigMapper;
+use AetherUpload\SavedPathResolver;
 use AetherUpload\Util;
 use Illuminate\Console\Command;
 use AetherUpload\RedisSavedPath;
@@ -37,11 +38,11 @@ class BuildRedisHashesCommand extends Command
     {
         $savedPathArr = [];
 
-        try{
+        try {
 
             RedisSavedPath::deleteAll();
 
-            foreach( Config::get('aetherupload.groups') as $groupName => $group ) {
+            foreach ( Config::get('aetherupload.groups') as $groupName => $group ) {
                 $subDirNames = Storage::directories(ConfigMapper::get('root_dir') . DIRECTORY_SEPARATOR . $group['group_dir']);
 
                 foreach ( $subDirNames as $subDirName ) {
@@ -52,7 +53,7 @@ class BuildRedisHashesCommand extends Command
                             continue;
                         }
 
-                        $savedPathArr[Util::getSavedPathKey($groupName,pathinfo($fileName, PATHINFO_FILENAME))] = $group['group_dir'] . '_' . basename($subDirName) . '_' . basename($fileName);
+                        $savedPathArr[RedisSavedPath::getKey($groupName, pathinfo($fileName, PATHINFO_FILENAME))] = SavedPathResolver::encode($group['group_dir'], basename($subDirName), basename($fileName));
 
                     }
                 }
@@ -63,7 +64,7 @@ class BuildRedisHashesCommand extends Command
             $this->info(count($savedPathArr) . ' items have been set in Redis.');
             $this->info('Done.');
 
-        }catch(\Exception $e){
+        } catch ( \Exception $e ) {
 
             $this->error($e->getMessage());
         }

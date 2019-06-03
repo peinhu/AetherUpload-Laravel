@@ -75,34 +75,38 @@ class Util
         return ConfigMapper::get('distributed_deployment_enable') === true && ConfigMapper::get('distributed_deployment_role') === 'web';
     }
 
-    public static function getSavedPathKey($group, $hash)
-    {
-        return $group . '_' . $hash;
-    }
-
     public static function deleteResource($savedPath)
     {
-        list($group, $groupSubDir, $name) = explode('_', $savedPath);
+        $params = SavedPathResolver::decode($savedPath);
 
         try {
-            ConfigMapper::instance()->applyGroupConfig($group);
-            $resource = new Resource($group, $groupSubDir, $name);
+
+            ConfigMapper::instance()->applyGroupConfig($params->group);
+
+            $resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
 
             return $resource->delete($resource->path);
-        }catch (\Exception $e){
+
+        } catch ( \Exception $e ) {
+
             return false;
         }
     }
 
     public static function deleteRedisSavedPath($savedPath)
     {
-        $savedPathArr = explode('_', $savedPath);
-        $savedPathKey = $savedPathArr[0].'_'.pathinfo($savedPathArr[2],PATHINFO_FILENAME);
+        $params = SavedPathResolver::decode($savedPath);
 
         try {
+
+            $savedPathKey = RedisSavedPath::getKey($params->group, pathinfo($params->resourceName, PATHINFO_FILENAME));
+
             return RedisSavedPath::delete($savedPathKey);
-        }catch (\Exception $e){
+
+        } catch ( \Exception $e ) {
+
             return false;
+
         }
     }
 

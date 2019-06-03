@@ -22,7 +22,7 @@ class RedisClient
     {
         $result = Redis::hget('aetherupload_header', $field);
 
-        if ( $result === null) {
+        if ( $result === null ) {
             throw new \Exception('read error');
         }
 

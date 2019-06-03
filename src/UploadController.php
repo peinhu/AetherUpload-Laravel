@@ -23,10 +23,17 @@ class UploadController extends \App\Http\Controllers\Controller
      */
     public function preprocess()
     {
-        $resourceName = Request::input('resource_name', false);
-        $resourceSize = Request::input('resource_size', false);
-        $resourceHash = Request::input('resource_hash', false);
-        $group = Request::input('group', false);
+        $this->validate(request(), [
+            'resource_name' => 'required',
+            'resource_size' => 'required',
+            'resource_hash' => 'required',
+            'group'         => 'required',
+        ]);
+
+        $resourceName = Request::input('resource_name');
+        $resourceSize = Request::input('resource_size');
+        $resourceHash = Request::input('resource_hash');
+        $group = Request::input('group');
 
         $result = [
             'error'                => 0,
@@ -44,10 +51,6 @@ class UploadController extends \App\Http\Controllers\Controller
                 throw new \Exception(trans('aetherupload::messages.upload_error'));
             }
 
-            if ( $resourceSize === false || $resourceName === false || $group === false ) {
-                throw new \Exception(trans('aetherupload::messages.invalid_resource_params'));
-            }
-
             ConfigMapper::instance()->applyGroupConfig($group);
 
             $result['resourceTempBaseName'] = $resourceTempBaseName = Util::generateTempName();
@@ -62,7 +65,7 @@ class UploadController extends \App\Http\Controllers\Controller
             $partialResource->filterByExtension($resourceExt);
 
             // determine if this upload meets the condition of instant completion
-            if ( empty($resourceHash) === false && ConfigMapper::get('instant_completion') === true && RedisSavedPath::exists($savedPathKey = Util::getSavedPathKey($group, $resourceHash)) === true ) {
+            if ( empty($resourceHash) === false && ConfigMapper::get('instant_completion') === true && RedisSavedPath::exists($savedPathKey = RedisSavedPath::getKey($group, $resourceHash)) === true ) {
                 $result['savedPath'] = RedisSavedPath::get($savedPathKey);
 
                 return Responser::returnResult($result);
@@ -87,15 +90,26 @@ class UploadController extends \App\Http\Controllers\Controller
      */
     public function saveChunk()
     {
-        $chunkTotalCount = Request::input('chunk_total', false);
-        $chunkIndex = Request::input('chunk_index', false);
-        $resourceTempBaseName = Request::input('resource_temp_basename', false);
-        $resourceExt = Request::input('resource_ext', false);
-        $chunk = Request::file('resource_chunk', false);
-        $groupSubDir = Request::input('group_subdir', false);
-        $resourceHash = Request::input('resource_hash', false);
-        $group = Request::input('group', false);
-        $savedPathKey = Util::getSavedPathKey($group, $resourceHash);
+        $this->validate(request(), [
+            'chunk_total'            => 'required',
+            'chunk_index'            => 'required',
+            'resource_temp_basename' => 'required',
+            'resource_ext'           => 'required',
+            'resource_chunk'         => 'required',
+            'group_subdir'           => 'required',
+            'resource_hash'          => 'required',
+            'group'                  => 'required',
+        ]);
+
+        $chunkTotalCount = Request::input('chunk_total');
+        $chunkIndex = Request::input('chunk_index');
+        $resourceTempBaseName = Request::input('resource_temp_basename');
+        $resourceExt = Request::input('resource_ext');
+        $chunk = Request::file('resource_chunk');
+        $groupSubDir = Request::input('group_subdir');
+        $resourceHash = Request::input('resource_hash');
+        $group = Request::input('group');
+        $savedPathKey = RedisSavedPath::getKey($group, $resourceHash);
         $partialResource = null;
 
         $result = [
@@ -104,10 +118,6 @@ class UploadController extends \App\Http\Controllers\Controller
         ];
 
         try {
-
-            if ( $chunkTotalCount === false || $chunkIndex === false || $resourceExt === false || $resourceTempBaseName === false || $groupSubDir === false || $chunk === false || $resourceHash === false || $group === false ) {
-                throw new \Exception(trans('aetherupload::messages.invalid_chunk_params'));
-            }
 
             ConfigMapper::instance()->applyGroupConfig($group);
 
@@ -119,7 +129,7 @@ class UploadController extends \App\Http\Controllers\Controller
             }
 
             // determine if this upload meets the condition of instant completion
-            if ( $resourceHash !== false && ConfigMapper::get('instant_completion') === true && RedisSavedPath::exists($savedPathKey) === true ) {
+            if ( empty($resourceHash) === false && ConfigMapper::get('instant_completion') === true && RedisSavedPath::exists($savedPathKey) === true ) {
                 $partialResource->delete();
                 unset($partialResource->chunkIndex);
                 $result['savedPath'] = RedisSavedPath::get($savedPathKey);
@@ -156,13 +166,15 @@ class UploadController extends \App\Http\Controllers\Controller
                     event(new $beforeUploadCompleteEvent($partialResource));
                 }
 
-                $resourceHash = $partialResource->calculateHash();
+                $resourceRealHash = $partialResource->calculateHash();
 
-                $partialResource->rename($completeName = Util::getFileName($resourceHash, $resourceExt));
+                if ( $resourceHash !== $resourceRealHash ) {
+                    throw new \Exception(trans('aetherupload::messages.upload_error'));
+                }
 
-                $resource = new Resource($group, $groupSubDir, $completeName);
+                $partialResource->rename($completeName = Util::getFileName($resourceRealHash, $resourceExt));
 
-                $savedPath = $resource->getSavedPath();
+                $savedPath = SavedPathResolver::encode($group, $groupSubDir, $completeName);
 
                 if ( ConfigMapper::get('instant_completion') === true ) {
                     RedisSavedPath::set($savedPathKey, $savedPath);
@@ -172,14 +184,12 @@ class UploadController extends \App\Http\Controllers\Controller
 
                 // trigger the event when an upload completes
                 if ( empty($uploadCompleteEvent = ConfigMapper::get('event_upload_complete')) === false ) {
-                    event(new $uploadCompleteEvent($resource));
+                    event(new $uploadCompleteEvent(new Resource($group, ConfigMapper::get('group_dir'), $groupSubDir, $completeName)));
                 }
 
                 $result['savedPath'] = $savedPath;
 
             }
-
-            return Responser::returnResult($result);
 
         } catch ( \Exception $e ) {
 
@@ -188,6 +198,8 @@ class UploadController extends \App\Http\Controllers\Controller
 
             return Responser::reportError($result, $e->getMessage());
         }
+
+        return Responser::returnResult($result);
 
     }
 

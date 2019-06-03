@@ -724,7 +724,6 @@ class MimeType
         'jad' => 'text/vnd.sun.j2me.app-descriptor',
         'wml' => 'text/vnd.wap.wml',
         'wmls' => 'text/vnd.wap.wmlscript',
-        'plist'=>'text/xml',
         's' => 'text/x-asm',
         'c' => 'text/x-c',
         'f' => 'text/x-fortran',
@@ -812,7 +811,7 @@ class MimeType
      */
     public static function search($mimeType)
     {
-        return array_search($mimeType, self::$mimes) ?: null;
+        return array_search($mimeType, array_merge(self::$mimes,config('aetherupload.extra_mime_types'))) ?: null;
     }
 
     /**
