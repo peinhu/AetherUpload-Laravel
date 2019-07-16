@@ -30,6 +30,7 @@ class ConfigMapper
     private $route_uploading;
     private $route_display;
     private $route_download;
+    private $lax_mode;
 
     private function __construct()
     {
@@ -67,6 +68,7 @@ class ConfigMapper
         $this->route_uploading = $config->get('aetherupload.route_uploading');
         $this->route_display = $config->get('aetherupload.route_display');
         $this->route_download = $config->get('aetherupload.route_download');
+        $this->lax_mode = $config->get('aetherupload.lax_mode');
 
         return $this;
     }

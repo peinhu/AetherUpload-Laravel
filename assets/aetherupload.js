@@ -70,9 +70,13 @@ var AetherUpload = {
 
         this.outputDom.text(this.messages.status_upload_begin);
 
-        if (!('FileReader' in window) || !('File' in window) || typeof SparkMD5 === 'undefined' ) {
+        if (!('FileReader' in window) || !('File' in window) || typeof SparkMD5 === 'undefined') {
 
             this.preprocess(); //浏览器不支持读取本地文件，跳过计算hash
+
+        } else if (this.laxMode === true) {
+
+            this.preprocess(); //宽松模式，跳过计算hash
 
         } else {
 
@@ -86,9 +90,9 @@ var AetherUpload = {
 
         var _this = this,
 
-            chunkSize = 2000000,
+            clientChunkSize = 4000000,
 
-            chunks = Math.ceil(_this.resource.size / chunkSize),
+            chunks = Math.ceil(_this.resource.size / clientChunkSize),
 
             currentChunk = 0,
 
@@ -125,9 +129,9 @@ var AetherUpload = {
 
         function loadNext() {
 
-            var start = currentChunk * chunkSize,
+            var start = currentChunk * clientChunkSize,
 
-                end = start + chunkSize >= _this.resource.size ? _this.resource.size : start + chunkSize;
+                end = start + clientChunkSize >= _this.resource.size ? _this.resource.size : start + clientChunkSize;
 
             fileReader.readAsArrayBuffer(_this.blobSlice.call(_this.resource, start, end));
 
@@ -307,7 +311,7 @@ var AetherUpload = {
 
                     typeof(_this.callback) !== 'undefined' ? _this.callback() : null;
 
-                }else{
+                } else {
 
                     ++_this.i;
 
@@ -386,6 +390,13 @@ var AetherUpload = {
         return this;
     },
 
+    setLaxMode: function (isLax) {
+
+        this.laxMode = isLax;
+
+        return this;
+    },
+
     getLocalizedMessages: function () {
 
         var lang = navigator.language ? navigator.language : navigator.browserLanguage;
@@ -460,6 +471,8 @@ function aetherupload(resource) {
     newInstance.preprocessRoute = '/aetherupload/preprocess'; //预处理路由的默认值
 
     newInstance.uploadingRoute = '/aetherupload/uploading'; //上传路由的默认值
+
+    newInstance.laxMode = false; //宽松模式
 
     return newInstance;
 }
