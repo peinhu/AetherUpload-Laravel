@@ -19,7 +19,7 @@ class PartialResource
 
     public function __construct($tempBaseName, $extension, $groupSubDir)
     {
-        $this->disk = Storage::disk('local');
+        $this->disk = Storage::disk();
         $this->tempName = Util::getFileName($tempBaseName, $extension);
         $this->group = ConfigMapper::get('group');
         $this->groupDir = ConfigMapper::get('group_dir');

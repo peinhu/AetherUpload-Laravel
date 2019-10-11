@@ -16,7 +16,7 @@ class Resource
 
     public function __construct($group, $groupDir, $groupSubDir, $name)
     {
-        $this->disk = Storage::disk('local');
+        $this->disk = Storage::disk();
         $this->name = $name;
         $this->group = $group;
         $this->groupDir = $groupDir;
