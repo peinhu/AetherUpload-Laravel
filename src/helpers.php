@@ -17,15 +17,15 @@ if ( ! function_exists('storage_host_field') ) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+/**
+ * 获取resource
+ * @param string $name 文件名字
+ * @param string $group 文件分组 对应config/aetherupload.php 下的group
+ * @return AetherUpload\Resource
+ */
+function aetherupload_resource($name, $group = 'file')
+{
+    $subGroup = \AetherUpload\Util::generateSubDirName();
+    $resource = new \AetherUpload\Resource($group, \AetherUpload\ConfigMapper::get('group_dir'), $subGroup, $name);
+    return $resource;
+}
