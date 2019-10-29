@@ -20,21 +20,36 @@ class Util
 
     public static function generateSubDirName()
     {
+        return self::getSubDirName(date('Y-m-d', time()));
+    }
+
+    /**
+     * 得到日期目录文件夹
+     * @param string $date 可以被strtotime解析格式的字符串
+     * @return string 返回生成的名字
+     */
+    public static function getSubDirName($date = null)
+    {
+        if (is_null($date)) {
+            $dateTimestamp = time();
+        }
+        $dateTimestamp = strtotime($date);
+
         switch ( ConfigMapper::get('resource_subdir_rule') ) {
             case "year":
-                $name = @date("Y", time());
+                $name = @date('Y', $dateTimestamp);
                 break;
             case "month":
-                $name = @date("Ym", time());
+                $name = @date('Ym', $dateTimestamp);
                 break;
             case "date":
-                $name = @date("Ymd", time());
+                $name = @date('Ymd', $dateTimestamp);
                 break;
             case "const":
                 $name = "subdir";
                 break;
             default :
-                $name = @date("Ym", time());
+                $name = @date('Ym', $dateTimestamp);
                 break;
         }
 
