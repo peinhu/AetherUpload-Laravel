@@ -18,7 +18,3 @@ if ( ! function_exists('storage_host_field') ) {
 }
 
 
-function aetherupload_resource($savedPath)
-{
-    return \AetherUpload\Util::getResource($savedPath);
-}
