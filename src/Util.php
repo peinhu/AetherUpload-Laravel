@@ -93,6 +93,25 @@ class Util
         }
     }
 
+    public static function getResource($savedPath)
+    {
+
+        $params = SavedPathResolver::decode($savedPath);
+
+        try {
+
+            ConfigMapper::instance()->applyGroupConfig($params->group);
+
+            $resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
+
+            return $resource;
+
+        } catch ( \Exception $e ) {
+
+            return false;
+        }
+    }
+
     public static function deleteRedisSavedPath($savedPath)
     {
         $params = SavedPathResolver::decode($savedPath);
