@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Request;
 
 class UploadController extends \App\Http\Controllers\Controller
 {
+    use ExamplePageTrait;
 
     public function __construct()
     {
@@ -65,7 +66,7 @@ class UploadController extends \App\Http\Controllers\Controller
             $partialResource->filterByExtension($resourceExt);
 
             // determine if this upload meets the condition of instant completion
-            if ( ConfigMapper::get('instant_completion') === true && !empty($resourceHash) && RedisSavedPath::exists($savedPathKey = RedisSavedPath::getKey($group, $resourceHash)) === true ) {
+            if ( ConfigMapper::get('instant_completion') === true && ! empty($resourceHash) && RedisSavedPath::exists($savedPathKey = RedisSavedPath::getKey($group, $resourceHash)) === true ) {
                 $result['savedPath'] = RedisSavedPath::get($savedPathKey);
 
                 return Responser::returnResult($result);
@@ -129,7 +130,7 @@ class UploadController extends \App\Http\Controllers\Controller
             }
 
             // determine if this upload meets the condition of instant completion
-            if ( ConfigMapper::get('instant_completion') === true && !empty($resourceHash) && RedisSavedPath::exists($savedPathKey) === true ) {
+            if ( ConfigMapper::get('instant_completion') === true && ! empty($resourceHash) && RedisSavedPath::exists($savedPathKey) === true ) {
                 $partialResource->delete();
                 unset($partialResource->chunkIndex);
                 $result['savedPath'] = RedisSavedPath::get($savedPathKey);
@@ -162,7 +163,7 @@ class UploadController extends \App\Http\Controllers\Controller
                 $partialResource->checkMimeType();
 
                 // trigger the event before an upload completes
-                if ( !empty($beforeUploadCompleteEvent = ConfigMapper::get('event_before_upload_complete'))) {
+                if ( ! empty($beforeUploadCompleteEvent = ConfigMapper::get('event_before_upload_complete')) ) {
                     event(new $beforeUploadCompleteEvent($partialResource));
                 }
 
@@ -183,7 +184,7 @@ class UploadController extends \App\Http\Controllers\Controller
                 unset($partialResource->chunkIndex);
 
                 // trigger the event when an upload completes
-                if ( !empty($uploadCompleteEvent = ConfigMapper::get('event_upload_complete'))) {
+                if ( ! empty($uploadCompleteEvent = ConfigMapper::get('event_upload_complete')) ) {
                     event(new $uploadCompleteEvent(new Resource($group, ConfigMapper::get('group_dir'), $groupSubDir, $completeName)));
                 }
 
