@@ -777,6 +777,9 @@ class MimeType
         'movie' => 'video/x-sgi-movie',
         'smv' => 'video/x-smv',
         'ice' => 'x-conference/x-cooltalk',
+        'tgz' => 'application/x-gzip',
+        'gz' => 'application/x-gzip',
+        'tar' => 'application/x-tar',
     ];
 
     /**

@@ -17,4 +17,5 @@ return [
     'write_header_fail'       => 'Error: fail to write head resource',
     'read_header_fail'        => 'Error: fail to read head resource',
     'delete_header_fail'      => 'Error: fail to delete head resource',
+    'missing_mimetype'        => 'Error: missing mime-type mapping'
 ];

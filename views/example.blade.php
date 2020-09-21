@@ -53,7 +53,7 @@
 
     </div>
 </div>
-<script src="{{ URL::asset('vendor/aetherupload/js/spark-md5.min.js') }}"></script><!--（可选）需要引入spark-md5.min.js，用以支持秒传功能-->
+<script src="{{ URL::asset('vendor/aetherupload/js/spark-md5.min.js') }}"></script><!--需要引入spark-md5.min.js-->
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!--需要引入jquery-->
 <script src="{{ URL::asset('vendor/aetherupload/js/aetherupload.js') }}"></script><!--需要引入aetherupload.js-->
 <script>
@@ -62,7 +62,7 @@
     someCallback = function () {
         // Example
         $('#result').append(
-            '<p>执行回调 - 文件已上传，原名：<span >' + this.resourceName + '</span> | 大小：<span >' + parseFloat(this.resourceSize / (1000 * 1000)).toFixed(2) + 'MB' + '</span> | 储存名：<span >' + this.savedPath.substr(this.savedPath.lastIndexOf('_') + 1) + '</span></p>'
+            '<p>执行回调 - 文件已上传，原名：<span >' + this.resourceName + '</span> | 大小：<span >' + parseFloat(this.resourceSize / (1000 * 1000)).toFixed(2) + 'MB（按1kb=1000b换算得出）' + '</span> | 储存名：<span >' + this.savedPath.substr(this.savedPath.lastIndexOf('_') + 1) + '</span></p>'
         );
     }
 

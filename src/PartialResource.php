@@ -101,6 +101,10 @@ class PartialResource
     {
         $extension = MimeType::search(mime_content_type($this->realPath));
 
+        if($extension === null){
+            throw new \Exception(trans('aetherupload::messages.missing_mimetype'));
+        }
+
         $this->filterByExtension($extension);
     }
 

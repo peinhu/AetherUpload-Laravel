@@ -456,7 +456,6 @@ var AetherUpload = {
 /*
  * 创建AetherUpload对象的全局方法
  * resource 文件对象
- * group 分组名
  */
 function aetherupload(resource) {
 
@@ -472,7 +471,7 @@ function aetherupload(resource) {
 
     newInstance.uploadingRoute = '/aetherupload/uploading'; //上传路由的默认值
 
-    newInstance.laxMode = false; //宽松模式
+    newInstance.laxMode = false; //宽松模式的默认值
 
     return newInstance;
 }

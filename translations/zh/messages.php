@@ -17,4 +17,5 @@ return [
     'write_header_fail'       => '错误：写头文件失败',
     'read_header_fail'        => '错误：读头文件失败',
     'delete_header_fail'      => '错误：删除头文件失败',
+    'missing_mimetype'        => '错误：缺少此类文件的mime-type映射'
 ];
