@@ -5,8 +5,7 @@
     <title></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="csrf-token" content="{{ csrf_token() }}"><!--需要csrf token-->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
@@ -53,9 +52,13 @@
 
     </div>
 </div>
-<script src="{{ URL::asset('vendor/aetherupload/js/spark-md5.min.js') }}"></script><!--需要引入spark-md5.min.js-->
-<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!--需要引入jquery-->
-<script src="{{ URL::asset('vendor/aetherupload/js/aetherupload.js') }}"></script><!--需要引入aetherupload.js-->
+<script src="{{ URL::asset('vendor/aetherupload/js/aetherupload-all.js') }}"></script><!--需引入aetherupload-core.js、zepto.min.js（类似jquery，更轻量化，可与jquery互相代替）、spark-md5.min.js，此文件已包含上述全部，也可分别单独引入 -->
+
+<!-- <script src="{{ URL::asset('vendor/aetherupload/js/aetherupload-core.js') }}"></script> -->
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/spark-md5/3.0.0/spark-md5.min.js"></script> -->
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/zepto/1.2.0/zepto.min.js"></script> -->
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.9.1/jquery.min.js"></script> -->
+
 <script>
     // success(someCallback)中声名的回调方法需在此定义，参数someCallback可为任意名称，此方法将会在上传完成后被调用
     // 可使用this对象获得resourceName,resourceSize,resourceTempBaseName,resourceExt,groupSubdir,group,savedPath等属性的值

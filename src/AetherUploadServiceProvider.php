@@ -24,8 +24,8 @@ class AetherUploadServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__ . '/../config/aetherupload.php'         => config_path('aetherupload.php'),
-            __DIR__ . '/../assets/aetherupload.js'          => public_path('vendor/aetherupload/js/aetherupload.js'),
-            __DIR__ . '/../assets/spark-md5.min.js'         => public_path('vendor/aetherupload/js/spark-md5.min.js'),
+            __DIR__ . '/../assets/aetherupload-all.js'      => public_path('vendor/aetherupload/js/aetherupload-all.js'),
+            __DIR__ . '/../assets/aetherupload-core.js'     => public_path('vendor/aetherupload/js/aetherupload-core.js'),
             __DIR__ . '/../uploads/aetherupload_file'       => storage_path('app/aetherupload/file'),
             __DIR__ . '/../uploads/aetherupload_header'     => storage_path('app/aetherupload/_header'),
             __DIR__ . '/../translations/zh/messages.php'    => base_path('resources/lang/vendor/aetherupload/zh/messages.php'),
