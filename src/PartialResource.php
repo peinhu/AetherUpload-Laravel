@@ -70,6 +70,9 @@ class PartialResource
             if ( $this->disk->move($this->path, $completePath) === false ) {
                 throw new \Exception(trans('aetherupload::messages.rename_resource_fail'));
             }
+        }else{
+        	
+        	$this->delete();
         }
     }
 
