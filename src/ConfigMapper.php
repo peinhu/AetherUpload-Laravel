@@ -12,6 +12,7 @@ class ConfigMapper
     private $resource_extensions;
     private $group;
     private $group_dir;
+    private $middleware_base;
     private $middleware_preprocess;
     private $middleware_uploading;
     private $middleware_display;
@@ -59,6 +60,7 @@ class ConfigMapper
         $this->distributed_deployment_middleware_cors = $config->get('aetherupload.distributed_deployment.storage.middleware_cors');
         $this->distributed_deployment_allow_origin = $config->get('aetherupload.distributed_deployment.storage.allow_origin');
         $this->forbidden_extensions = $config->get('aetherupload.forbidden_extensions');
+        $this->middleware_base = $config->get('aetherupload.middleware_base') ?: 'web';
         $this->middleware_preprocess = $config->get('aetherupload.middleware_preprocess');
         $this->middleware_uploading = $config->get('aetherupload.middleware_uploading');
         $this->middleware_display = $config->get('aetherupload.middleware_display');
