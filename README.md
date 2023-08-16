@@ -169,10 +169,9 @@ AetherUpload在上传前使用白名单+黑名单的形式进行文件后缀名�
 虽然做了诸多安全工作，但恶意文件上传是防不胜防的，建议正确设置上传目录权限，确保相关程序对资源文件没有执行权限。
 
 # 更新日志  
-**2021-01-04 v2.0.8**  
-修复执行route:cache时可能报错的问题    
-增加mime-type错误警告    
-优化合并js文件
+**2023-08-16 v2.0.9**  
+支持路由基础中间件，并添加相关配置选项    
+简化验证方法    
 
 详见[CHANGELOG.md](https://github.com/peinhu/AetherUpload-Laravel/blob/master/CHANGELOG.md)  
 
