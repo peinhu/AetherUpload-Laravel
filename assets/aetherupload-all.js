@@ -176,8 +176,6 @@ var AetherUpload = {
                 withCredentials: true
             },
 
-            cache: false,
-
             crossDomain: true,
 
             data: {
@@ -290,8 +288,6 @@ var AetherUpload = {
             xhrFields: {
                 withCredentials: true
             },
-
-            cache: false,
 
             crossDomain: true,
 

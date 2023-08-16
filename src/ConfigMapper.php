@@ -60,7 +60,7 @@ class ConfigMapper
         $this->distributed_deployment_middleware_cors = $config->get('aetherupload.distributed_deployment.storage.middleware_cors');
         $this->distributed_deployment_allow_origin = $config->get('aetherupload.distributed_deployment.storage.allow_origin');
         $this->forbidden_extensions = $config->get('aetherupload.forbidden_extensions');
-        $this->middleware_base = $config->get('aetherupload.middleware_base') ?: 'web';
+        $this->middleware_base = $config->get('aetherupload.middleware_base');
         $this->middleware_preprocess = $config->get('aetherupload.middleware_preprocess');
         $this->middleware_uploading = $config->get('aetherupload.middleware_uploading');
         $this->middleware_display = $config->get('aetherupload.middleware_display');
@@ -75,7 +75,7 @@ class ConfigMapper
         return $this;
     }
 
-    public function applyGroupConfig($group)
+    private function applyGroupConfig($group)
     {
         $config = app('config');
 
@@ -101,6 +101,11 @@ class ConfigMapper
     public static function set($property, $value)
     {
         self::instance()->{$property} = $value;
+    }
+
+    public static function __callStatic($name, $arguments)
+    {
+        return self::instance()->{$name}(... $arguments);
     }
 
 }

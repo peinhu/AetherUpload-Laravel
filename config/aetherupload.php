@@ -128,7 +128,7 @@ return [
     | 【一般设置】上传预处理、上传分块、文件展示、文件下载时的路由中间件。
     |
     */
-
+    'middleware_base'       => ['web'], # 插件所有路由的基础中间件
     'middleware_preprocess' => [], # 上传预处理时的路由中间件
     'middleware_uploading'  => [], # 上传文件分块时的路由中间件
     'middleware_display'    => [], # 文件展示时的路由中间件

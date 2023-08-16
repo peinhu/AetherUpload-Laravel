@@ -15,7 +15,7 @@ class ResourceController extends \Illuminate\Routing\Controller
 
             $params = SavedPathResolver::decode(Request::route('uri'));
 
-            ConfigMapper::instance()->applyGroupConfig($params->group);
+            ConfigMapper::applyGroupConfig($params->group);
 
             $resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
 
@@ -39,7 +39,7 @@ class ResourceController extends \Illuminate\Routing\Controller
 
             $params = SavedPathResolver::decode(Request::route('uri'));
 
-            ConfigMapper::instance()->applyGroupConfig($params->group);
+            ConfigMapper::applyGroupConfig($params->group);
 
             $resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
 

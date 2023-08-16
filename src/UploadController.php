@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Request;
 
 class UploadController extends \App\Http\Controllers\Controller
 {
-    use ExamplePageTrait;
+    use ExamplePageTrait, SimpleValidateTrait;
 
     public function __construct()
     {
@@ -24,18 +24,6 @@ class UploadController extends \App\Http\Controllers\Controller
      */
     public function preprocess()
     {
-        $this->validate(request(), [
-            'resource_name' => 'required',
-            'resource_size' => 'required',
-            'group'         => 'required',
-            'resource_hash' => 'present',
-        ]);
-
-        $resourceName = Request::input('resource_name');
-        $resourceSize = Request::input('resource_size');
-        $resourceHash = Request::input('resource_hash');
-        $group = Request::input('group');
-
         $result = [
             'error'                => 0,
             'chunkSize'            => 0,
@@ -45,6 +33,20 @@ class UploadController extends \App\Http\Controllers\Controller
             'savedPath'            => '',
         ];
 
+        if ( $this->validatedWithError(request(), [
+            'resource_name' => 'required',
+            'resource_size' => 'required',
+            'group'         => 'required',
+            'resource_hash' => 'present',
+        ]) ) {
+            return Responser::reportError($result, trans('aetherupload::messages.invalid_resource_params'));
+        }
+
+        $resourceName = Request::input('resource_name');
+        $resourceSize = Request::input('resource_size');
+        $resourceHash = Request::input('resource_hash');
+        $group = Request::input('group');
+
         try {
 
             // prevents uploading files to the application server when distributed deployment is enabled
@@ -52,7 +54,7 @@ class UploadController extends \App\Http\Controllers\Controller
                 throw new \Exception(trans('aetherupload::messages.upload_error'));
             }
 
-            ConfigMapper::instance()->applyGroupConfig($group);
+            ConfigMapper::applyGroupConfig($group);
 
             $result['resourceTempBaseName'] = $resourceTempBaseName = Util::generateTempName();
             $result['resourceExt'] = $resourceExt = strtolower(pathinfo($resourceName, PATHINFO_EXTENSION));
@@ -91,16 +93,22 @@ class UploadController extends \App\Http\Controllers\Controller
      */
     public function saveChunk()
     {
-        $this->validate(request(), [
+        $result = [
+            'error'     => 0,
+            'savedPath' => '',
+        ];
+
+        if ( $this->validatedWithError(request(), [
             'chunk_total'            => 'required',
             'chunk_index'            => 'required',
             'resource_temp_basename' => 'required',
             'resource_ext'           => 'required',
-            'resource_chunk'         => 'required',
             'group_subdir'           => 'required',
             'group'                  => 'required',
             'resource_hash'          => 'present',
-        ]);
+        ]) ) {
+            return Responser::reportError($result, trans('aetherupload::messages.invalid_resource_params'));
+        }
 
         $chunkTotalCount = Request::input('chunk_total');
         $chunkIndex = Request::input('chunk_index');
@@ -113,14 +121,9 @@ class UploadController extends \App\Http\Controllers\Controller
         $savedPathKey = RedisSavedPath::getKey($group, $resourceHash);
         $partialResource = null;
 
-        $result = [
-            'error'     => 0,
-            'savedPath' => '',
-        ];
-
         try {
 
-            ConfigMapper::instance()->applyGroupConfig($group);
+            ConfigMapper::applyGroupConfig($group);
 
             $partialResource = new PartialResource($resourceTempBaseName, $resourceExt, $groupSubDir);
 

@@ -81,7 +81,7 @@ class Util
 
         try {
 
-            ConfigMapper::instance()->applyGroupConfig($params->group);
+            ConfigMapper::applyGroupConfig($params->group);
 
             $resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
 
@@ -100,7 +100,7 @@ class Util
 
         try {
 
-            ConfigMapper::instance()->applyGroupConfig($params->group);
+            ConfigMapper::applyGroupConfig($params->group);
 
             $resource = new Resource($params->group, ConfigMapper::get('group_dir'), $params->groupSubDir, $params->resourceName);
 
