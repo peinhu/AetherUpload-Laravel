@@ -9,15 +9,7 @@ class RedisSavedPath
 
     public static function exists($key)
     {
-        $result = Redis::hexists('aetherupload_resource', $key);
-
-        if ( $result === 1 ) {
-            return true;
-        } elseif ( $result === 0 ) {
-            return false;
-        } else {
-            throw new \Exception('exists error');
-        }
+        return Redis::hexists('aetherupload_resource', $key);
     }
 
     public static function get($key)
